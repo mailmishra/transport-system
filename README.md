@@ -1,2 +1,223 @@
-# transport-system
-This repo is for creating robust transport system for Inventory, billing and tracking
+# Transport System
+
+A transport & freight accounting system for a small group of firms (Sri Krishna,
+Shivsakti, and Shivam Transport Company — Katni, Madhya Pradesh), covering the
+workflow:
+
+```
+Loading Slip → Bilti/GR → Agent/Dalal Ledger → Truck Owner Ledger → Final Receipt → Reports
+```
+
+The app started as a single-file offline PWA prototype (`concept/index.html`,
+storing everything in `localStorage`) and now has a real FastAPI + Postgres
+backend behind it. The same `index.html` is still the UI — it now talks to
+the API instead of the browser's local storage.
+
+## Architecture
+
+One deployable service: FastAPI serves both the JSON API (under `/api`) and
+the static frontend (`concept/`) from the same process, so there's no CORS to
+manage and nothing extra to deploy. Postgres is a separate managed service.
+
+```
+┌─────────────────────────────┐
+│  FastAPI (backend/app)      │
+│  ├─ /api/*  → JSON API      │
+│  └─ /       → concept/ (SPA)│
+└──────────────┬──────────────┘
+               │ asyncpg
+               ▼
+        ┌─────────────┐
+        │  PostgreSQL │
+        └─────────────┘
+```
+
+- **Backend**: FastAPI, async SQLAlchemy 2.0, Alembic migrations, Pydantic v2
+  validation, Postgres.
+- **Frontend**: the original single-file `concept/index.html` PWA, edited to
+  call the API via `fetch` instead of `localStorage`. No build step, no
+  framework — kept exactly as friction-free as the original prototype.
+- **No auth yet** — deliberately. A stub `get_current_actor()` dependency
+  (`backend/app/deps.py`) and nullable `created_by` columns exist so Supabase
+  auth can be wired in later without a schema change.
+
+## Data model
+
+| Table | Purpose |
+|---|---|
+| `firms` | The 3 configured companies. Seeded by migration `0001`. |
+| `loading_slips` | First step of the workflow. |
+| `bilties` | The core freight document — freight, dalali, advance, and the hidden `freight_difference` (FD) field. |
+| `agents` | Normalized Agent/Dalal identities (was free text; see migration `0002`). |
+| `truck_owners` | Normalized truck owner identities. |
+| `agent_payments` | Settlements paid out to an agent over time. |
+| `truck_owner_payments` | Settlements paid to a truck owner, optionally against a specific Bilti. |
+| `receipts` | Money received from a consignee against a Bilti (replaces the old client-only Final Receipt). |
+
+Ledger balances (Agent Ledger, Truck Owner Ledger) are **not** stored — they're
+computed as `accrued (from bilties) − paid (from the payments tables)`, so
+there's a single source of truth for the underlying numbers. See
+`GET /api/agents/{id}/balance` and `GET /api/truck-owners/{id}/balance`.
+
+All money columns have both a Pydantic validator (fast, friendly 422s) and a
+matching DB-level `CHECK` constraint (the schema holds even if something
+other than this API ever writes to it). Every relationship is a real foreign
+key; deleting an agent/truck owner/loading slip/bilti with ledger history
+attached is blocked (`RESTRICT`) — records are soft-deleted (`is_deleted`),
+never hard-deleted, since this is accounting data.
+
+## Repo layout
+
+```
+backend/
+  app/
+    main.py          # FastAPI app, mounts /api + serves concept/ as static
+    config.py         # env-based settings (DATABASE_URL, CORS, future Supabase)
+    db.py               # async SQLAlchemy engine/session
+    deps.py              # get_db(), auth stub
+    models/               # SQLAlchemy ORM models
+    schemas/               # Pydantic request/response schemas
+    crud/                    # DB access functions
+    routers/                  # FastAPI route handlers, one file per resource
+  alembic/
+    versions/0001_init.py       # firms, loading_slips, bilties
+    versions/0002_ledgers.py     # agents, truck_owners, payments, receipts
+  Dockerfile
+concept/                          # the frontend (served as static files)
+  index.html
+docker-compose.yml                # local dev: postgres + backend
+railway.json                      # Railway build/deploy config
+```
+
+## Local development
+
+Requires Docker.
+
+```bash
+docker compose up --build
+```
+
+This builds the backend image, starts Postgres, runs `alembic upgrade head`
+(creating and seeding the schema), and serves the app on
+**http://localhost:8000** — the UI at `/`, the API at `/api/*`,
+`GET /healthz` for a liveness check.
+
+Postgres is exposed on host port `5433` (not the default `5432`, to avoid
+clashing with a local Postgres install) — see `docker-compose.yml`.
+
+To run the backend outside Docker:
+
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env   # adjust DATABASE_URL to point at a running Postgres
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+## API overview
+
+All routes are under `/api`. Full interactive docs (Swagger UI) are
+available at `/api/docs` when the server is running.
+
+| Resource | Routes |
+|---|---|
+| Firms | `GET /firms` |
+| Loading Slips | `POST` `GET` `GET /{id}` `PATCH /{id}` `DELETE /{id}` `/loading-slips` |
+| Bilties | same CRUD on `/bilties`, plus `GET /bilties/{id}/print` (omits the hidden `freight_difference` field) |
+| Agents | `GET /agents`, `GET /agents/{id}`, `PATCH /agents/{id}`, `GET /agents/{id}/balance?firm_id=` |
+| Truck Owners | same shape on `/truck-owners` |
+| Agent Payments | `POST` `GET` `GET /{id}` `DELETE /{id}` on `/agent-payments` |
+| Truck Owner Payments | same shape on `/truck-owner-payments` |
+| Receipts | same shape on `/receipts` |
+
+`agent_name` / `truck_owner_name` on `POST /bilties` are plain strings — the
+API resolves them to an `agents`/`truck_owners` row by case/whitespace-
+insensitive match, creating one if it doesn't exist yet. The UI never has to
+manage agent/owner IDs directly.
+
+## Deployment (Railway)
+
+The repo deploys as a single Railway service (this app) plus Railway's
+managed Postgres plugin. Config lives in `railway.json` at the repo root
+(pins the Dockerfile builder, `backend/Dockerfile` as the build target, and
+`/healthz` as the healthcheck path).
+
+1. **Push this repo to GitHub** (Railway deploys from a connected repo).
+2. **Provision Postgres**: in the Railway project → *New* → *Provision
+   PostgreSQL*.
+3. **Add the backend service**: *New* → *GitHub Repo* → select this repo.
+   Leave the root directory as `/` — the Dockerfile does
+   `COPY backend/ ...` and `COPY concept/ ...` as siblings, so it needs the
+   repo root as build context. `railway.json` is auto-detected from there.
+4. **Wire the database in**: on the backend service → *Variables* → add
+   `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (Railway's reference-variable
+   syntax, resolves to the Postgres service's connection string
+   automatically). Leave `PORT` unset — Railway injects it and the container
+   already binds to `${PORT:-8000}`. Railway's Postgres hands out a plain
+   `postgresql://` URL; `app/config.py` rewrites it to `postgresql+asyncpg://`
+   automatically, so no manual editing is needed.
+5. **Deploy.** The container `CMD` runs `alembic upgrade head` before
+   starting `uvicorn`, so the schema is created/migrated on every deploy.
+   Fine for a single instance; if this ever scales to multiple replicas,
+   move the migration to Railway's pre-deploy/release-command step instead
+   of the container `CMD` so parallel instances don't race each other
+   running migrations at the same time.
+6. **Verify**: open the generated `*.up.railway.app` URL (should serve the
+   UI) and `/healthz` + `/api/firms` (should respond).
+
+CLI alternative:
+
+```bash
+railway login
+railway init                 # in repo root
+railway add --plugin postgresql
+railway up                   # builds & deploys using railway.json
+railway variables --set DATABASE_URL='${{Postgres.DATABASE_URL}}'
+```
+
+## Testing
+
+```bash
+cd backend
+python3.11 -m venv .venv   # pinned deps don't have 3.14 wheels yet; use 3.11 or 3.12
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest                     # needs Docker running - spins up a real Postgres
+```
+
+`tests/` has three layers, all against a **real Postgres** (via
+[testcontainers](https://testcontainers-python.readthedocs.io/), one
+container for the whole session) rather than mocks — this app's entire value
+is in its constraints (FKs, CHECKs, uniqueness), and a mocked DB would let
+broken constraints pass silently:
+
+- `tests/unit/` — Pydantic validators and `Settings` (the Railway
+  `postgres://` → `postgresql+asyncpg://` rewrite), no DB. Run these alone
+  without Docker via `SKIP_DB_TESTS=1 pytest -m "not integration and not e2e"`.
+- `tests/integration/` — one file per resource (firms, loading slips,
+  bilties, agents/owners/payments/receipts), covering CRUD, validation
+  (422/409), FK violations, soft-delete, and — specifically —
+  `test_migration_backfill.py`, which builds an isolated DB at revision
+  `0001`, inserts a legacy free-text `agent`/`truck_owner` row by hand, and
+  asserts the `0002` migration backfills it into `agents`/`truck_owners`
+  correctly. That test caught nothing on its own, but it's the one that
+  would catch a future edit to that migration silently breaking the backfill.
+- `tests/e2e/test_business_flow.py` — walks the full documented workflow
+  (Loading Slip → Bilti/GR → Agent Ledger → Truck Owner Ledger → Final
+  Receipt) against the running app and asserts the business facts at each
+  step (FD hidden from print, ledger balances net to zero after payment,
+  received equals freight), not just status codes.
+
+All 41 tests currently pass. One thing worth knowing if you touch
+`tests/conftest.py`: the `client` fixture is deliberately **session-scoped** —
+an earlier per-test version reproducibly broke every other test in the whole
+run (an exact alternating pass/fail pattern) due to an interaction between
+`anyio`'s blocking-portal thread machinery and asyncpg when a new
+portal+engine got created and torn down for every test. One portal for the
+whole session avoids the create/teardown cycle that triggered it.
+
+**Not covered**: no browser/UI test — `concept/index.html` is a thin
+`fetch()` layer over this same API with no independent logic, so the API
+layer is where the tests live. No CI wiring yet (nothing runs these
+automatically on push) — worth adding once there's a place to run them.
