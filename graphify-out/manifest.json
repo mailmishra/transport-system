@@ -1,0 +1,32 @@
+{
+  "concept/manifest.json": {
+    "mtime": 1789187000.0,
+    "seen": 1789790078.16167,
+    "ast_hash": "64aeb79c204f8ac8071ddef4c54804bb",
+    "semantic_hash": "64aeb79c204f8ac8071ddef4c54804bb"
+  },
+  "concept/sw.js": {
+    "mtime": 1789187000.0,
+    "seen": 1789790078.161673,
+    "ast_hash": "d4bb19d0d8d958bedc71b18a7f1a62af",
+    "semantic_hash": "d4bb19d0d8d958bedc71b18a7f1a62af"
+  },
+  "README.md": {
+    "mtime": 1789788600.4861102,
+    "seen": 1789790078.161674,
+    "ast_hash": "49da3b732af339e2ed33bbc7e8a40bef",
+    "semantic_hash": "49da3b732af339e2ed33bbc7e8a40bef"
+  },
+  "concept/README.txt": {
+    "mtime": 1789187000.0,
+    "seen": 1789790078.161675,
+    "ast_hash": "667fbd772114175f91d865a9ec18bcdb",
+    "semantic_hash": "667fbd772114175f91d865a9ec18bcdb"
+  },
+  "concept/index.html": {
+    "mtime": 1789187000.0,
+    "seen": 1789790078.161675,
+    "ast_hash": "5b65b79dd92571bd2946cc909538f079",
+    "semantic_hash": "5b65b79dd92571bd2946cc909538f079"
+  }
+}

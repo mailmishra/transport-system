@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17324d">
+<link rel="manifest" href="manifest.json">
+<title>Transport Management System</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#17212b}
+header{background:#17324d;color:#fff;padding:14px 18px;position:sticky;top:0;z-index:5}
+h1{font-size:20px;margin:0 0 4px}.sub{font-size:12px;opacity:.85}
+nav{display:flex;gap:7px;overflow:auto;padding:10px;background:#fff;border-bottom:1px solid #ddd}
+nav button{white-space:nowrap;border:1px solid #ccd3da;background:#fff;border-radius:8px;padding:9px 12px}
+nav button.active{background:#17324d;color:#fff}
+main{max-width:1100px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid #dde2e7;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 2px #0000000b}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{font-size:12px;font-weight:bold;color:#53606c}input,select{width:100%;padding:10px;border:1px solid #cbd3da;border-radius:7px;margin-top:4px}
+.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button.primary{background:#17324d;color:white;border:0;border-radius:8px;padding:10px 14px}
+button.secondary{background:#eef2f5;border:1px solid #ccd3da;border-radius:8px;padding:10px 14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;border-bottom:1px solid #e5e8eb;padding:8px}th{background:#f5f7f9}
+.metric{font-size:23px;font-weight:bold}.muted{color:#687682;font-size:12px}
+.notice{background:#fff8df;border:1px solid #ecd37a;padding:10px;border-radius:8px;font-size:13px}
+.error{background:#fdecea;border:1px solid #f2a29c;color:#8a1f16;padding:10px;border-radius:8px;font-size:13px;margin-top:10px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}main{padding:9px}table{font-size:12px}}
+@media print{header,nav,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+</style>
+</head>
+<body>
+<header><h1 id="firmTitle">Sri Krishna Transport Company</h1><div class="sub">Katni, Madhya Pradesh • Multi-Firm Transport & Accounting</div></header>
+<nav id="nav"></nav>
+<main id="app"></main>
+<script>
+const API="/api";
+async function apiRequest(method,path,body){
+ const res=await fetch(API+path,{method,headers:body?{"Content-Type":"application/json"}:undefined,body:body?JSON.stringify(body):undefined});
+ if(res.status===204) return null;
+ let data=null;
+ try{data=await res.json();}catch(e){}
+ if(!res.ok){
+  let msg=(data&&data.detail)?data.detail:res.statusText;
+  if(Array.isArray(msg)) msg=msg.map(e=>`${(e.loc||[]).slice(-1)[0]}: ${e.msg}`).join("; ");
+  const err=new Error(msg||"Request failed");err.status=res.status;throw err;
+ }
+ return data;
+}
+const apiGet=(path)=>apiRequest("GET",path);
+const apiPost=(path,body)=>apiRequest("POST",path,body);
+const apiPatch=(path,body)=>apiRequest("PATCH",path,body);
+const apiDelete=(path)=>apiRequest("DELETE",path);
+
+let state={firm:null,firms:[],bilties:[],loading:[],payments:JSON.parse(localStorage.getItem("tms_payments")||"[]")};
+const savePayments=()=>localStorage.setItem("tms_payments",JSON.stringify(state.payments));
+let lastError=null;
+const navItems=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Final Receipt","Reports","Firm Setup"];
+const LISTED_SCREENS=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Reports"];
+function nav(){
+ document.getElementById("nav").innerHTML=navItems.map((x,i)=>`<button class="${i==0?'active':''}" onclick="show('${x}')">${x}</button>`).join("");
+}
+async function refreshData(){
+ const [loading,bilties]=await Promise.all([apiGet("/loading-slips"),apiGet("/bilties")]);
+ state.loading=loading;state.bilties=bilties;
+}
+function firmName(id){const f=state.firms.find(x=>x.id===id);return f?f.name:id;}
+async function show(name){
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.textContent===name));
+ const a=document.getElementById("app");
+ const errBefore=lastError;lastError=null;
+ if(LISTED_SCREENS.includes(name)){
+  try{await refreshData();}catch(e){a.innerHTML=`<div class="card"><div class="error">Failed to load data: ${e.message}</div></div>`;return;}
+ }
+ if(name==="Dashboard") a.innerHTML=dashboard();
+ if(name==="Loading Slip") a.innerHTML=loadingForm(errBefore);
+ if(name==="Bilti / GR") a.innerHTML=biltiForm(errBefore);
+ if(name==="Agent Ledger") a.innerHTML=agentLedger();
+ if(name==="Truck Owner Ledger") a.innerHTML=ownerLedger();
+ if(name==="Final Receipt") a.innerHTML=receiptForm();
+ if(name==="Reports") a.innerHTML=reports();
+ if(name==="Firm Setup") a.innerHTML=firmSetup();
+}
+function dashboard(){
+ return `<div class="card"><h2>Dashboard</h2><div class="grid">
+ <div><div class="metric">${state.bilties.length}</div><div class="muted">Bilties</div></div>
+ <div><div class="metric">${state.loading.length}</div><div class="muted">Loading Slips</div></div>
+ <div><div class="metric">₹${sum("dalali")}</div><div class="muted">Dalali</div></div>
+ <div><div class="metric">₹${sum("freight_difference")}</div><div class="muted">Hidden Freight Difference</div></div>
+ </div></div>
+ <div class="notice">Current firm: <b>${state.firm?state.firm.name:"(none)"}</b>. All new documents inherit this firm automatically.</div>`;
+}
+function loadingForm(err){
+ let rows=state.loading.map(x=>`<tr><td>${x.slip_date}</td><td>${firmName(x.firm_id)}</td><td>${x.vehicle_no}</td><td>${x.loading_point}</td><td>${x.destination}</td><td>${x.goods_description}</td><td>${x.quantity_weight}</td></tr>`).join("");
+ return `<div class="card"><h2>Loading Slip</h2><div class="grid">
+ <label>Lorry / Vehicle No.<input id="l_vehicle" required></label>
+ <label>Date<input id="l_date" type="date" required></label>
+ <label>Loading Point<input id="l_from" required></label>
+ <label>Destination<input id="l_to" required></label>
+ <label>Goods / Material<input id="l_goods" required></label>
+ <label>Quantity / Weight<input id="l_qty" required></label>
+ </div>
+ ${err?`<div class="error">${err}</div>`:""}
+ <div class="actions"><button class="primary" onclick="addLoading()">Save Loading Slip</button></div></div>
+ <div class="card"><h3>Recent Loading Slips</h3><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div>`;
+}
+async function addLoading(){
+ if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Loading Slip");}
+ try{
+  await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty")});
+ }catch(e){lastError=e.message;return show("Loading Slip");}
+ alert("Loading Slip saved");show("Dashboard");
+}
+function biltiForm(err){
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>₹${x.freight}</td></tr>`).join("");
+ return `<div class="card"><h2>Bilti / GR</h2><div class="grid">
+ <label>Bilti No.<input id="b_no" required></label><label>Date<input id="b_date" type="date" required></label>
+ <label>Consignor / Goods Provider<input id="b_party" required></label><label>Consignee<input id="b_consignee" required></label>
+ <label>From<input id="b_from" required></label><label>To<input id="b_to" required></label>
+ <label>Lorry No.<input id="b_vehicle" required></label><label>Truck Owner<input id="b_owner" required></label>
+ <label>Agent / Dalal<input id="b_agent"></label><label>Goods / Description<input id="b_goods" required></label>
+ <label>Weight<input id="b_weight" required></label><label>Freight<input id="b_freight" type="number" min="0.01" step="0.01" required></label>
+ <label>Dalali (visible on Bilti)<input id="b_dalali" type="number" min="0" step="0.01" value="0"></label>
+ <label>Advance to Truck Owner<input id="b_advance" type="number" min="0" step="0.01" value="0"></label>
+ <label class="full no-print">FD — Freight Difference (hidden from printed Bilti)<input id="b_fd" type="number" min="0" step="0.01" value="0"></label>
+ </div>
+ <div class="notice">FD is stored in accounting and Agent/Dalal ledger, but is excluded from the printed Bilti.</div>
+ ${err?`<div class="error">${err}</div>`:""}
+ <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button><button class="secondary" onclick="window.print()">Print</button></div></div>
+ <div class="card"><h3>Recent Bilties</h3><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th></tr>${rows||"<tr><td colspan=5>No entries</td></tr>"}</table></div>`;
+}
+async function addBilti(){
+ if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Bilti / GR");}
+ try{
+  await apiPost("/bilties",{firm_id:state.firm.id,bilti_no:v("b_no"),bilti_date:v("b_date"),consignor:v("b_party"),consignee:v("b_consignee"),from_location:v("b_from"),to_location:v("b_to"),vehicle_no:v("b_vehicle"),truck_owner:v("b_owner"),agent:v("b_agent")||null,goods_description:v("b_goods"),weight:v("b_weight"),freight:n("b_freight"),dalali:n("b_dalali"),advance_to_owner:n("b_advance"),freight_difference:n("b_fd")});
+ }catch(e){lastError=e.message;return show("Bilti / GR");}
+ alert("Bilti saved. Ledger entries generated automatically.");show("Dashboard");
+}
+function agentLedger(){
+ let rows=state.bilties.filter(x=>x.agent).map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.agent}</td><td>₹${x.dalali}</td><td>₹${x.freight_difference}</td><td>₹${(Number(x.dalali)+Number(x.freight_difference)).toFixed(2)}</td></tr>`).join("");
+ return `<div class="card"><h2>Agent / Dalal Ledger</h2><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Agent</th><th>Dalali</th><th>FD</th><th>Total</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div>`;
+}
+function ownerLedger(){
+ let rows=state.bilties.filter(x=>x.truck_owner).map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.truck_owner}</td><td>${x.vehicle_no}</td><td>₹${x.freight}</td><td>₹${x.advance_to_owner}</td><td>₹${(Number(x.freight)-Number(x.advance_to_owner)).toFixed(2)}</td></tr>`).join("");
+ return `<div class="card"><h2>Truck Owner Ledger</h2><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Owner</th><th>Lorry</th><th>Freight</th><th>Advance</th><th>Balance</th></tr>${rows||"<tr><td colspan=8>No entries</td></tr>"}</table></div>`;
+}
+function receiptForm(){
+ return `<div class="card"><h2>Final Receipt</h2><div class="grid"><label>Bilti No.<input id="r_no"></label><label>Receipt Date<input id="r_date" type="date"></label><label>Received From<input id="r_from"></label><label>Amount<input id="r_amount" type="number"></label><label class="full">Remarks<input id="r_remarks"></label></div><div class="actions"><button class="primary" onclick="addReceipt()">Save Receipt</button><button class="secondary" onclick="window.print()">Print</button></div></div>`;
+}
+function addReceipt(){state.payments.push({firm:state.firm?state.firm.name:null,no:v("r_no"),date:v("r_date"),from:v("r_from"),amount:n("r_amount"),remarks:v("r_remarks")});savePayments();alert("Final receipt saved");}
+function reports(){
+ let firmsHtml=state.firms.map(f=>{let b=state.bilties.filter(x=>x.firm_id===f.id);return `<tr><td>${f.name}</td><td>${b.length}</td><td>₹${b.reduce((s,x)=>s+Number(x.freight),0).toFixed(2)}</td><td>₹${b.reduce((s,x)=>s+Number(x.dalali),0).toFixed(2)}</td><td>₹${b.reduce((s,x)=>s+Number(x.freight_difference),0).toFixed(2)}</td><td>₹${b.reduce((s,x)=>s+Number(x.advance_to_owner),0).toFixed(2)}</td></tr>`}).join("");
+ return `<div class="card"><h2>Firm-wise Reports</h2><table><tr><th>Firm</th><th>Bilties</th><th>Freight</th><th>Dalali</th><th>FD</th><th>Owner Advances</th></tr>${firmsHtml}</table></div>
+ <div class="card"><h3>Available reports</h3><p>Bilti-wise • Party/Goods Provider • Agent/Dalal • Freight Difference • Truck Owner • Driver • Lorry/Trip • Advance • Final Receipt • Firm-wise • Outstanding • Profit/Loss • Day Book • Trial Balance • Balance Sheet</p></div>`;
+}
+function firmSetup(){
+ return `<div class="card"><h2>Firm Setup</h2><div class="grid"><label>Current Firm<select id="firmSelect">${state.firms.map(f=>`<option value="${f.id}" ${state.firm&&f.id===state.firm.id?'selected':''}>${f.name}</option>`).join("")}</select></label></div><div class="actions"><button class="primary" onclick="selectFirm()">Select Firm</button></div><p class="muted">The selected firm automatically prints on Loading Slip, Bilti and Final Receipt and is attached to every ledger entry.</p></div>`;
+}
+function selectFirm(){
+ const id=document.getElementById("firmSelect").value;
+ state.firm=state.firms.find(f=>f.id===id)||null;
+ updateHeader();show("Dashboard");
+}
+function updateHeader(){document.getElementById("firmTitle").textContent=state.firm?state.firm.name:"Transport Management System"}
+function v(id){return document.getElementById(id).value} function n(id){return Number(v(id)||0)}
+function sum(k){return state.bilties.reduce((s,x)=>s+(Number(x[k])||0),0).toFixed(2)}
+async function init(){
+ nav();
+ try{
+  state.firms=await apiGet("/firms");
+  state.firm=state.firms[0]||null;
+  updateHeader();
+ }catch(e){
+  document.getElementById("app").innerHTML=`<div class="card"><div class="error">Could not reach the API: ${e.message}</div></div>`;
+  return;
+ }
+ show("Dashboard");
+}
+init();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+</script>
+</body></html>
