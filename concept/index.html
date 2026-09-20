@@ -20,7 +20,8 @@ label{font-size:12px;font-weight:bold;color:#53606c}input,select{width:100%;padd
 .full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 button.primary{background:#17324d;color:white;border:0;border-radius:8px;padding:10px 14px}
 button.secondary{background:#eef2f5;border:1px solid #ccd3da;border-radius:8px;padding:10px 14px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;border-bottom:1px solid #e5e8eb;padding:8px}th{background:#f5f7f9}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;border-bottom:1px solid #e5e8eb;padding:8px;white-space:nowrap}th{background:#f5f7f9}
 .metric{font-size:23px;font-weight:bold}.muted{color:#687682;font-size:12px}
 .notice{background:#fff8df;border:1px solid #ecd37a;padding:10px;border-radius:8px;font-size:13px}
 .error{background:#fdecea;border:1px solid #f2a29c;color:#8a1f16;padding:10px;border-radius:8px;font-size:13px;margin-top:10px}
@@ -105,7 +106,7 @@ function loadingForm(err){
  </div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addLoading()">Save Loading Slip</button></div></div>
- <div class="card"><h3>Recent Loading Slips</h3><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div>`;
+ <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>`;
 }
 async function addLoading(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Loading Slip");}
@@ -130,7 +131,7 @@ function biltiForm(err){
  <div class="notice">FD is stored in accounting and Agent/Dalal ledger, but is excluded from the printed Bilti.</div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button><button class="secondary" onclick="window.print()">Print</button></div></div>
- <div class="card"><h3>Recent Bilties</h3><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th></tr>${rows||"<tr><td colspan=5>No entries</td></tr>"}</table></div>`;
+ <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th></tr>${rows||"<tr><td colspan=5>No entries</td></tr>"}</table></div></div>`;
 }
 async function addBilti(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Bilti / GR");}
@@ -146,8 +147,8 @@ function agentLedger(err){
  state.bilties.filter(x=>x.agent).forEach(x=>{const k=x.agent.id;balances[k]=balances[k]||{name:x.agent.name,accrued:0,paid:0};balances[k].accrued+=Number(x.dalali)+Number(x.freight_difference);});
  state.agentPayments.forEach(p=>{const k=p.agent.id;balances[k]=balances[k]||{name:p.agent.name,accrued:0,paid:0};balances[k].paid+=Number(p.amount);});
  let balRows=Object.values(balances).map(b=>`<tr><td>${b.name}</td><td>₹${money(b.accrued)}</td><td>₹${money(b.paid)}</td><td>₹${money(b.accrued-b.paid)}</td></tr>`).join("");
- return `<div class="card"><h2>Agent / Dalal Ledger</h2><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Agent</th><th>Dalali</th><th>FD</th><th>Total</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div>
- <div class="card"><h3>Balances</h3><table><tr><th>Agent</th><th>Accrued</th><th>Paid</th><th>Balance</th></tr>${balRows||"<tr><td colspan=4>No agents</td></tr>"}</table></div>
+ return `<div class="card"><h2>Agent / Dalal Ledger</h2><div class="table-wrap"><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Agent</th><th>Dalali</th><th>FD</th><th>Total</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>
+ <div class="card"><h3>Balances</h3><div class="table-wrap"><table><tr><th>Agent</th><th>Accrued</th><th>Paid</th><th>Balance</th></tr>${balRows||"<tr><td colspan=4>No agents</td></tr>"}</table></div></div>
  <div class="card"><h3>Record Agent Payment</h3><div class="grid">
  <label>Agent<select id="ap_agent">${state.agents.map(a=>`<option value="${a.id}">${a.name}</option>`).join("")}</select></label>
  <label>Amount<input id="ap_amount" type="number" min="0.01" step="0.01"></label>
@@ -156,7 +157,7 @@ function agentLedger(err){
  <label class="full">Remarks<input id="ap_remarks"></label></div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addAgentPayment()">Record Payment</button></div></div>
- <div class="card"><h3>Recent Payments</h3><table><tr><th>Date</th><th>Firm</th><th>Agent</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div>`;
+ <div class="card"><h3>Recent Payments</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Agent</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div></div>`;
 }
 async function addAgentPayment(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Agent Ledger");}
@@ -174,8 +175,8 @@ function ownerLedger(err){
  state.bilties.forEach(x=>{const k=x.truck_owner.id;balances[k]=balances[k]||{name:x.truck_owner.name,freight:0,advance:0,paid:0};balances[k].freight+=Number(x.freight);balances[k].advance+=Number(x.advance_to_owner);});
  state.truckOwnerPayments.forEach(p=>{const k=p.truck_owner.id;balances[k]=balances[k]||{name:p.truck_owner.name,freight:0,advance:0,paid:0};balances[k].paid+=Number(p.amount);});
  let balRows=Object.values(balances).map(b=>`<tr><td>${b.name}</td><td>₹${money(b.freight)}</td><td>₹${money(b.advance)}</td><td>₹${money(b.paid)}</td><td>₹${money(b.freight-b.advance-b.paid)}</td></tr>`).join("");
- return `<div class="card"><h2>Truck Owner Ledger</h2><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Owner</th><th>Lorry</th><th>Freight</th><th>Advance</th><th>Balance</th></tr>${rows||"<tr><td colspan=8>No entries</td></tr>"}</table></div>
- <div class="card"><h3>Balances</h3><table><tr><th>Owner</th><th>Freight</th><th>Advance</th><th>Paid</th><th>Balance</th></tr>${balRows||"<tr><td colspan=5>No owners</td></tr>"}</table></div>
+ return `<div class="card"><h2>Truck Owner Ledger</h2><div class="table-wrap"><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Owner</th><th>Lorry</th><th>Freight</th><th>Advance</th><th>Balance</th></tr>${rows||"<tr><td colspan=8>No entries</td></tr>"}</table></div></div>
+ <div class="card"><h3>Balances</h3><div class="table-wrap"><table><tr><th>Owner</th><th>Freight</th><th>Advance</th><th>Paid</th><th>Balance</th></tr>${balRows||"<tr><td colspan=5>No owners</td></tr>"}</table></div></div>
  <div class="card"><h3>Record Owner Payment</h3><div class="grid">
  <label>Owner<select id="op_owner">${state.truckOwners.map(o=>`<option value="${o.id}">${o.name}</option>`).join("")}</select></label>
  <label>Amount<input id="op_amount" type="number" min="0.01" step="0.01"></label>
@@ -184,7 +185,7 @@ function ownerLedger(err){
  <label class="full">Remarks<input id="op_remarks"></label></div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addOwnerPayment()">Record Payment</button></div></div>
- <div class="card"><h3>Recent Payments</h3><table><tr><th>Date</th><th>Firm</th><th>Owner</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div>`;
+ <div class="card"><h3>Recent Payments</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Owner</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div></div>`;
 }
 async function addOwnerPayment(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Truck Owner Ledger");}
@@ -205,7 +206,7 @@ function receiptForm(err){
  <label class="full">Remarks<input id="r_remarks"></label></div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addReceipt()">Save Receipt</button><button class="secondary" onclick="window.print()">Print</button></div></div>
- <div class="card"><h3>Recent Receipts</h3><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Received From</th><th>Amount</th><th>Remarks</th></tr>${rows||"<tr><td colspan=6>No entries</td></tr>"}</table></div>`;
+ <div class="card"><h3>Recent Receipts</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Received From</th><th>Amount</th><th>Remarks</th></tr>${rows||"<tr><td colspan=6>No entries</td></tr>"}</table></div></div>`;
 }
 async function addReceipt(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Final Receipt");}
@@ -223,7 +224,7 @@ function reports(){
   let freight=b.reduce((s,x)=>s+Number(x.freight),0);
   return `<tr><td>${f.name}</td><td>${b.length}</td><td>₹${money(freight)}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.dalali),0))}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.freight_difference),0))}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.advance_to_owner),0))}</td><td>₹${money(received)}</td><td>₹${money(freight-received)}</td></tr>`;
  }).join("");
- return `<div class="card"><h2>Firm-wise Reports</h2><table><tr><th>Firm</th><th>Bilties</th><th>Freight</th><th>Dalali</th><th>FD</th><th>Owner Advances</th><th>Received</th><th>Outstanding</th></tr>${firmsHtml}</table></div>
+ return `<div class="card"><h2>Firm-wise Reports</h2><div class="table-wrap"><table><tr><th>Firm</th><th>Bilties</th><th>Freight</th><th>Dalali</th><th>FD</th><th>Owner Advances</th><th>Received</th><th>Outstanding</th></tr>${firmsHtml}</table></div></div>
  <div class="card"><h3>Available reports</h3><p>Bilti-wise • Party/Goods Provider • Agent/Dalal • Freight Difference • Truck Owner • Driver • Lorry/Trip • Advance • Final Receipt • Firm-wise • Outstanding • Profit/Loss • Day Book • Trial Balance • Balance Sheet</p></div>`;
 }
 function firmSetup(){
