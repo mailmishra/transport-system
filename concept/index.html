@@ -52,7 +52,7 @@ const apiPost=(path,body)=>apiRequest("POST",path,body);
 const apiPatch=(path,body)=>apiRequest("PATCH",path,body);
 const apiDelete=(path)=>apiRequest("DELETE",path);
 
-let state={firm:null,firms:[],bilties:[],loading:[],agents:[],truckOwners:[],agentPayments:[],truckOwnerPayments:[],receipts:[]};
+let state={firm:null,firms:[],bilties:[],loading:[],agents:[],truckOwners:[],agentPayments:[],truckOwnerPayments:[],receipts:[],reportView:"firm"};
 let lastError=null;
 const navItems=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Final Receipt","Reports","Firm Setup"];
 const LISTED_SCREENS=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Final Receipt","Reports"];
@@ -82,7 +82,7 @@ async function show(name){
  if(name==="Agent Ledger") a.innerHTML=agentLedger(errBefore);
  if(name==="Truck Owner Ledger") a.innerHTML=ownerLedger(errBefore);
  if(name==="Final Receipt") a.innerHTML=receiptForm(errBefore);
- if(name==="Reports") a.innerHTML=reports();
+ if(name==="Reports"){state.reportView="firm";a.innerHTML=reports();}
  if(name==="Firm Setup") a.innerHTML=firmSetup();
 }
 function dashboard(){
@@ -217,15 +217,112 @@ async function addReceipt(){
  }catch(e){lastError=e.message;return show("Final Receipt");}
  alert("Final receipt saved");show("Final Receipt");
 }
+const REPORTS=[
+ {id:"bilti",label:"Bilti-wise",fn:reportBiltiWise},
+ {id:"party",label:"Party/Goods Provider",fn:reportParty},
+ {id:"agent",label:"Agent/Dalal",fn:reportAgent},
+ {id:"fd",label:"Freight Difference",fn:reportFD},
+ {id:"owner",label:"Truck Owner",fn:reportOwner},
+ {id:"driver",label:"Driver",fn:null},
+ {id:"lorry",label:"Lorry/Trip",fn:reportLorry},
+ {id:"advance",label:"Advance",fn:reportAdvance},
+ {id:"receipt",label:"Final Receipt",fn:reportReceipt},
+ {id:"firm",label:"Firm-wise",fn:reportFirmWise},
+ {id:"outstanding",label:"Outstanding",fn:reportOutstanding},
+ {id:"pl",label:"Profit/Loss",fn:null},
+ {id:"daybook",label:"Day Book",fn:reportDayBook},
+ {id:"trial",label:"Trial Balance",fn:null},
+ {id:"balance",label:"Balance Sheet",fn:null}
+];
 function reports(){
- let firmsHtml=state.firms.map(f=>{
+ if(!state.reportView) state.reportView="firm";
+ let pills=REPORTS.map(r=>r.fn
+  ?`<button class="${state.reportView===r.id?'primary':'secondary'}" onclick="showReport('${r.id}')">${r.label}</button>`
+  :`<button class="secondary" disabled title="Not built yet">${r.label} (soon)</button>`
+ ).join("");
+ let active=REPORTS.find(r=>r.id===state.reportView);
+ let body=(active&&active.fn)?active.fn():reportFirmWise();
+ return `<div class="card"><h2>Reports</h2><div class="actions">${pills}</div></div>${body}`;
+}
+function showReport(id){state.reportView=id;document.getElementById("app").innerHTML=reports();}
+function reportTable(title,headCells,rows,colCount){
+ return `<div class="card"><h3>${title}</h3><div class="table-wrap"><table><tr>${headCells.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.join("")||`<tr><td colspan=${colCount}>No entries</td></tr>`}</table></div></div>`;
+}
+function reportFirmWise(){
+ let rows=state.firms.map(f=>{
   let b=state.bilties.filter(x=>x.firm_id===f.id);
   let received=state.receipts.filter(r=>r.firm_id===f.id).reduce((s,r)=>s+Number(r.amount),0);
   let freight=b.reduce((s,x)=>s+Number(x.freight),0);
   return `<tr><td>${f.name}</td><td>${b.length}</td><td>₹${money(freight)}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.dalali),0))}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.freight_difference),0))}</td><td>₹${money(b.reduce((s,x)=>s+Number(x.advance_to_owner),0))}</td><td>₹${money(received)}</td><td>₹${money(freight-received)}</td></tr>`;
- }).join("");
- return `<div class="card"><h2>Firm-wise Reports</h2><div class="table-wrap"><table><tr><th>Firm</th><th>Bilties</th><th>Freight</th><th>Dalali</th><th>FD</th><th>Owner Advances</th><th>Received</th><th>Outstanding</th></tr>${firmsHtml}</table></div></div>
- <div class="card"><h3>Available reports</h3><p>Bilti-wise • Party/Goods Provider • Agent/Dalal • Freight Difference • Truck Owner • Driver • Lorry/Trip • Advance • Final Receipt • Firm-wise • Outstanding • Profit/Loss • Day Book • Trial Balance • Balance Sheet</p></div>`;
+ });
+ return reportTable("Firm-wise Report",["Firm","Bilties","Freight","Dalali","FD","Owner Advances","Received","Outstanding"],rows,8);
+}
+function reportBiltiWise(){
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>${x.consignee}</td><td>${x.vehicle_no}</td><td>${x.truck_owner.name}</td><td>${x.agent?x.agent.name:""}</td><td>₹${money(x.freight)}</td><td>₹${money(x.dalali)}</td><td>₹${money(x.advance_to_owner)}</td><td>₹${money(x.freight_difference)}</td></tr>`);
+ return reportTable("Bilti-wise Report",["Date","Bilti No","Firm","Consignor","Consignee","Vehicle","Truck Owner","Agent","Freight","Dalali","Advance","FD"],rows,12);
+}
+function reportParty(){
+ let byParty={};
+ state.bilties.forEach(x=>{byParty[x.consignor]=byParty[x.consignor]||{count:0,freight:0};byParty[x.consignor].count++;byParty[x.consignor].freight+=Number(x.freight);});
+ let rows=Object.entries(byParty).map(([name,v])=>`<tr><td>${name}</td><td>${v.count}</td><td>₹${money(v.freight)}</td></tr>`);
+ return reportTable("Party / Goods Provider Report",["Party (Consignor)","Bilties","Total Freight"],rows,3);
+}
+function reportAgent(){
+ let balances={};
+ state.bilties.filter(x=>x.agent).forEach(x=>{const k=x.agent.id;balances[k]=balances[k]||{name:x.agent.name,accrued:0,paid:0};balances[k].accrued+=Number(x.dalali)+Number(x.freight_difference);});
+ state.agentPayments.forEach(p=>{const k=p.agent.id;balances[k]=balances[k]||{name:p.agent.name,accrued:0,paid:0};balances[k].paid+=Number(p.amount);});
+ let rows=Object.values(balances).map(b=>`<tr><td>${b.name}</td><td>₹${money(b.accrued)}</td><td>₹${money(b.paid)}</td><td>₹${money(b.accrued-b.paid)}</td></tr>`);
+ return reportTable("Agent / Dalal Report",["Agent","Accrued","Paid","Balance"],rows,4);
+}
+function reportFD(){
+ let withFd=state.bilties.filter(x=>Number(x.freight_difference)>0);
+ let total=withFd.reduce((s,x)=>s+Number(x.freight_difference),0);
+ let rows=withFd.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.agent?x.agent.name:""}</td><td>₹${money(x.freight_difference)}</td></tr>`);
+ if(withFd.length) rows.push(`<tr><td colspan=4><b>Total</b></td><td><b>₹${money(total)}</b></td></tr>`);
+ return reportTable("Freight Difference Report",["Date","Bilti No","Firm","Agent","FD"],rows,5);
+}
+function reportOwner(){
+ let balances={};
+ state.bilties.forEach(x=>{const k=x.truck_owner.id;balances[k]=balances[k]||{name:x.truck_owner.name,freight:0,advance:0,paid:0};balances[k].freight+=Number(x.freight);balances[k].advance+=Number(x.advance_to_owner);});
+ state.truckOwnerPayments.forEach(p=>{const k=p.truck_owner.id;balances[k]=balances[k]||{name:p.truck_owner.name,freight:0,advance:0,paid:0};balances[k].paid+=Number(p.amount);});
+ let rows=Object.values(balances).map(b=>`<tr><td>${b.name}</td><td>₹${money(b.freight)}</td><td>₹${money(b.advance)}</td><td>₹${money(b.paid)}</td><td>₹${money(b.freight-b.advance-b.paid)}</td></tr>`);
+ return reportTable("Truck Owner Report",["Owner","Freight","Advance","Paid","Balance"],rows,5);
+}
+function reportLorry(){
+ let byVehicle={};
+ state.bilties.forEach(x=>{byVehicle[x.vehicle_no]=byVehicle[x.vehicle_no]||{trips:0,freight:0};byVehicle[x.vehicle_no].trips++;byVehicle[x.vehicle_no].freight+=Number(x.freight);});
+ let rows=Object.entries(byVehicle).map(([vehicle,v])=>`<tr><td>${vehicle}</td><td>${v.trips}</td><td>₹${money(v.freight)}</td></tr>`);
+ return reportTable("Lorry / Trip Report",["Vehicle","Trips","Total Freight"],rows,3);
+}
+function reportAdvance(){
+ let withAdvance=state.bilties.filter(x=>Number(x.advance_to_owner)>0);
+ let total=withAdvance.reduce((s,x)=>s+Number(x.advance_to_owner),0);
+ let rows=withAdvance.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${x.truck_owner.name}</td><td>₹${money(x.advance_to_owner)}</td></tr>`);
+ if(withAdvance.length) rows.push(`<tr><td colspan=3><b>Total</b></td><td><b>₹${money(total)}</b></td></tr>`);
+ return reportTable("Advance Report",["Date","Bilti No","Owner","Advance"],rows,4);
+}
+function reportReceipt(){
+ let rows=state.receipts.map(r=>`<tr><td>${r.receipt_date}</td><td>${(state.bilties.find(b=>b.id===r.bilti_id)||{}).bilti_no||""}</td><td>${firmName(r.firm_id)}</td><td>${r.received_from}</td><td>₹${money(r.amount)}</td><td>${r.remarks||""}</td></tr>`);
+ return reportTable("Final Receipt Report",["Date","Bilti No","Firm","Received From","Amount","Remarks"],rows,6);
+}
+function reportOutstanding(){
+ let rows=state.bilties.map(x=>{
+  let received=state.receipts.filter(r=>r.bilti_id===x.id).reduce((s,r)=>s+Number(r.amount),0);
+  let outstanding=Number(x.freight)-received;
+  return {x,received,outstanding};
+ }).filter(r=>r.outstanding!==0).map(({x,received,outstanding})=>`<tr><td>${firmName(x.firm_id)}</td><td>${x.bilti_no}</td><td>${x.consignee}</td><td>₹${money(x.freight)}</td><td>₹${money(received)}</td><td>₹${money(outstanding)}</td></tr>`);
+ return reportTable("Outstanding Report",["Firm","Bilti No","Consignee","Freight","Received","Outstanding"],rows,6);
+}
+function reportDayBook(){
+ let events=[];
+ state.loading.forEach(x=>events.push({date:x.slip_date,type:"Loading Slip",desc:`${x.vehicle_no}: ${x.loading_point} → ${x.destination}`,amount:null}));
+ state.bilties.forEach(x=>events.push({date:x.bilti_date,type:"Bilti",desc:`${x.bilti_no} (${x.consignor} → ${x.consignee})`,amount:x.freight}));
+ state.agentPayments.forEach(p=>events.push({date:p.payment_date,type:"Agent Payment",desc:p.agent.name,amount:p.amount}));
+ state.truckOwnerPayments.forEach(p=>events.push({date:p.payment_date,type:"Owner Payment",desc:p.truck_owner.name,amount:p.amount}));
+ state.receipts.forEach(r=>events.push({date:r.receipt_date,type:"Receipt",desc:r.received_from,amount:r.amount}));
+ events.sort((a,b)=>b.date.localeCompare(a.date));
+ let rows=events.map(e=>`<tr><td>${e.date}</td><td>${e.type}</td><td>${e.desc}</td><td>${e.amount!=null?"₹"+money(e.amount):""}</td></tr>`);
+ return reportTable("Day Book",["Date","Type","Details","Amount"],rows,4);
 }
 function firmSetup(){
  return `<div class="card"><h2>Firm Setup</h2><div class="grid"><label>Current Firm<select id="firmSelect">${state.firms.map(f=>`<option value="${f.id}" ${state.firm&&f.id===state.firm.id?'selected':''}>${f.name}</option>`).join("")}</select></label></div><div class="actions"><button class="primary" onclick="selectFirm()">Select Firm</button></div><p class="muted">The selected firm automatically prints on Loading Slip, Bilti and Final Receipt and is attached to every ledger entry.</p></div>`;
