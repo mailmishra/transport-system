@@ -4,10 +4,12 @@ from decimal import Decimal
 
 from sqlalchemy import Date, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
+from app.models.agent import Agent
 from app.models.base import ActorTrackedMixin, SoftDeleteMixin, TimestampMixin, UUIDPKMixin
+from app.models.truck_owner import TruckOwner
 
 
 class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Base):
@@ -27,8 +29,16 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     from_location: Mapped[str] = mapped_column(String(200), nullable=False)
     to_location: Mapped[str] = mapped_column(String(200), nullable=False)
     vehicle_no: Mapped[str] = mapped_column(String(50), nullable=False)
-    truck_owner: Mapped[str] = mapped_column(String(200), nullable=False)
-    agent: Mapped[str | None] = mapped_column(String(200), nullable=True, index=True)
+    # Normalized so the ledgers can aggregate by identity instead of free text
+    # (see backend/app/models/agent.py, truck_owner.py). RESTRICT: an
+    # agent/owner with ledger history must never be deletable out from
+    # under it — deactivate (is_active=false) instead.
+    truck_owner_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("truck_owners.id", ondelete="RESTRICT"), nullable=False
+    )
+    agent_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("agents.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
     goods_description: Mapped[str] = mapped_column(String(300), nullable=False)
     weight: Mapped[str] = mapped_column(String(100), nullable=False)
     freight: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
@@ -36,3 +46,6 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     advance_to_owner: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     # Hidden field: excluded from BiltiPrint schema / the /print endpoint.
     freight_difference: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
+
+    truck_owner: Mapped[TruckOwner] = relationship(lazy="joined")
+    agent: Mapped[Agent | None] = relationship(lazy="joined")

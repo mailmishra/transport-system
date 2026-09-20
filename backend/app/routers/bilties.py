@@ -52,10 +52,11 @@ async def create_bilti(
 @router.get("", response_model=list[BiltiRead])
 async def list_bilties(
     firm_id: uuid.UUID | None = None,
-    agent: str | None = None,
+    agent_id: uuid.UUID | None = None,
+    truck_owner_id: uuid.UUID | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, agent=agent)
+    return await crud.list_(db, firm_id=firm_id, agent_id=agent_id, truck_owner_id=truck_owner_id)
 
 
 @router.get("/{bilti_id}", response_model=BiltiRead)

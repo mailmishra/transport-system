@@ -4,6 +4,9 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.agent import AgentRead
+from app.schemas.truck_owner import TruckOwnerRead
+
 _TEXT_FIELDS = (
     "bilti_no",
     "consignor",
@@ -11,7 +14,7 @@ _TEXT_FIELDS = (
     "from_location",
     "to_location",
     "vehicle_no",
-    "truck_owner",
+    "truck_owner_name",
     "goods_description",
     "weight",
 )
@@ -27,8 +30,11 @@ class BiltiBase(BaseModel):
     from_location: str = Field(min_length=1, max_length=200)
     to_location: str = Field(min_length=1, max_length=200)
     vehicle_no: str = Field(min_length=1, max_length=50)
-    truck_owner: str = Field(min_length=1, max_length=200)
-    agent: str | None = Field(default=None, max_length=200)
+    # Free text in, normalized to agents/truck_owners rows via get-or-create
+    # in the CRUD layer (see app/crud/bilti.py) — keeps the simple-text-input
+    # UX while the DB stores a real FK.
+    truck_owner_name: str = Field(min_length=1, max_length=200)
+    agent_name: str | None = Field(default=None, max_length=200)
     goods_description: str = Field(min_length=1, max_length=300)
     weight: str = Field(min_length=1, max_length=100)
     freight: Decimal = Field(gt=0)
@@ -44,7 +50,7 @@ class BiltiBase(BaseModel):
             raise ValueError("must not be blank")
         return v
 
-    @field_validator("agent")
+    @field_validator("agent_name")
     @classmethod
     def blank_agent_to_none(cls, v: str | None) -> str | None:
         if v is None:
@@ -67,8 +73,8 @@ class BiltiUpdate(BaseModel):
     from_location: str | None = Field(default=None, min_length=1, max_length=200)
     to_location: str | None = Field(default=None, min_length=1, max_length=200)
     vehicle_no: str | None = Field(default=None, min_length=1, max_length=50)
-    truck_owner: str | None = Field(default=None, min_length=1, max_length=200)
-    agent: str | None = Field(default=None, max_length=200)
+    truck_owner_name: str | None = Field(default=None, min_length=1, max_length=200)
+    agent_name: str | None = Field(default=None, max_length=200)
     goods_description: str | None = Field(default=None, min_length=1, max_length=300)
     weight: str | None = Field(default=None, min_length=1, max_length=100)
     freight: Decimal | None = Field(default=None, gt=0)
@@ -77,10 +83,27 @@ class BiltiUpdate(BaseModel):
     freight_difference: Decimal | None = Field(default=None, ge=0)
 
 
-class BiltiRead(BiltiBase):
+class BiltiRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    firm_id: uuid.UUID
+    loading_slip_id: uuid.UUID | None
+    bilti_no: str
+    bilti_date: date
+    consignor: str
+    consignee: str
+    from_location: str
+    to_location: str
+    vehicle_no: str
+    truck_owner: TruckOwnerRead
+    agent: AgentRead | None
+    goods_description: str
+    weight: str
+    freight: Decimal
+    dalali: Decimal
+    advance_to_owner: Decimal
+    freight_difference: Decimal
     created_at: datetime
     updated_at: datetime
 
@@ -103,8 +126,8 @@ class BiltiPrint(BaseModel):
     from_location: str
     to_location: str
     vehicle_no: str
-    truck_owner: str
-    agent: str | None
+    truck_owner: TruckOwnerRead
+    agent: AgentRead | None
     goods_description: str
     weight: str
     freight: Decimal
