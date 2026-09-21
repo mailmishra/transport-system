@@ -130,7 +130,7 @@ def test_soft_deleted_bilti_hidden_from_list_and_get(client):
     assert (client.delete(f"/api/bilties/{created['id']}")).status_code == 204
     assert (client.get(f"/api/bilties/{created['id']}")).status_code == 404
     listed = client.get("/api/bilties", params={"firm_id": firm_id})
-    assert not any(x["id"] == created["id"] for x in listed.json())
+    assert not any(x["id"] == created["id"] for x in listed.json()["items"])
 
 
 def test_grand_total_and_topay_computed_from_charge_breakdown(client):
@@ -178,3 +178,59 @@ def test_gst_paid_by_rejects_invalid_value(client):
         },
     )
     assert res.status_code == 422
+
+
+def test_list_is_paginated_with_envelope(client):
+    firm_id = get_firm_id(client)
+    consignor = unique("SearchableConsignor")
+    for _ in range(3):
+        create_bilti(client, firm_id, consignor=consignor)
+
+    page1 = client.get("/api/bilties", params={"firm_id": firm_id, "q": consignor, "limit": 2})
+    assert page1.status_code == 200
+    body = page1.json()
+    assert set(body.keys()) == {"items", "total", "page", "limit"}
+    assert body["total"] == 3
+    assert body["page"] == 1
+    assert body["limit"] == 2
+    assert len(body["items"]) == 2
+
+    page2 = client.get(
+        "/api/bilties", params={"firm_id": firm_id, "q": consignor, "limit": 2, "page": 2}
+    )
+    assert len(page2.json()["items"]) == 1
+    # no overlap between pages
+    ids_p1 = {x["id"] for x in body["items"]}
+    ids_p2 = {x["id"] for x in page2.json()["items"]}
+    assert ids_p1.isdisjoint(ids_p2)
+
+
+def test_search_q_matches_consignor_and_bilti_no(client):
+    firm_id = get_firm_id(client)
+    needle = unique("Vindhya")
+    match_by_consignor = create_bilti(client, firm_id, consignor=needle)
+    match_by_bilti_no = create_bilti(client, firm_id, bilti_no=needle)
+    create_bilti(client, firm_id)  # unrelated, should not match
+
+    found = client.get("/api/bilties", params={"firm_id": firm_id, "q": needle}).json()["items"]
+    found_ids = {x["id"] for x in found}
+    assert match_by_consignor["id"] in found_ids
+    assert match_by_bilti_no["id"] in found_ids
+    assert len(found) == 2
+
+
+def test_sort_by_freight(client):
+    firm_id = get_firm_id(client)
+    marker = unique("SortMarker")
+    low = create_bilti(client, firm_id, consignor=marker, freight=100)
+    high = create_bilti(client, firm_id, consignor=marker, freight=9000)
+
+    ascending = client.get(
+        "/api/bilties", params={"firm_id": firm_id, "q": marker, "sort": "freight"}
+    ).json()["items"]
+    assert [x["id"] for x in ascending] == [low["id"], high["id"]]
+
+    descending = client.get(
+        "/api/bilties", params={"firm_id": firm_id, "q": marker, "sort": "-freight"}
+    ).json()["items"]
+    assert [x["id"] for x in descending] == [high["id"], low["id"]]

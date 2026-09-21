@@ -9,22 +9,28 @@ Loading Slip → Bilti/GR → Agent/Dalal Ledger → Truck Owner Ledger → Fina
 ```
 
 The app started as a single-file offline PWA prototype (`concept/index.html`,
-storing everything in `localStorage`) and now has a real FastAPI + Postgres
-backend behind it. The same `index.html` is still the UI — it now talks to
-the API instead of the browser's local storage.
+storing everything in `localStorage`), then grew a real FastAPI + Postgres
+backend behind it. As of this pass, the prototype is being retired in favor
+of a real React frontend (`frontend/`) — the reason: `concept/index.html`
+rendered every "recent records" table in full on the same page as its own
+create form (no pagination, sort, or search; lookups shipped as complete
+preloaded lists), which stopped scaling once there was real transaction
+volume. `concept/index.html` stays in the repo for reference but is no
+longer built or served.
 
 ## Architecture
 
 One deployable service: FastAPI serves both the JSON API (under `/api`) and
-the static frontend (`concept/`) from the same process, so there's no CORS to
-manage and nothing extra to deploy. Postgres is a separate managed service.
+the built frontend SPA (`frontend/dist/`, built in a Docker stage) from the
+same process, so there's no CORS to manage and nothing extra to deploy.
+Postgres is a separate managed service.
 
 ```
-┌─────────────────────────────┐
-│  FastAPI (backend/app)      │
-│  ├─ /api/*  → JSON API      │
-│  └─ /       → concept/ (SPA)│
-└──────────────┬──────────────┘
+┌───────────────────────────────────┐
+│  FastAPI (backend/app)            │
+│  ├─ /api/*  → JSON API            │
+│  └─ /       → frontend/dist (SPA) │
+└──────────────┬─────────────────────┘
                │ asyncpg
                ▼
         ┌─────────────┐
@@ -33,13 +39,20 @@ manage and nothing extra to deploy. Postgres is a separate managed service.
 ```
 
 - **Backend**: FastAPI, async SQLAlchemy 2.0, Alembic migrations, Pydantic v2
-  validation, Postgres.
-- **Frontend**: the original single-file `concept/index.html` PWA, edited to
-  call the API via `fetch` instead of `localStorage`. No build step, no
-  framework — kept exactly as friction-free as the original prototype.
+  validation, Postgres. Every list endpoint (`GET /api/<resource>`) is
+  paginated/searchable/sortable — `?q=`, `?sort=`, `?page=`, `?limit=` — and
+  returns `{items, total, page, limit}` (see `backend/app/pagination.py`).
+- **Frontend**: React + TypeScript + Vite, Tailwind + shadcn/ui-pattern
+  components, TanStack Query (server state) + TanStack Table (the shared
+  `DataTable`). See `frontend/README.md` for the module layout and dev
+  workflow. Styled to a navy `#122A42` / gold `#C89B3C` "Freight ERP" look,
+  one responsive shell rather than separate desktop/mobile apps.
 - **No auth yet** — deliberately. A stub `get_current_actor()` dependency
-  (`backend/app/deps.py`) and nullable `created_by` columns exist so Supabase
-  auth can be wired in later without a schema change.
+  (`backend/app/deps.py`) and nullable `created_by` columns exist on the
+  backend; the frontend routes every edit/delete affordance through one
+  `can(action, resource)` helper (`frontend/src/components/permissions/`)
+  that returns `true` unconditionally today, so wiring Supabase auth later
+  changes one function, not every screen.
 
 ## Data model
 
@@ -72,10 +85,11 @@ never hard-deleted, since this is accounting data.
 ```
 backend/
   app/
-    main.py          # FastAPI app, mounts /api + serves concept/ as static
+    main.py          # FastAPI app, mounts /api + serves frontend/dist as SPA
     config.py         # env-based settings (DATABASE_URL, CORS, future Supabase)
     db.py               # async SQLAlchemy engine/session
     deps.py              # get_db(), auth stub
+    pagination.py         # shared Page[T] envelope + apply_sort()/paginate()
     models/               # SQLAlchemy ORM models
     schemas/               # Pydantic request/response schemas
     crud/                    # DB access functions
@@ -84,20 +98,25 @@ backend/
     versions/0001_init.py       # firms, loading_slips, bilties
     versions/0002_ledgers.py     # agents, truck_owners, payments, receipts
     versions/0003_paper_form_fields.py  # vehicles; full paper GR fields
-  Dockerfile
-concept/                          # the frontend (served as static files)
+  Dockerfile                        # multi-stage: builds frontend/, then Python
+frontend/                             # React SPA (see frontend/README.md)
+  src/
+concept/                                # retired prototype, kept for reference
   index.html
-docker-compose.yml                # local dev: postgres + backend
-railway.json                      # Railway build/deploy config
+docker-compose.yml                        # local dev: postgres + backend (+ built frontend)
+railway.json                                # Railway build/deploy config
 ```
 
 ## Local development
 
-Requires Docker.
+Requires Docker (builds both the frontend and backend in one command):
 
 ```bash
 docker compose up --build
 ```
+
+For frontend-only iteration with hot reload, run the Vite dev server
+alongside the Dockerized backend instead — see `frontend/README.md`.
 
 This builds the backend image, starts Postgres, runs `alembic upgrade head`
 (creating and seeding the schema), and serves the app on
@@ -121,6 +140,12 @@ uvicorn app.main:app --reload
 
 All routes are under `/api`. Full interactive docs (Swagger UI) are
 available at `/api/docs` when the server is running.
+
+Every `GET /api/<resource>` list endpoint except `/firms` (a fixed 3-row
+table, deliberately unpaginated) takes `?q=` (search), `?sort=` (e.g.
+`-bilti_date`, whitelisted per resource in `backend/app/pagination.py`),
+`?page=`, `?limit=` (max 100, default 25), and returns `{items, total,
+page, limit}` rather than a bare array.
 
 | Resource | Routes |
 |---|---|
@@ -220,7 +245,7 @@ broken constraints pass silently:
   step (FD hidden from print, ledger balances net to zero after payment,
   received equals freight), not just status codes.
 
-All 50 tests currently pass. One thing worth knowing if you touch
+All 53 tests currently pass. One thing worth knowing if you touch
 `tests/conftest.py`: the `client` fixture is deliberately **session-scoped** —
 an earlier per-test version reproducibly broke every other test in the whole
 run (an exact alternating pass/fail pattern) due to an interaction between

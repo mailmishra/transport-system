@@ -8,6 +8,7 @@ from app.crud import truck_owner as truck_owner_crud
 from app.crud import truck_owner_payment as crud
 from app.deps import Actor, get_current_actor, get_db
 from app.models.firm import Firm
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.truck_owner_payment import TruckOwnerPaymentCreate, TruckOwnerPaymentRead
 
 router = APIRouter(prefix="/truck-owner-payments", tags=["truck-owner-payments"])
@@ -39,14 +40,21 @@ async def create_truck_owner_payment(
     return await crud.create(db, data, created_by=actor.id)
 
 
-@router.get("", response_model=list[TruckOwnerPaymentRead])
+@router.get("", response_model=Page[TruckOwnerPaymentRead])
 async def list_truck_owner_payments(
     firm_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
     bilti_id: uuid.UUID | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, truck_owner_id=truck_owner_id, bilti_id=bilti_id)
+    items, total, page, limit = await crud.list_(
+        db, firm_id=firm_id, truck_owner_id=truck_owner_id, bilti_id=bilti_id,
+        sort=sort, page=page, limit=limit,
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{payment_id}", response_model=TruckOwnerPaymentRead)

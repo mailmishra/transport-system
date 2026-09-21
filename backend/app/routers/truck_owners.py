@@ -9,6 +9,7 @@ from app.crud import truck_owner as crud
 from app.deps import get_db
 from app.models.bilti import Bilti
 from app.models.truck_owner_payment import TruckOwnerPayment
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.truck_owner import TruckOwnerBalance, TruckOwnerRead, TruckOwnerUpdate
 
 router = APIRouter(prefix="/truck-owners", tags=["truck-owners"])
@@ -21,9 +22,19 @@ async def _get_or_404(db: AsyncSession, truck_owner_id: uuid.UUID):
     return obj
 
 
-@router.get("", response_model=list[TruckOwnerRead])
-async def list_truck_owners(active_only: bool = False, db: AsyncSession = Depends(get_db)):
-    return await crud.list_(db, active_only=active_only)
+@router.get("", response_model=Page[TruckOwnerRead])
+async def list_truck_owners(
+    active_only: bool = False,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+    db: AsyncSession = Depends(get_db),
+):
+    items, total, page, limit = await crud.list_(
+        db, active_only=active_only, q=q, sort=sort, page=page, limit=limit
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{truck_owner_id}", response_model=TruckOwnerRead)

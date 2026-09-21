@@ -7,6 +7,7 @@ from app.crud import agent as agent_crud
 from app.crud import agent_payment as crud
 from app.deps import Actor, get_current_actor, get_db
 from app.models.firm import Firm
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.agent_payment import AgentPaymentCreate, AgentPaymentRead
 
 router = APIRouter(prefix="/agent-payments", tags=["agent-payments"])
@@ -32,13 +33,19 @@ async def create_agent_payment(
     return await crud.create(db, data, created_by=actor.id)
 
 
-@router.get("", response_model=list[AgentPaymentRead])
+@router.get("", response_model=Page[AgentPaymentRead])
 async def list_agent_payments(
     firm_id: uuid.UUID | None = None,
     agent_id: uuid.UUID | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, agent_id=agent_id)
+    items, total, page, limit = await crud.list_(
+        db, firm_id=firm_id, agent_id=agent_id, sort=sort, page=page, limit=limit
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{payment_id}", response_model=AgentPaymentRead)

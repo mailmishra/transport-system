@@ -4,7 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.truck_owner_payment import TruckOwnerPayment
+from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.truck_owner_payment import TruckOwnerPaymentCreate
+
+_SORTABLE = {"payment_date": TruckOwnerPayment.payment_date, "amount": TruckOwnerPayment.amount}
+_DEFAULT_SORT = [TruckOwnerPayment.payment_date.desc(), TruckOwnerPayment.created_at.desc()]
 
 
 async def create(
@@ -29,7 +33,10 @@ async def list_(
     firm_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
     bilti_id: uuid.UUID | None = None,
-) -> list[TruckOwnerPayment]:
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+) -> tuple[list[TruckOwnerPayment], int, int, int]:
     stmt = select(TruckOwnerPayment).where(TruckOwnerPayment.is_deleted.is_(False))
     if firm_id is not None:
         stmt = stmt.where(TruckOwnerPayment.firm_id == firm_id)
@@ -37,8 +44,8 @@ async def list_(
         stmt = stmt.where(TruckOwnerPayment.truck_owner_id == truck_owner_id)
     if bilti_id is not None:
         stmt = stmt.where(TruckOwnerPayment.bilti_id == bilti_id)
-    stmt = stmt.order_by(TruckOwnerPayment.payment_date.desc(), TruckOwnerPayment.created_at.desc())
-    return list((await db.execute(stmt)).scalars().all())
+    stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
+    return await paginate(db, stmt, page, limit)
 
 
 async def soft_delete(db: AsyncSession, obj: TruckOwnerPayment) -> None:

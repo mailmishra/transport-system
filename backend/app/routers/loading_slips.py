@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud import loading_slip as crud
 from app.deps import Actor, get_current_actor, get_db
 from app.models.firm import Firm
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.loading_slip import LoadingSlipCreate, LoadingSlipRead, LoadingSlipUpdate
 
 router = APIRouter(prefix="/loading-slips", tags=["loading-slips"])
@@ -34,14 +35,21 @@ async def create_loading_slip(
     return await crud.create(db, data, created_by=actor.id)
 
 
-@router.get("", response_model=list[LoadingSlipRead])
+@router.get("", response_model=Page[LoadingSlipRead])
 async def list_loading_slips(
     firm_id: uuid.UUID | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, date_from=date_from, date_to=date_to)
+    items, total, page, limit = await crud.list_(
+        db, firm_id=firm_id, date_from=date_from, date_to=date_to, q=q, sort=sort, page=page, limit=limit
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{slip_id}", response_model=LoadingSlipRead)
