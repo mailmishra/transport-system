@@ -25,7 +25,7 @@ def test_full_workflow(client):
 
     # 1. Loading Slip: goods are booked for transport.
     slip = create_loading_slip(client, firm_id, vehicle_no="MP20AB1234")
-    assert slip["vehicle_no"] == "MP20AB1234"
+    assert slip["vehicle"]["vehicle_no"] == "MP20AB1234"
 
     # 2. Bilti/GR: the freight document is raised against that Loading Slip,
     #    naming the agent who brokered it and the truck owner carrying it.

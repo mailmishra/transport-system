@@ -14,6 +14,7 @@ from app.routers import (
     receipts,
     truck_owner_payments,
     truck_owners,
+    vehicles,
 )
 
 settings = get_settings()
@@ -34,6 +35,7 @@ api.include_router(loading_slips.router)
 api.include_router(bilties.router)
 api.include_router(agents.router)
 api.include_router(truck_owners.router)
+api.include_router(vehicles.router)
 api.include_router(agent_payments.router)
 api.include_router(truck_owner_payments.router)
 api.include_router(receipts.router)

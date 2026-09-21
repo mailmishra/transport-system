@@ -45,11 +45,12 @@ manage and nothing extra to deploy. Postgres is a separate managed service.
 
 | Table | Purpose |
 |---|---|
-| `firms` | The 3 configured companies. Seeded by migration `0001`. |
-| `loading_slips` | First step of the workflow. |
-| `bilties` | The core freight document — freight, dalali, advance, and the hidden `freight_difference` (FD) field. |
-| `agents` | Normalized Agent/Dalal identities (was free text; see migration `0002`). |
+| `firms` | The 3 configured companies, plus letterhead/bank details (address, phone, email, PAN, bank a/c) printed on the GR. Seeded by migration `0001`, letterhead fields added in `0003`. |
+| `loading_slips` | First step of the workflow — vehicle/truck-owner/broker, package count, and advance given at loading time. |
+| `bilties` | The core freight document — the full paper GR: freight + charge breakdown (Kanta/Bahi/Service Tax/Hamali/P.Freight), dalali, advance, the hidden `freight_difference` (FD) field, GST/E-Way Bill/Invoice Value, and an optional insurance block. |
+| `agents` | Normalized Agent/Dalal identities (was free text; see migration `0002`). Doubles as the "Broker" on both forms. |
 | `truck_owners` | Normalized truck owner identities. |
+| `vehicles` | Normalized vehicle numbers (was free text; see migration `0003`) — reused across Loading Slip, Bilti, and the Bilti's "Palti" (alternate/transship) vehicle. |
 | `agent_payments` | Settlements paid out to an agent over time. |
 | `truck_owner_payments` | Settlements paid to a truck owner, optionally against a specific Bilti. |
 | `receipts` | Money received from a consignee against a Bilti (replaces the old client-only Final Receipt). |
@@ -82,6 +83,7 @@ backend/
   alembic/
     versions/0001_init.py       # firms, loading_slips, bilties
     versions/0002_ledgers.py     # agents, truck_owners, payments, receipts
+    versions/0003_paper_form_fields.py  # vehicles; full paper GR fields
   Dockerfile
 concept/                          # the frontend (served as static files)
   index.html
@@ -122,19 +124,28 @@ available at `/api/docs` when the server is running.
 
 | Resource | Routes |
 |---|---|
-| Firms | `GET /firms` |
+| Firms | `GET /firms`, `PATCH /firms/{id}` (letterhead/bank details) |
 | Loading Slips | `POST` `GET` `GET /{id}` `PATCH /{id}` `DELETE /{id}` `/loading-slips` |
 | Bilties | same CRUD on `/bilties`, plus `GET /bilties/{id}/print` (omits the hidden `freight_difference` field) |
 | Agents | `GET /agents`, `GET /agents/{id}`, `PATCH /agents/{id}`, `GET /agents/{id}/balance?firm_id=` |
 | Truck Owners | same shape on `/truck-owners` |
+| Vehicles | `GET /vehicles`, `GET /vehicles/{id}`, `PATCH /vehicles/{id}` |
 | Agent Payments | `POST` `GET` `GET /{id}` `DELETE /{id}` on `/agent-payments` |
 | Truck Owner Payments | same shape on `/truck-owner-payments` |
 | Receipts | same shape on `/receipts` |
 
-`agent_name` / `truck_owner_name` on `POST /bilties` are plain strings — the
-API resolves them to an `agents`/`truck_owners` row by case/whitespace-
-insensitive match, creating one if it doesn't exist yet. The UI never has to
-manage agent/owner IDs directly.
+`agent_name` / `truck_owner_name` / `vehicle_no` (and `palti_vehicle_no` on
+Bilti) on `POST`/`PATCH` for Loading Slips and Bilties are plain strings —
+the API resolves each to an `agents`/`truck_owners`/`vehicles` row by
+case/whitespace-insensitive match, creating one if it doesn't exist yet. The
+UI renders these as `<input list="...">` bound to a `<datalist>` of existing
+values, so they behave like a dropdown while still accepting free text — the
+frontend and API never have to manage those IDs directly.
+
+`BiltiRead`/`BiltiPrint` also expose two **computed, not stored** fields —
+`grand_total` (freight + all charge-breakdown fields) and `topay`
+(`grand_total − advance_to_owner`) — mirroring the paper GR's own totals
+box, computed the same way ledger balances are (see below).
 
 ## Deployment (Railway)
 
@@ -209,7 +220,7 @@ broken constraints pass silently:
   step (FD hidden from print, ledger balances net to zero after payment,
   received equals freight), not just status codes.
 
-All 41 tests currently pass. One thing worth knowing if you touch
+All 50 tests currently pass. One thing worth knowing if you touch
 `tests/conftest.py`: the `client` fixture is deliberately **session-scoped** —
 an earlier per-test version reproducibly broke every other test in the whole
 run (an exact alternating pass/fail pattern) due to an interaction between

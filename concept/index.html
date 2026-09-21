@@ -52,7 +52,7 @@ const apiPost=(path,body)=>apiRequest("POST",path,body);
 const apiPatch=(path,body)=>apiRequest("PATCH",path,body);
 const apiDelete=(path)=>apiRequest("DELETE",path);
 
-let state={firm:null,firms:[],bilties:[],loading:[],agents:[],truckOwners:[],agentPayments:[],truckOwnerPayments:[],receipts:[],reportView:"firm"};
+let state={firm:null,firms:[],bilties:[],loading:[],agents:[],truckOwners:[],vehicles:[],agentPayments:[],truckOwnerPayments:[],receipts:[],reportView:"firm"};
 let lastError=null;
 const navItems=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Final Receipt","Reports","Firm Setup"];
 const LISTED_SCREENS=["Dashboard","Loading Slip","Bilti / GR","Agent Ledger","Truck Owner Ledger","Final Receipt","Reports"];
@@ -60,15 +60,24 @@ function nav(){
  document.getElementById("nav").innerHTML=navItems.map((x,i)=>`<button class="${i==0?'active':''}" onclick="show('${x}')">${x}</button>`).join("");
 }
 async function refreshData(){
- const [loading,bilties,agents,truckOwners,agentPayments,truckOwnerPayments,receipts]=await Promise.all([
-  apiGet("/loading-slips"),apiGet("/bilties"),apiGet("/agents"),apiGet("/truck-owners"),
+ const [loading,bilties,agents,truckOwners,vehicles,agentPayments,truckOwnerPayments,receipts]=await Promise.all([
+  apiGet("/loading-slips"),apiGet("/bilties"),apiGet("/agents"),apiGet("/truck-owners"),apiGet("/vehicles"),
   apiGet("/agent-payments"),apiGet("/truck-owner-payments"),apiGet("/receipts")
  ]);
- state.loading=loading;state.bilties=bilties;state.agents=agents;state.truckOwners=truckOwners;
+ state.loading=loading;state.bilties=bilties;state.agents=agents;state.truckOwners=truckOwners;state.vehicles=vehicles;
  state.agentPayments=agentPayments;state.truckOwnerPayments=truckOwnerPayments;state.receipts=receipts;
 }
 function firmName(id){const f=state.firms.find(x=>x.id===id);return f?f.name:id;}
 function money(x){return Number(x||0).toFixed(2);}
+// Native dropdown-with-manual-fallback: <input list="..."> bound to a
+// <datalist> shows existing values as suggestions while still accepting
+// free text, matching how Agent/Truck Owner/Vehicle are get-or-create'd
+// server-side.
+function datalists(){
+ return `<datalist id="dl_vehicles">${state.vehicles.map(v=>`<option value="${v.vehicle_no}">`).join("")}</datalist>
+ <datalist id="dl_truck_owners">${state.truckOwners.map(o=>`<option value="${o.name}">`).join("")}</datalist>
+ <datalist id="dl_agents">${state.agents.map(a=>`<option value="${a.name}">`).join("")}</datalist>`;
+}
 async function show(name){
  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.textContent===name));
  const a=document.getElementById("app");
@@ -83,7 +92,7 @@ async function show(name){
  if(name==="Truck Owner Ledger") a.innerHTML=ownerLedger(errBefore);
  if(name==="Final Receipt") a.innerHTML=receiptForm(errBefore);
  if(name==="Reports"){state.reportView="firm";a.innerHTML=reports();}
- if(name==="Firm Setup") a.innerHTML=firmSetup();
+ if(name==="Firm Setup") a.innerHTML=firmSetup(errBefore);
 }
 function dashboard(){
  return `<div class="card"><h2>Dashboard</h2><div class="grid">
@@ -95,48 +104,102 @@ function dashboard(){
  <div class="notice">Current firm: <b>${state.firm?state.firm.name:"(none)"}</b>. All new documents inherit this firm automatically.</div>`;
 }
 function loadingForm(err){
- let rows=state.loading.map(x=>`<tr><td>${x.slip_date}</td><td>${firmName(x.firm_id)}</td><td>${x.vehicle_no}</td><td>${x.loading_point}</td><td>${x.destination}</td><td>${x.goods_description}</td><td>${x.quantity_weight}</td></tr>`).join("");
- return `<div class="card"><h2>Loading Slip</h2><div class="grid">
- <label>Lorry / Vehicle No.<input id="l_vehicle" required></label>
+ let rows=state.loading.map(x=>`<tr><td>${x.slip_date}</td><td>${firmName(x.firm_id)}</td><td>${x.vehicle.vehicle_no}</td><td>${x.truck_owner?x.truck_owner.name:""}</td><td>${x.agent?x.agent.name:""}</td><td>${x.loading_point}</td><td>${x.destination}</td><td>${x.goods_description}</td><td>${x.quantity_weight}</td><td>${x.package_count||""}</td></tr>`).join("");
+ return `<div class="card"><h2>Loading Slip</h2>${datalists()}<div class="grid">
+ <label>Lorry / Vehicle No.<input id="l_vehicle" list="dl_vehicles" required></label>
  <label>Date<input id="l_date" type="date" required></label>
+ <label>M/s (Truck Owner)<input id="l_owner" list="dl_truck_owners"></label>
+ <label>Through / Broker<input id="l_agent" list="dl_agents"></label>
  <label>Loading Point<input id="l_from" required></label>
  <label>Destination<input id="l_to" required></label>
  <label>Goods / Material<input id="l_goods" required></label>
  <label>Quantity / Weight<input id="l_qty" required></label>
+ <label>Package Count (कट्टी)<input id="l_pkgcount" placeholder="e.g. 500 bags"></label>
+ <label>Advance Rs<input id="l_advance" type="number" min="0" step="0.01" value="0"></label>
+ <label class="full">Advance Breakdown (notes)<input id="l_advnote" placeholder="itemized advance lines, if any"></label>
  </div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addLoading()">Save Loading Slip</button></div></div>
- <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>`;
+ <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>Truck Owner</th><th>Broker</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th><th>Pkgs</th></tr>${rows||"<tr><td colspan=10>No entries</td></tr>"}</table></div></div>`;
 }
 async function addLoading(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Loading Slip");}
  try{
-  await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty")});
+  await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),truck_owner_name:v("l_owner")||null,agent_name:v("l_agent")||null,loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty"),package_count:v("l_pkgcount")||null,advance_amount:n("l_advance"),advance_note:v("l_advnote")||null});
  }catch(e){lastError=e.message;return show("Loading Slip");}
  alert("Loading Slip saved");show("Dashboard");
 }
 function biltiForm(err){
- let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>₹${x.freight}</td></tr>`).join("");
- return `<div class="card"><h2>Bilti / GR</h2><div class="grid">
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>₹${money(x.freight)}</td><td>₹${money(x.grand_total)}</td><td>₹${money(x.topay)}</td></tr>`).join("");
+ return `<div class="card"><h2>Bilti / GR</h2>${datalists()}<div class="grid">
  <label>Bilti No.<input id="b_no" required></label><label>Date<input id="b_date" type="date" required></label>
  <label>Consignor / Goods Provider<input id="b_party" required></label><label>Consignee<input id="b_consignee" required></label>
  <label>From<input id="b_from" required></label><label>To<input id="b_to" required></label>
- <label>Lorry No.<input id="b_vehicle" required></label><label>Truck Owner<input id="b_owner" required></label>
- <label>Agent / Dalal<input id="b_agent"></label><label>Goods / Description<input id="b_goods" required></label>
- <label>Weight<input id="b_weight" required></label><label>Freight<input id="b_freight" type="number" min="0.01" step="0.01" required></label>
+ <label>Lorry No.<input id="b_vehicle" list="dl_vehicles" required></label>
+ <label>Palti (Alt.) Lorry No.<input id="b_palti" list="dl_vehicles"></label>
+ <label>Truck Owner<input id="b_owner" list="dl_truck_owners" required></label>
+ <label>Agent / Dalal (Broker)<input id="b_agent" list="dl_agents"></label>
+ <label>Goods / Description<input id="b_goods" required></label>
+ <label>Package Count / Unit<input id="b_pkgcount" placeholder="e.g. 67" style="width:60%;display:inline-block"><input id="b_pkgunit" placeholder="BAG" style="width:38%;display:inline-block;margin-left:2%"></label>
+ <label>Weight (Actual)<input id="b_weight" required oninput="updateBiltiTotals()"></label>
+ <label>Weight (Charged)<input id="b_cweight"></label>
+ <label>Freight Rate<input id="b_rate" type="number" min="0" step="0.01"></label>
+ <label>Freight<input id="b_freight" type="number" min="0.01" step="0.01" required oninput="updateBiltiTotals()"></label>
+ <label>Other Charges<input id="b_other" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
+ <label>Kanta Charges<input id="b_kanta" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
+ <label>Bahi Charges<input id="b_bahi" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
+ <label>Service Tax<input id="b_stax" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
+ <label>Hamali<input id="b_hamali" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
+ <label>P.Freight<input id="b_pfreight" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
  <label>Dalali (visible on Bilti)<input id="b_dalali" type="number" min="0" step="0.01" value="0"></label>
- <label>Advance to Truck Owner<input id="b_advance" type="number" min="0" step="0.01" value="0"></label>
+ <label>Advance to Truck Owner<input id="b_advance" type="number" min="0" step="0.01" value="0" oninput="updateBiltiTotals()"></label>
  <label class="full no-print">FD — Freight Difference (hidden from printed Bilti)<input id="b_fd" type="number" min="0" step="0.01" value="0"></label>
+ <label>GST Paid By<select id="b_gst"><option value="">(unspecified)</option><option value="consignor">Consignor</option><option value="consignee">Consignee</option><option value="transporter">Transporter</option><option value="exempted">Exempted</option></select></label>
+ <label>E-Way Bill No.<input id="b_eway"></label>
+ <label>Invoice Value<input id="b_invoice" type="number" min="0" step="0.01"></label>
+ <label>Goods Value Declared (Owner's Risk)<input id="b_goodsvalue" type="number" min="0" step="0.01"></label>
+ <label class="full">Remark<input id="b_remark"></label>
  </div>
+ <details class="card" style="margin-top:10px"><summary>Insurance details (optional)</summary><div class="grid" style="margin-top:10px">
+ <label>Insured?<select id="b_insured"><option value="">(unspecified)</option><option value="true">Yes</option><option value="false">No</option></select></label>
+ <label>Insurance Company<input id="b_inscompany"></label>
+ <label>Policy No.<input id="b_inspolicy"></label>
+ <label>Insured Amount<input id="b_insamount" type="number" min="0" step="0.01"></label>
+ <label>Insurance Date<input id="b_insdate" type="date"></label>
+ <label>Risk<input id="b_insrisk"></label>
+ <label class="full">Insurance Agent Name<input id="b_insagent"></label>
+ </div></details>
  <div class="notice">FD is stored in accounting and Agent/Dalal ledger, but is excluded from the printed Bilti.</div>
+ <div class="notice">Grand Total: ₹<span id="b_gt_display">0.00</span> · To Pay: ₹<span id="b_tp_display">0.00</span></div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button><button class="secondary" onclick="window.print()">Print</button></div></div>
- <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th></tr>${rows||"<tr><td colspan=5>No entries</td></tr>"}</table></div></div>`;
+ <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th><th>Grand Total</th><th>To Pay</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>`;
+}
+function updateBiltiTotals(){
+ const freight=n("b_freight"),other=n("b_other"),kanta=n("b_kanta"),bahi=n("b_bahi"),stax=n("b_stax"),hamali=n("b_hamali"),pfreight=n("b_pfreight"),advance=n("b_advance");
+ const grand=freight+other+kanta+bahi+stax+hamali+pfreight;
+ document.getElementById("b_gt_display").textContent=grand.toFixed(2);
+ document.getElementById("b_tp_display").textContent=(grand-advance).toFixed(2);
 }
 async function addBilti(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Bilti / GR");}
+ const insuredSel=v("b_insured");
  try{
-  await apiPost("/bilties",{firm_id:state.firm.id,bilti_no:v("b_no"),bilti_date:v("b_date"),consignor:v("b_party"),consignee:v("b_consignee"),from_location:v("b_from"),to_location:v("b_to"),vehicle_no:v("b_vehicle"),truck_owner_name:v("b_owner"),agent_name:v("b_agent")||null,goods_description:v("b_goods"),weight:v("b_weight"),freight:n("b_freight"),dalali:n("b_dalali"),advance_to_owner:n("b_advance"),freight_difference:n("b_fd")});
+  await apiPost("/bilties",{
+   firm_id:state.firm.id,bilti_no:v("b_no"),bilti_date:v("b_date"),consignor:v("b_party"),consignee:v("b_consignee"),
+   from_location:v("b_from"),to_location:v("b_to"),vehicle_no:v("b_vehicle"),palti_vehicle_no:v("b_palti")||null,
+   truck_owner_name:v("b_owner"),agent_name:v("b_agent")||null,goods_description:v("b_goods"),
+   package_count:v("b_pkgcount")||null,package_unit:v("b_pkgunit")||null,
+   weight:v("b_weight"),charged_weight:v("b_cweight")||null,freight_rate:v("b_rate")?n("b_rate"):null,
+   freight:n("b_freight"),dalali:n("b_dalali"),advance_to_owner:n("b_advance"),freight_difference:n("b_fd"),
+   other_charges:n("b_other"),kanta_charges:n("b_kanta"),bahi_charges:n("b_bahi"),service_tax:n("b_stax"),
+   hamali:n("b_hamali"),p_freight:n("b_pfreight"),
+   gst_paid_by:v("b_gst")||null,eway_bill_no:v("b_eway")||null,invoice_value:v("b_invoice")?n("b_invoice"):null,
+   insured:insuredSel===""?null:insuredSel==="true",insurance_company:v("b_inscompany")||null,
+   insurance_policy_no:v("b_inspolicy")||null,insurance_amount:v("b_insamount")?n("b_insamount"):null,
+   insurance_date:v("b_insdate")||null,insurance_risk:v("b_insrisk")||null,insurance_agent_name:v("b_insagent")||null,
+   goods_value_declared:v("b_goodsvalue")?n("b_goodsvalue"):null,remark:v("b_remark")||null
+  });
  }catch(e){lastError=e.message;return show("Bilti / GR");}
  alert("Bilti saved. Ledger entries generated automatically.");show("Dashboard");
 }
@@ -169,7 +232,7 @@ async function addAgentPayment(){
  show("Agent Ledger");
 }
 function ownerLedger(err){
- let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.truck_owner.name}</td><td>${x.vehicle_no}</td><td>₹${money(x.freight)}</td><td>₹${money(x.advance_to_owner)}</td><td>₹${money(Number(x.freight)-Number(x.advance_to_owner))}</td></tr>`).join("");
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.truck_owner.name}</td><td>${x.vehicle.vehicle_no}</td><td>₹${money(x.freight)}</td><td>₹${money(x.advance_to_owner)}</td><td>₹${money(Number(x.freight)-Number(x.advance_to_owner))}</td></tr>`).join("");
  let payRows=state.truckOwnerPayments.map(p=>`<tr><td>${p.payment_date}</td><td>${firmName(p.firm_id)}</td><td>${p.truck_owner.name}</td><td>₹${money(p.amount)}</td><td>${p.mode||""}</td><td>${p.remarks||""}</td></tr>`).join("");
  let balances={};
  state.bilties.forEach(x=>{const k=x.truck_owner.id;balances[k]=balances[k]||{name:x.truck_owner.name,freight:0,advance:0,paid:0};balances[k].freight+=Number(x.freight);balances[k].advance+=Number(x.advance_to_owner);});
@@ -258,7 +321,7 @@ function reportFirmWise(){
  return reportTable("Firm-wise Report",["Firm","Bilties","Freight","Dalali","FD","Owner Advances","Received","Outstanding"],rows,8);
 }
 function reportBiltiWise(){
- let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>${x.consignee}</td><td>${x.vehicle_no}</td><td>${x.truck_owner.name}</td><td>${x.agent?x.agent.name:""}</td><td>₹${money(x.freight)}</td><td>₹${money(x.dalali)}</td><td>₹${money(x.advance_to_owner)}</td><td>₹${money(x.freight_difference)}</td></tr>`);
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>${x.consignee}</td><td>${x.vehicle.vehicle_no}</td><td>${x.truck_owner.name}</td><td>${x.agent?x.agent.name:""}</td><td>₹${money(x.freight)}</td><td>₹${money(x.dalali)}</td><td>₹${money(x.advance_to_owner)}</td><td>₹${money(x.freight_difference)}</td></tr>`);
  return reportTable("Bilti-wise Report",["Date","Bilti No","Firm","Consignor","Consignee","Vehicle","Truck Owner","Agent","Freight","Dalali","Advance","FD"],rows,12);
 }
 function reportParty(){
@@ -290,7 +353,7 @@ function reportOwner(){
 }
 function reportLorry(){
  let byVehicle={};
- state.bilties.forEach(x=>{byVehicle[x.vehicle_no]=byVehicle[x.vehicle_no]||{trips:0,freight:0};byVehicle[x.vehicle_no].trips++;byVehicle[x.vehicle_no].freight+=Number(x.freight);});
+ state.bilties.forEach(x=>{const vno=x.vehicle.vehicle_no;byVehicle[vno]=byVehicle[vno]||{trips:0,freight:0};byVehicle[vno].trips++;byVehicle[vno].freight+=Number(x.freight);});
  let rows=Object.entries(byVehicle).map(([vehicle,v])=>`<tr><td>${vehicle}</td><td>${v.trips}</td><td>₹${money(v.freight)}</td></tr>`);
  return reportTable("Lorry / Trip Report",["Vehicle","Trips","Total Freight"],rows,3);
 }
@@ -315,7 +378,7 @@ function reportOutstanding(){
 }
 function reportDayBook(){
  let events=[];
- state.loading.forEach(x=>events.push({date:x.slip_date,type:"Loading Slip",desc:`${x.vehicle_no}: ${x.loading_point} → ${x.destination}`,amount:null}));
+ state.loading.forEach(x=>events.push({date:x.slip_date,type:"Loading Slip",desc:`${x.vehicle.vehicle_no}: ${x.loading_point} → ${x.destination}`,amount:null}));
  state.bilties.forEach(x=>events.push({date:x.bilti_date,type:"Bilti",desc:`${x.bilti_no} (${x.consignor} → ${x.consignee})`,amount:x.freight}));
  state.agentPayments.forEach(p=>events.push({date:p.payment_date,type:"Agent Payment",desc:p.agent.name,amount:p.amount}));
  state.truckOwnerPayments.forEach(p=>events.push({date:p.payment_date,type:"Owner Payment",desc:p.truck_owner.name,amount:p.amount}));
@@ -324,13 +387,39 @@ function reportDayBook(){
  let rows=events.map(e=>`<tr><td>${e.date}</td><td>${e.type}</td><td>${e.desc}</td><td>${e.amount!=null?"₹"+money(e.amount):""}</td></tr>`);
  return reportTable("Day Book",["Date","Type","Details","Amount"],rows,4);
 }
-function firmSetup(){
- return `<div class="card"><h2>Firm Setup</h2><div class="grid"><label>Current Firm<select id="firmSelect">${state.firms.map(f=>`<option value="${f.id}" ${state.firm&&f.id===state.firm.id?'selected':''}>${f.name}</option>`).join("")}</select></label></div><div class="actions"><button class="primary" onclick="selectFirm()">Select Firm</button></div><p class="muted">The selected firm automatically prints on Loading Slip, Bilti and Final Receipt and is attached to every ledger entry.</p></div>`;
+function firmSetup(err){
+ const f=state.firm||{};
+ return `<div class="card"><h2>Firm Setup</h2><div class="grid"><label>Current Firm<select id="firmSelect" onchange="selectFirm()">${state.firms.map(x=>`<option value="${x.id}" ${state.firm&&x.id===state.firm.id?'selected':''}>${x.name}</option>`).join("")}</select></label></div><p class="muted">The selected firm automatically prints on Loading Slip, Bilti and Final Receipt and is attached to every ledger entry.</p></div>
+ <div class="card"><h3>Firm Letterhead &amp; Bank Details</h3><div class="grid">
+ <label class="full">Address<input id="f_address" value="${f.address||''}"></label>
+ <label>Phone<input id="f_phone" value="${f.phone||''}"></label>
+ <label>Email<input id="f_email" value="${f.email||''}"></label>
+ <label>PAN No.<input id="f_pan" value="${f.pan_no||''}"></label>
+ <label>Bank Name<input id="f_bankname" value="${f.bank_name||''}"></label>
+ <label>Bank Branch<input id="f_bankbranch" value="${f.bank_branch||''}"></label>
+ <label>Bank A/c No.<input id="f_bankacct" value="${f.bank_account_no||''}"></label>
+ <label>Bank IFSC<input id="f_bankifsc" value="${f.bank_ifsc||''}"></label>
+ </div>
+ ${err?`<div class="error">${err}</div>`:""}
+ <div class="actions"><button class="primary" onclick="saveFirmDetails()">Save Firm Details</button></div></div>`;
 }
 function selectFirm(){
  const id=document.getElementById("firmSelect").value;
  state.firm=state.firms.find(f=>f.id===id)||null;
- updateHeader();show("Dashboard");
+ updateHeader();show("Firm Setup");
+}
+async function saveFirmDetails(){
+ if(!state.firm){lastError="Select a firm first.";return show("Firm Setup");}
+ try{
+  const updated=await apiPatch(`/firms/${state.firm.id}`,{
+   address:v("f_address")||null,phone:v("f_phone")||null,email:v("f_email")||null,pan_no:v("f_pan")||null,
+   bank_name:v("f_bankname")||null,bank_branch:v("f_bankbranch")||null,bank_account_no:v("f_bankacct")||null,
+   bank_ifsc:v("f_bankifsc")||null
+  });
+  state.firms=state.firms.map(x=>x.id===updated.id?updated:x);
+  state.firm=updated;
+ }catch(e){lastError=e.message;return show("Firm Setup");}
+ alert("Firm details saved");show("Firm Setup");
 }
 function updateHeader(){document.getElementById("firmTitle").textContent=state.firm?state.firm.name:"Transport Management System"}
 function v(id){return document.getElementById(id).value} function n(id){return Number(v(id)||0)}
