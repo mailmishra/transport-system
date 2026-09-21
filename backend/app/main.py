@@ -13,6 +13,7 @@ from app.routers import (
     firms,
     loading_slips,
     receipts,
+    reports,
     truck_owner_payments,
     truck_owners,
     vehicles,
@@ -40,6 +41,7 @@ api.include_router(vehicles.router)
 api.include_router(agent_payments.router)
 api.include_router(truck_owner_payments.router)
 api.include_router(receipts.router)
+api.include_router(reports.router)
 app.mount("/api", api)
 
 # Uploaded firm logos (see routers/firms.py's MEDIA_DIR) -- must be mounted

@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,6 +56,9 @@ async def list_bilties(
     firm_id: uuid.UUID | None = None,
     agent_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
+    vehicle_id: uuid.UUID | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
     q: str | None = None,
     sort: str | None = None,
     page: int = 1,
@@ -63,6 +67,7 @@ async def list_bilties(
 ):
     items, total, page, limit = await crud.list_(
         db, firm_id=firm_id, agent_id=agent_id, truck_owner_id=truck_owner_id,
+        vehicle_id=vehicle_id, date_from=date_from, date_to=date_to,
         q=q, sort=sort, page=page, limit=limit,
     )
     return Page(items=items, total=total, page=page, limit=limit)
