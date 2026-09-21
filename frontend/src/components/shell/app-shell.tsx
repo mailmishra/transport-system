@@ -1,6 +1,7 @@
 import * as React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
+  Building2,
   ChevronDown,
   ClipboardList,
   FileText,
@@ -65,10 +66,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="hidden items-center gap-2 rounded bg-[#1C3A57] px-3 py-1.5 text-xs font-medium text-[#C6D2DD] hover:bg-[#24466A] sm:flex"
+              className="flex items-center gap-1.5 rounded bg-[#1C3A57] px-2 py-1.5 text-xs font-medium text-[#C6D2DD] hover:bg-[#24466A] sm:gap-2 sm:px-3"
               disabled={firms.length === 0}
+              aria-label={`Switch firm (current: ${firm?.name ?? "none selected"})`}
             >
-              Firm: {firm?.name ?? "…"}
+              <Building2 className="h-3.5 w-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Firm: {firm?.name ?? "…"}</span>
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
