@@ -26,27 +26,47 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;b
 .notice{background:#fff8df;border:1px solid #ecd37a;padding:10px;border-radius:8px;font-size:13px}
 .error{background:#fdecea;border:1px solid #f2a29c;color:#8a1f16;padding:10px;border-radius:8px;font-size:13px;margin-top:10px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}main{padding:9px}table{font-size:12px}}
-@media print{header,nav,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
 .link-btn{background:none;border:0;color:#17324d;text-decoration:underline;padding:0;font-size:12px;cursor:pointer}
-.gr-doc{border:2px solid #17324d;padding:16px;background:#fff;font-size:12px}
-.gr-head{text-align:center;border-bottom:2px solid #17324d;padding-bottom:8px;margin-bottom:10px}
-.gr-head h2{margin:0 0 2px;font-size:21px;color:#17324d}
-.gr-head .tag{font-size:10px;color:#687682}
-.gr-head .addr{font-size:11px;margin-top:4px}
-.gr-toprow{display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px}
-.gr-meta{display:flex;justify-content:space-between;font-size:12px;margin:6px 0}
-.gr-boxes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
-.gr-box{border:1px solid #ccd3da;padding:6px;min-height:50px}
-.gr-box b{display:block;margin-bottom:3px;font-size:10px;color:#53606c;text-transform:uppercase}
-.gr-table{width:100%;border-collapse:collapse;margin:8px 0}
-.gr-table th,.gr-table td{border:1px solid #ccd3da;padding:5px;text-align:left}
-.gr-total-row td{font-weight:bold}
-.gr-gst{display:flex;gap:14px;font-size:11px;margin:8px 0}
-.gr-insure{border:1px dashed #ccd3da;padding:6px;font-size:11px;margin:8px 0}
-.gr-sign{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}
-.gr-note{font-size:10px;color:#687682;margin-top:8px}
-.gr-bank{font-size:10px;color:#53606c;border-top:1px solid #e5e8eb;margin-top:10px;padding-top:6px}
-@media print{.gr-doc{border:none}}
+/* Inline field validation: red-outlined input + small red note right below it,
+   instead of one joined multi-field message at the bottom of the form. */
+input.invalid,select.invalid{border-color:#d64541;background:#fff6f5}
+.field-error{color:#8a1f16;font-size:11px;margin-top:3px;display:block;font-weight:normal}
+
+/* Printable document (Bilti/GR, Loading Slip, Receipt) - styled to look like
+   a real letterhead form, not a bare data dump, and sized for A4 printing. */
+.gr-doc{border:1px solid #ccd3da;border-radius:4px;padding:0;background:#fff;font-size:13px;overflow:hidden;box-shadow:0 2px 10px #00000014}
+.gr-head{background:#17324d;color:#fff;text-align:center;padding:18px 16px 14px}
+.gr-head h2{margin:0 0 4px;font-size:24px;letter-spacing:.5px;font-weight:800}
+.gr-head .tag{font-size:11px;opacity:.85;letter-spacing:.4px;text-transform:uppercase}
+.gr-head .addr{font-size:11.5px;margin-top:6px;opacity:.92}
+.gr-body{padding:16px 18px}
+.gr-toprow{display:flex;justify-content:space-between;font-size:11.5px;color:#53606c;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e5e8eb}
+.gr-doctitle{display:flex;justify-content:space-between;align-items:baseline;background:#f5f7f9;border:1px solid #e5e8eb;border-radius:6px;padding:8px 12px;margin-bottom:10px}
+.gr-doctitle b{font-size:14px;color:#17324d}
+.gr-meta{display:flex;justify-content:space-between;font-size:12.5px;margin:7px 0}
+.gr-meta span b{color:#17212b}
+.gr-boxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.gr-box{border:1px solid #ccd3da;border-radius:6px;padding:8px 10px;min-height:52px}
+.gr-box b{display:block;margin-bottom:4px;font-size:10px;color:#17324d;text-transform:uppercase;letter-spacing:.4px;font-weight:800}
+.gr-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.gr-table th{background:#17324d;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+.gr-table th,.gr-table td{border:1px solid #ccd3da;padding:6px 8px;text-align:left}
+.gr-total-row td{font-weight:800;background:#f5f7f9}
+.gr-gst{display:flex;gap:16px;font-size:11.5px;margin:10px 0;align-items:center}
+.gr-gst b{color:#17324d}
+.gr-insure{border:1px dashed #ccd3da;border-radius:6px;padding:8px 10px;font-size:11.5px;margin:10px 0;background:#fbfcfd}
+.gr-insure b{color:#17324d}
+.gr-syscert{text-align:center;font-size:11px;color:#53606c;font-style:italic;margin-top:22px;padding-top:12px;border-top:1px dashed #ccd3da}
+.gr-note{font-size:10px;color:#8a949c;margin-top:8px}
+.gr-bank{font-size:10.5px;color:#3d4952;background:#f5f7f9;border-top:1px solid #e5e8eb;margin-top:12px;padding:8px 18px}
+@media print{
+ @page{size:A4;margin:12mm}
+ header,nav,.no-print{display:none!important}
+ body{background:#fff}
+ main{max-width:none!important;margin:0!important;padding:0!important}
+ .card{box-shadow:none;border:0}
+ .gr-doc{box-shadow:none;border:1px solid #ccd3da}
+}
 </style>
 </head>
 <body>
@@ -62,8 +82,16 @@ async function apiRequest(method,path,body){
  try{data=await res.json();}catch(e){}
  if(!res.ok){
   let msg=(data&&data.detail)?data.detail:res.statusText;
-  if(Array.isArray(msg)) msg=msg.map(e=>`${(e.loc||[]).slice(-1)[0]}: ${e.msg}`).join("; ");
-  const err=new Error(msg||"Request failed");err.status=res.status;throw err;
+  let fields=null;
+  if(Array.isArray(msg)){
+   // FastAPI/Pydantic 422 body: a list of {loc:[...,"field"], msg:"..."}.
+   // Keep this structured (fields) so a form can show each message under
+   // its own input instead of joining them into one bottom-of-form string.
+   fields={};
+   msg.forEach(e=>{fields[(e.loc||[]).slice(-1)[0]]=e.msg;});
+   msg=Object.entries(fields).map(([f,m])=>`${f}: ${m}`).join("; ");
+  }
+  const err=new Error(msg||"Request failed");err.status=res.status;err.fields=fields;throw err;
  }
  return data;
 }
@@ -71,6 +99,43 @@ const apiGet=(path)=>apiRequest("GET",path);
 const apiPost=(path,body)=>apiRequest("POST",path,body);
 const apiPatch=(path,body)=>apiRequest("PATCH",path,body);
 const apiDelete=(path)=>apiRequest("DELETE",path);
+
+// Inline per-field validation: clears old markers, then either places each
+// server-reported message directly under its input (field-mapped errors) or
+// falls back to a single concise banner for errors that aren't about one
+// specific field (e.g. "bilti_no already used for this firm").
+function clearFieldErrors(){
+ document.querySelectorAll(".field-error").forEach(el=>el.remove());
+ document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
+}
+function showFieldError(id,msg){
+ const el=document.getElementById(id);
+ if(!el) return false;
+ el.classList.add("invalid");
+ const small=document.createElement("small");
+ small.className="field-error";
+ small.textContent=msg;
+ el.insertAdjacentElement("afterend",small);
+ return true;
+}
+function applyFormError(e,fieldMap){
+ clearFieldErrors();
+ if(e.fields){
+  const unmapped=[];
+  Object.entries(e.fields).forEach(([f,m])=>{
+   if(!(fieldMap[f]&&showFieldError(fieldMap[f],m))) unmapped.push(`${f}: ${m}`);
+  });
+  if(unmapped.length) lastErrorBanner(unmapped.join("; "));
+  const first=document.querySelector(".invalid");
+  if(first) first.scrollIntoView({block:"center",behavior:"smooth"});
+ } else {
+  lastErrorBanner(e.message);
+ }
+}
+function lastErrorBanner(msg){
+ const host=document.querySelector(".form-error-slot");
+ if(host) host.innerHTML=`<div class="error">${msg}</div>`; else alert(msg);
+}
 
 let state={firm:null,firms:[],bilties:[],loading:[],agents:[],truckOwners:[],vehicles:[],agentPayments:[],truckOwnerPayments:[],receipts:[],reportView:"firm"};
 let lastError=null;
@@ -99,6 +164,7 @@ function datalists(){
  <datalist id="dl_agents">${state.agents.map(a=>`<option value="${a.name}">`).join("")}</datalist>`;
 }
 async function show(name){
+ document.title="Transport Management System";
  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.textContent===name));
  const a=document.getElementById("app");
  const errBefore=lastError;lastError=null;
@@ -138,16 +204,18 @@ function loadingForm(err){
  <label>Advance Rs<input id="l_advance" type="number" min="0" step="0.01" value="0"></label>
  <label class="full">Advance Breakdown (notes)<input id="l_advnote" placeholder="itemized advance lines, if any"></label>
  </div>
- ${err?`<div class="error">${err}</div>`:""}
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
  <div class="actions"><button class="primary" onclick="addLoading()">Save Loading Slip</button></div></div>
  <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>Truck Owner</th><th>Broker</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th><th>Pkgs</th><th></th></tr>${rows||"<tr><td colspan=11>No entries</td></tr>"}</table></div></div>`;
 }
+const LOADING_FIELD_MAP={vehicle_no:"l_vehicle",slip_date:"l_date",truck_owner_name:"l_owner",agent_name:"l_agent",loading_point:"l_from",destination:"l_to",goods_description:"l_goods",quantity_weight:"l_qty",package_count:"l_pkgcount",advance_amount:"l_advance",advance_note:"l_advnote"};
 async function addLoading(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Loading Slip");}
+ clearFieldErrors();
  let created;
  try{
   created=await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),truck_owner_name:v("l_owner")||null,agent_name:v("l_agent")||null,loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty"),package_count:v("l_pkgcount")||null,advance_amount:n("l_advance"),advance_note:v("l_advnote")||null});
- }catch(e){lastError=e.message;return show("Loading Slip");}
+ }catch(e){applyFormError(e,LOADING_FIELD_MAP);return;}
  await printLoadingSlip(created.id);
 }
 async function printLoadingSlip(id){
@@ -155,6 +223,7 @@ async function printLoadingSlip(id){
  try{x=await apiGet(`/loading-slips/${id}`);}catch(e){alert("Could not load Loading Slip: "+e.message);return;}
  const firm=state.firms.find(f=>f.id===x.firm_id)||{};
  document.getElementById("nav").querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+ document.title=`LR-${x.vehicle.vehicle_no}-${x.slip_date}`;
  document.getElementById("app").innerHTML=loadingSlipPrintView(x,firm);
 }
 function loadingSlipPrintView(x,firm){
@@ -165,14 +234,16 @@ function loadingSlipPrintView(x,firm){
  <div class="card gr-doc">
  <div class="gr-head"><h2>${firm.name||""}</h2><div class="tag">लोडिंग स्लिप — Loading Slip</div>
  ${firm.address?`<div class="addr">${firm.address}</div>`:""}</div>
+ <div class="gr-body">
  <div class="gr-toprow"><span>${x.agent?"Through: "+x.agent.name:""}</span><span>${firm.phone?"Mob: "+firm.phone:""}</span></div>
- <div class="gr-meta"><span>Date: ${x.slip_date}</span><span></span></div>
+ <div class="gr-doctitle"><b>Loading Instruction</b><span>Date: ${x.slip_date}</span></div>
  <div class="gr-box"><b>M/s (Truck Owner)</b>${x.truck_owner?x.truck_owner.name:""}</div>
  <p>आपके पास गाड़ी क्र. <b>${x.vehicle.vehicle_no}</b> जा रही है, इसमें <b>${x.goods_description}</b> का <b>${x.quantity_weight}</b> चढ़ (कट्टी ${x.package_count||"—"}) लोड करवाने की कृपा करें।</p>
  <div class="gr-meta"><span>From: ${x.loading_point}</span><span>To: ${x.destination}</span></div>
  ${Number(x.advance_amount)>0?`<div class="gr-meta"><span>Advance: ₹${money(x.advance_amount)}</span><span></span></div>`:""}
  ${x.advance_note?`<div class="gr-meta"><span>Notes: ${x.advance_note}</span></div>`:""}
- <div class="gr-sign"><span>Signature of Booking Clerk</span><span>For ${firm.name||""}</span></div>
+ <div class="gr-syscert">This is a system-generated document and does not require a signature.</div>
+ </div>
  </div>`;
 }
 function biltiForm(err){
@@ -217,8 +288,8 @@ function biltiForm(err){
  </div></details>
  <div class="notice">FD is stored in accounting and Agent/Dalal ledger, but is excluded from the printed Bilti.</div>
  <div class="notice">Grand Total: ₹<span id="b_gt_display">0.00</span> · To Pay: ₹<span id="b_tp_display">0.00</span></div>
- ${err?`<div class="error">${err}</div>`:""}
- <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button><button class="secondary" onclick="window.print()">Print</button></div></div>
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
+ <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button></div></div>
  <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th><th>Grand Total</th><th>To Pay</th><th></th></tr>${rows||"<tr><td colspan=8>No entries</td></tr>"}</table></div></div>`;
 }
 function updateBiltiTotals(){
@@ -227,8 +298,10 @@ function updateBiltiTotals(){
  document.getElementById("b_gt_display").textContent=grand.toFixed(2);
  document.getElementById("b_tp_display").textContent=(grand-advance).toFixed(2);
 }
+const BILTI_FIELD_MAP={bilti_no:"b_no",bilti_date:"b_date",consignor:"b_party",consignee:"b_consignee",from_location:"b_from",to_location:"b_to",vehicle_no:"b_vehicle",palti_vehicle_no:"b_palti",truck_owner_name:"b_owner",agent_name:"b_agent",goods_description:"b_goods",package_count:"b_pkgcount",package_unit:"b_pkgunit",weight:"b_weight",charged_weight:"b_cweight",freight_rate:"b_rate",freight:"b_freight",other_charges:"b_other",kanta_charges:"b_kanta",bahi_charges:"b_bahi",service_tax:"b_stax",hamali:"b_hamali",p_freight:"b_pfreight",dalali:"b_dalali",advance_to_owner:"b_advance",freight_difference:"b_fd",gst_paid_by:"b_gst",eway_bill_no:"b_eway",invoice_value:"b_invoice",insurance_company:"b_inscompany",insurance_policy_no:"b_inspolicy",insurance_amount:"b_insamount",insurance_date:"b_insdate",insurance_risk:"b_insrisk",insurance_agent_name:"b_insagent",goods_value_declared:"b_goodsvalue",remark:"b_remark"};
 async function addBilti(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Bilti / GR");}
+ clearFieldErrors();
  const insuredSel=v("b_insured");
  let created;
  try{
@@ -247,7 +320,7 @@ async function addBilti(){
    insurance_date:v("b_insdate")||null,insurance_risk:v("b_insrisk")||null,insurance_agent_name:v("b_insagent")||null,
    goods_value_declared:v("b_goodsvalue")?n("b_goodsvalue"):null,remark:v("b_remark")||null
   });
- }catch(e){lastError=e.message;return show("Bilti / GR");}
+ }catch(e){applyFormError(e,BILTI_FIELD_MAP);return;}
  await printBilti(created.id);
 }
 async function printBilti(id){
@@ -255,6 +328,7 @@ async function printBilti(id){
  try{b=await apiGet(`/bilties/${id}/print`);}catch(e){alert("Could not load Bilti: "+e.message);return;}
  const firm=state.firms.find(f=>f.id===b.firm_id)||{};
  document.getElementById("nav").querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+ document.title=`Bilti-${b.bilti_no}`;
  document.getElementById("app").innerHTML=biltiPrintView(b,firm);
 }
 function biltiPrintView(b,firm){
@@ -274,8 +348,9 @@ function biltiPrintView(b,firm){
  <div class="card gr-doc">
  <div class="gr-head"><h2>${firm.name||""}</h2><div class="tag">All Subject to KATNI Jurisdiction</div>
  ${firm.address?`<div class="addr">${firm.address}</div>`:""}</div>
+ <div class="gr-body">
  <div class="gr-toprow"><span>${firm.pan_no?"PAN: "+firm.pan_no:""} ${firm.email?" · "+firm.email:""}</span><span>${firm.phone?"Mob: "+firm.phone:""}</span></div>
- <div class="gr-meta"><b>GR No.: ${b.bilti_no}</b><span>Date: ${b.bilti_date}</span></div>
+ <div class="gr-doctitle"><b>GR No.: ${b.bilti_no}</b><span>Date: ${b.bilti_date}</span></div>
  <div class="gr-meta"><span>From: ${b.from_location}</span><span>To: ${b.to_location}</span></div>
  <div class="gr-meta"><span>Truck No.: ${b.vehicle.vehicle_no}</span><span>${b.palti_vehicle?"Palti Vehicle No.: "+b.palti_vehicle.vehicle_no:""}</span></div>
  <div class="gr-boxes">
@@ -297,8 +372,9 @@ function biltiPrintView(b,firm){
  <div class="gr-meta"><span>${b.agent?"Agent / Broker: "+b.agent.name:""}</span><span>${b.eway_bill_no?"E-Way Bill: "+b.eway_bill_no:""}</span></div>
  ${b.invoice_value?`<div class="gr-meta"><span>Invoice Value: ₹${money(b.invoice_value)}</span><span></span></div>`:""}
  ${b.remark?`<div class="gr-meta"><span>Remark: ${b.remark}</span></div>`:""}
- <div class="gr-sign"><span>Signature of Booking Clerk</span><span>For ${firm.name||""}</span></div>
+ <div class="gr-syscert">This is a system-generated document and does not require a signature.</div>
  <div class="gr-note">This consignment is booked subject to the terms endorsed on the original GR. FD (internal accounting) is never shown here.</div>
+ </div>
  ${bankLine}
  </div>`;
 }
@@ -317,17 +393,19 @@ function agentLedger(err){
  <label>Date<input id="ap_date" type="date"></label>
  <label>Mode<input id="ap_mode" placeholder="cash / bank / upi"></label>
  <label class="full">Remarks<input id="ap_remarks"></label></div>
- ${err?`<div class="error">${err}</div>`:""}
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
  <div class="actions"><button class="primary" onclick="addAgentPayment()">Record Payment</button></div></div>
  <div class="card"><h3>Recent Payments</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Agent</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div></div>`;
 }
+const AGENT_PAYMENT_FIELD_MAP={agent_id:"ap_agent",amount:"ap_amount",payment_date:"ap_date",mode:"ap_mode",remarks:"ap_remarks"};
 async function addAgentPayment(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Agent Ledger");}
  const agentId=document.getElementById("ap_agent").value;
  if(!agentId){lastError="No agents yet — add a Bilti with an Agent / Dalal first.";return show("Agent Ledger");}
+ clearFieldErrors();
  try{
   await apiPost("/agent-payments",{firm_id:state.firm.id,agent_id:agentId,amount:n("ap_amount"),payment_date:v("ap_date"),mode:v("ap_mode")||null,remarks:v("ap_remarks")||null});
- }catch(e){lastError=e.message;return show("Agent Ledger");}
+ }catch(e){applyFormError(e,AGENT_PAYMENT_FIELD_MAP);return;}
  show("Agent Ledger");
 }
 function ownerLedger(err){
@@ -345,39 +423,72 @@ function ownerLedger(err){
  <label>Date<input id="op_date" type="date"></label>
  <label>Mode<input id="op_mode" placeholder="cash / bank / upi"></label>
  <label class="full">Remarks<input id="op_remarks"></label></div>
- ${err?`<div class="error">${err}</div>`:""}
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
  <div class="actions"><button class="primary" onclick="addOwnerPayment()">Record Payment</button></div></div>
  <div class="card"><h3>Recent Payments</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Owner</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr>${payRows||"<tr><td colspan=6>No payments</td></tr>"}</table></div></div>`;
 }
+const OWNER_PAYMENT_FIELD_MAP={truck_owner_id:"op_owner",bilti_id:"op_owner",amount:"op_amount",payment_date:"op_date",mode:"op_mode",remarks:"op_remarks"};
 async function addOwnerPayment(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Truck Owner Ledger");}
  const ownerId=document.getElementById("op_owner").value;
  if(!ownerId){lastError="No truck owners yet — add a Bilti first.";return show("Truck Owner Ledger");}
+ clearFieldErrors();
  try{
   await apiPost("/truck-owner-payments",{firm_id:state.firm.id,truck_owner_id:ownerId,amount:n("op_amount"),payment_date:v("op_date"),mode:v("op_mode")||null,remarks:v("op_remarks")||null});
- }catch(e){lastError=e.message;return show("Truck Owner Ledger");}
+ }catch(e){applyFormError(e,OWNER_PAYMENT_FIELD_MAP);return;}
  show("Truck Owner Ledger");
 }
 function receiptForm(err){
- let rows=state.receipts.map(r=>{const b=state.bilties.find(x=>x.id===r.bilti_id);return `<tr><td>${r.receipt_date}</td><td>${b?b.bilti_no:r.bilti_id}</td><td>${firmName(r.firm_id)}</td><td>${r.received_from}</td><td>₹${money(r.amount)}</td><td>${r.remarks||""}</td></tr>`}).join("");
+ let rows=state.receipts.map(r=>{const b=state.bilties.find(x=>x.id===r.bilti_id);return `<tr><td>${r.receipt_date}</td><td>${b?b.bilti_no:r.bilti_id}</td><td>${firmName(r.firm_id)}</td><td>${r.received_from}</td><td>₹${money(r.amount)}</td><td>${r.remarks||""}</td><td><button class="link-btn" onclick="printReceipt('${r.id}')">View / Download</button></td></tr>`}).join("");
  return `<div class="card"><h2>Final Receipt</h2><div class="grid">
  <label>Bilti<select id="r_bilti">${state.bilties.map(b=>`<option value="${b.id}">${b.bilti_no} — ${firmName(b.firm_id)} (₹${money(b.freight)})</option>`).join("")}</select></label>
  <label>Receipt Date<input id="r_date" type="date"></label>
  <label>Received From<input id="r_from"></label>
  <label>Amount<input id="r_amount" type="number" min="0.01" step="0.01"></label>
  <label class="full">Remarks<input id="r_remarks"></label></div>
- ${err?`<div class="error">${err}</div>`:""}
- <div class="actions"><button class="primary" onclick="addReceipt()">Save Receipt</button><button class="secondary" onclick="window.print()">Print</button></div></div>
- <div class="card"><h3>Recent Receipts</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Received From</th><th>Amount</th><th>Remarks</th></tr>${rows||"<tr><td colspan=6>No entries</td></tr>"}</table></div></div>`;
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
+ <div class="actions"><button class="primary" onclick="addReceipt()">Save Receipt</button></div></div>
+ <div class="card"><h3>Recent Receipts</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti</th><th>Firm</th><th>Received From</th><th>Amount</th><th>Remarks</th><th></th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>`;
 }
+const RECEIPT_FIELD_MAP={bilti_id:"r_bilti",receipt_date:"r_date",received_from:"r_from",amount:"r_amount",remarks:"r_remarks"};
 async function addReceipt(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Final Receipt");}
  const biltiId=document.getElementById("r_bilti").value;
  if(!biltiId){lastError="No bilties yet — create a Bilti / GR first.";return show("Final Receipt");}
+ clearFieldErrors();
+ let created;
  try{
-  await apiPost("/receipts",{firm_id:state.firm.id,bilti_id:biltiId,receipt_date:v("r_date"),received_from:v("r_from"),amount:n("r_amount"),remarks:v("r_remarks")||null});
- }catch(e){lastError=e.message;return show("Final Receipt");}
- alert("Final receipt saved");show("Final Receipt");
+  created=await apiPost("/receipts",{firm_id:state.firm.id,bilti_id:biltiId,receipt_date:v("r_date"),received_from:v("r_from"),amount:n("r_amount"),remarks:v("r_remarks")||null});
+ }catch(e){applyFormError(e,RECEIPT_FIELD_MAP);return;}
+ await printReceipt(created.id);
+}
+async function printReceipt(id){
+ let r;
+ try{r=await apiGet(`/receipts/${id}`);}catch(e){alert("Could not load Receipt: "+e.message);return;}
+ const firm=state.firms.find(f=>f.id===r.firm_id)||{};
+ const bilti=state.bilties.find(b=>b.id===r.bilti_id)||null;
+ document.getElementById("nav").querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+ document.title=`Receipt-${bilti?bilti.bilti_no:r.id.slice(0,8)}`;
+ document.getElementById("app").innerHTML=receiptPrintView(r,bilti,firm);
+}
+function receiptPrintView(r,bilti,firm){
+ return `<div class="card no-print"><div class="actions">
+  <button class="secondary" onclick="show('Dashboard')">← Back</button>
+  <button class="primary" onclick="window.print()">Download / Print (PDF)</button>
+ </div><p class="muted">In the print dialog, choose "Save as PDF" as the destination to download a file you can share on WhatsApp/email.</p></div>
+ <div class="card gr-doc">
+ <div class="gr-head"><h2>${firm.name||""}</h2><div class="tag">Final Receipt</div>
+ ${firm.address?`<div class="addr">${firm.address}</div>`:""}</div>
+ <div class="gr-body">
+ <div class="gr-toprow"><span>${firm.pan_no?"PAN: "+firm.pan_no:""}</span><span>${firm.phone?"Mob: "+firm.phone:""}</span></div>
+ <div class="gr-doctitle"><b>Receipt</b><span>Date: ${r.receipt_date}</span></div>
+ <div class="gr-meta"><span>Received From: <b>${r.received_from}</b></span><span>Amount: <b>₹${money(r.amount)}</b></span></div>
+ ${bilti?`<div class="gr-meta"><span>Against Bilti / GR No.: ${bilti.bilti_no}</span><span>Vehicle: ${bilti.vehicle.vehicle_no}</span></div>
+ <div class="gr-meta"><span>Consignor: ${bilti.consignor}</span><span>Consignee: ${bilti.consignee}</span></div>`:""}
+ ${r.remarks?`<div class="gr-meta"><span>Remarks: ${r.remarks}</span></div>`:""}
+ <div class="gr-syscert">This is a system-generated document and does not require a signature.</div>
+ </div>
+ </div>`;
 }
 const REPORTS=[
  {id:"bilti",label:"Bilti-wise",fn:reportBiltiWise},
@@ -499,9 +610,10 @@ function firmSetup(err){
  <label>Bank A/c No.<input id="f_bankacct" value="${f.bank_account_no||''}"></label>
  <label>Bank IFSC<input id="f_bankifsc" value="${f.bank_ifsc||''}"></label>
  </div>
- ${err?`<div class="error">${err}</div>`:""}
+ <div class="form-error-slot">${err?`<div class="error">${err}</div>`:""}</div>
  <div class="actions"><button class="primary" onclick="saveFirmDetails()">Save Firm Details</button></div></div>`;
 }
+const FIRM_FIELD_MAP={address:"f_address",phone:"f_phone",email:"f_email",pan_no:"f_pan",bank_name:"f_bankname",bank_branch:"f_bankbranch",bank_account_no:"f_bankacct",bank_ifsc:"f_bankifsc"};
 function selectFirm(){
  const id=document.getElementById("firmSelect").value;
  state.firm=state.firms.find(f=>f.id===id)||null;
@@ -509,6 +621,7 @@ function selectFirm(){
 }
 async function saveFirmDetails(){
  if(!state.firm){lastError="Select a firm first.";return show("Firm Setup");}
+ clearFieldErrors();
  try{
   const updated=await apiPatch(`/firms/${state.firm.id}`,{
    address:v("f_address")||null,phone:v("f_phone")||null,email:v("f_email")||null,pan_no:v("f_pan")||null,
@@ -517,7 +630,7 @@ async function saveFirmDetails(){
   });
   state.firms=state.firms.map(x=>x.id===updated.id?updated:x);
   state.firm=updated;
- }catch(e){lastError=e.message;return show("Firm Setup");}
+ }catch(e){applyFormError(e,FIRM_FIELD_MAP);return;}
  alert("Firm details saved");show("Firm Setup");
 }
 function updateHeader(){document.getElementById("firmTitle").textContent=state.firm?state.firm.name:"Transport Management System"}
