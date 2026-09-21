@@ -3,7 +3,7 @@ import { useReceipt } from "@/api/receipts";
 import { useBilti } from "@/api/bilties";
 import { useFirms } from "@/api/firms";
 import { rupees } from "@/lib/money";
-import { PrintDocument } from "@/components/print/print-document";
+import { PrintDocument, Field, FieldRow } from "@/components/print/print-document";
 
 /** Body content only -- letterhead/signatures/footer come from
  * PrintDocument. ReceiptRead has no expanded `bilti` object (just
@@ -34,26 +34,25 @@ export function ReceiptPrintView() {
         <span>Date: {r.receipt_date}</span>
       </div>
 
-      <Row left={`Received From: ${r.received_from}`} right={`Amount: ${rupees(r.amount)}`} />
+      <FieldRow
+        left={<Field label="Received From" value={r.received_from} />}
+        right={<Field label="Amount" value={rupees(r.amount)} />}
+      />
 
       {b && (
         <>
-          <Row left={`Against Bilti / GR No.: ${b.bilti_no}`} right={`Vehicle: ${b.vehicle.vehicle_no}`} />
-          <Row left={`Consignor: ${b.consignor}`} right={`Consignee: ${b.consignee}`} />
+          <FieldRow
+            left={<Field label="Against Bilti / GR No." value={b.bilti_no} />}
+            right={<Field label="Vehicle" value={b.vehicle.vehicle_no} />}
+          />
+          <FieldRow
+            left={<Field label="Consignor" value={b.consignor} />}
+            right={<Field label="Consignee" value={b.consignee} />}
+          />
         </>
       )}
 
-      {r.remarks && <Row left={`Remarks: ${r.remarks}`} right="" />}
+      {r.remarks && <FieldRow left={<Field label="Remarks" value={r.remarks} />} />}
     </PrintDocument>
-  );
-}
-
-function Row({ left, right }: { left: string; right: string }) {
-  if (!left && !right) return null;
-  return (
-    <div className="my-1.5 flex justify-between text-[12.5px]">
-      <span>{left}</span>
-      <span>{right}</span>
-    </div>
   );
 }

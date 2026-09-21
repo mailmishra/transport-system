@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useBiltiPrint } from "@/api/bilties";
 import { useFirms } from "@/api/firms";
 import { rupees } from "@/lib/money";
-import { PrintDocument } from "@/components/print/print-document";
+import { PrintDocument, Field, FieldRow } from "@/components/print/print-document";
 import type { GstPaidBy } from "@/api/types";
 
 const GST_OPTIONS: GstPaidBy[] = ["consignor", "consignee", "transporter", "exempted"];
@@ -38,10 +38,10 @@ export function BiltiPrintView() {
         <span>Date: {b.bilti_date}</span>
       </div>
 
-      <Row left={`From: ${b.from_location}`} right={`To: ${b.to_location}`} />
-      <Row
-        left={`Truck No.: ${b.vehicle.vehicle_no}`}
-        right={b.palti_vehicle ? `Palti Vehicle No.: ${b.palti_vehicle.vehicle_no}` : ""}
+      <FieldRow left={<Field label="From" value={b.from_location} />} right={<Field label="To" value={b.to_location} />} />
+      <FieldRow
+        left={<Field label="Truck No." value={b.vehicle.vehicle_no} />}
+        right={b.palti_vehicle && <Field label="Palti Vehicle No." value={b.palti_vehicle.vehicle_no} />}
       />
 
       <div className="my-2.5 grid grid-cols-2 gap-2.5">
@@ -123,27 +123,17 @@ export function BiltiPrintView() {
         </div>
       )}
 
-      <Row
-        left={`Truck Owner: ${b.truck_owner.name}`}
-        right={b.goods_value_declared ? `Value: ${rupees(b.goods_value_declared)}` : ""}
+      <FieldRow
+        left={<Field label="Truck Owner" value={b.truck_owner.name} />}
+        right={b.goods_value_declared && <Field label="Value" value={rupees(b.goods_value_declared)} />}
       />
-      <Row
-        left={b.agent ? `Agent / Broker: ${b.agent.name}` : ""}
-        right={b.eway_bill_no ? `E-Way Bill: ${b.eway_bill_no}` : ""}
+      <FieldRow
+        left={b.agent && <Field label="Agent / Broker" value={b.agent.name} />}
+        right={b.eway_bill_no && <Field label="E-Way Bill" value={b.eway_bill_no} />}
       />
-      {b.invoice_value && <Row left={`Invoice Value: ${rupees(b.invoice_value)}`} right="" />}
-      {b.remark && <Row left={`Remark: ${b.remark}`} right="" />}
+      {b.invoice_value && <FieldRow left={<Field label="Invoice Value" value={rupees(b.invoice_value)} />} />}
+      {b.remark && <FieldRow left={<Field label="Remark" value={b.remark} />} />}
     </PrintDocument>
-  );
-}
-
-function Row({ left, right }: { left: string; right: string }) {
-  if (!left && !right) return null;
-  return (
-    <div className="my-1.5 flex justify-between text-[12.5px]">
-      <span>{left}</span>
-      <span>{right}</span>
-    </div>
   );
 }
 
