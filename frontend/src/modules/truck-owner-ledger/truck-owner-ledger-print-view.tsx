@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useTruckOwner, useTruckOwnerStatement } from "@/api/truckOwners";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { PrintDocument } from "@/components/print/print-document";
@@ -12,8 +12,7 @@ import { PrintDocument } from "@/components/print/print-document";
 export function TruckOwnerLedgerPrintView() {
   const { id } = useParams();
   const { data: owner } = useTruckOwner(id);
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firm, firmId } = useSelectedFirm();
   const { data: statement, isLoading } = useTruckOwnerStatement(id, firmId);
 
   if (isLoading || !statement || !owner) {
@@ -22,7 +21,7 @@ export function TruckOwnerLedgerPrintView() {
 
   return (
     <PrintDocument
-      firm={firms?.find((f) => f.id === firmId)}
+      firm={firm}
       docLabel="Truck Owner Ledger Statement"
       docId={`STMT-TO-${owner.id.slice(0, 8)}`}
       pdfFilename={`TruckOwnerStatement-${owner.name}`}

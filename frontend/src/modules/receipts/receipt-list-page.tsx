@@ -5,7 +5,7 @@ import { FileDown, Plus, Trash2, ExternalLink } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { useReceiptList, useDeleteReceipt } from "@/api/receipts";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import type { Receipt } from "@/api/types";
 import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
@@ -21,8 +21,7 @@ const SORT_MAP: Record<string, string> = { receipt_date: "receipt_date", amount:
  */
 export function ReceiptListPage() {
   const navigate = useNavigate();
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");

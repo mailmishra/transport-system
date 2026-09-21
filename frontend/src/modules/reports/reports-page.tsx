@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { DayBookTab } from "./day-book-tab";
 import { OutstandingTab } from "./outstanding-tab";
 import { GstTab } from "./gst-tab";
@@ -15,8 +15,7 @@ import { ReceivablesTab } from "./receivables-tab";
  * filters these reports use.
  */
 export function ReportsPage() {
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   return (
     <div className="flex flex-col gap-4">

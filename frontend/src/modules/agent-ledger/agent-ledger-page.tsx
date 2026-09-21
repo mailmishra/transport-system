@@ -11,7 +11,7 @@ import { FormError } from "@/components/ui/field-error";
 import { useAgentList, useAgentBalance } from "@/api/agents";
 import { useAgentPaymentList, useCreateAgentPayment } from "@/api/agentPayments";
 import { useBiltiList } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { Agent, AgentPayment, Bilti } from "@/api/types";
 import { rupees } from "@/lib/money";
@@ -28,8 +28,7 @@ import { can } from "@/components/permissions/can";
  * into that agent's ledger detail below.
  */
 export function AgentLedgerPage() {
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [agent, setAgent] = React.useState<Agent | null>(null);
 

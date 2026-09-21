@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useAgent, useAgentStatement } from "@/api/agents";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { PrintDocument } from "@/components/print/print-document";
@@ -14,8 +14,7 @@ import { PrintDocument } from "@/components/print/print-document";
 export function AgentLedgerPrintView() {
   const { id } = useParams();
   const { data: agent } = useAgent(id);
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firm, firmId } = useSelectedFirm();
   const { data: statement, isLoading } = useAgentStatement(id, firmId);
 
   if (isLoading || !statement || !agent) {
@@ -24,7 +23,7 @@ export function AgentLedgerPrintView() {
 
   return (
     <PrintDocument
-      firm={firms?.find((f) => f.id === firmId)}
+      firm={firm}
       docLabel="Agent Ledger Statement"
       docId={`STMT-AGT-${agent.id.slice(0, 8)}`}
       pdfFilename={`AgentStatement-${agent.name}`}

@@ -11,7 +11,7 @@ import { FormError } from "@/components/ui/field-error";
 import { useTruckOwnerList, useTruckOwnerBalance } from "@/api/truckOwners";
 import { useTruckOwnerPaymentList, useCreateTruckOwnerPayment } from "@/api/truckOwnerPayments";
 import { useBiltiList } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { Bilti, TruckOwner, TruckOwnerPayment } from "@/api/types";
 import { rupees } from "@/lib/money";
@@ -23,8 +23,7 @@ import { can } from "@/components/permissions/can";
  * as the Agent Ledger's picker, see that file's comment for the rationale.
  */
 export function TruckOwnerLedgerPage() {
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [owner, setOwner] = React.useState<TruckOwner | null>(null);
 

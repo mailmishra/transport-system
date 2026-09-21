@@ -1,6 +1,7 @@
 import * as React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
+  ChevronDown,
   ClipboardList,
   FileText,
   Home,
@@ -13,7 +14,13 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /** ONE responsive shell, not two separate desktop/mobile apps -- same
  * navy/gold identity, horizontal tabs + stat surface on desktop collapsing
@@ -32,8 +39,7 @@ const NAV_ITEMS = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { data: firms } = useFirms();
-  const firm = firms?.[0];
+  const { firms, firm, firmId, setFirmId } = useSelectedFirm();
   const navigate = useNavigate();
 
   return (
@@ -53,9 +59,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {firm?.address ?? ""}
         </div>
         <div className="flex-1" />
-        <div className="hidden items-center gap-2 rounded bg-[#1C3A57] px-3 py-1.5 text-xs font-medium text-[#C6D2DD] sm:flex">
-          Firm: {firm?.name ?? "…"} ▾
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="hidden items-center gap-2 rounded bg-[#1C3A57] px-3 py-1.5 text-xs font-medium text-[#C6D2DD] hover:bg-[#24466A] sm:flex"
+              disabled={firms.length === 0}
+            >
+              Firm: {firm?.name ?? "…"}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {firms.map((f) => (
+              <DropdownMenuItem key={f.id} selected={f.id === firmId} onSelect={() => setFirmId(f.id)}>
+                {f.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-gold text-[11.5px] font-bold text-navy">
           AM
         </div>

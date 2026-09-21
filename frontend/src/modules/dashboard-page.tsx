@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useBiltiList } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 
 /** Minimal counts-only dashboard for Phase 1 -- the old concept app's
  * dashboard() summed every bilti's dalali/FD client-side over the whole
@@ -9,8 +9,7 @@ import { useFirms } from "@/api/firms";
  */
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firm, firmId } = useSelectedFirm();
   const { data: bilties } = useBiltiList({ firmId, limit: 1 });
 
   return (
@@ -18,7 +17,7 @@ export function DashboardPage() {
       <h1 className="text-[19px] font-bold text-navy">Dashboard</h1>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Bilties" value={bilties?.total ?? "…"} accent="border-navy" />
-        <StatCard label="Firm" value={firms?.[0]?.name ?? "…"} accent="border-gold" small />
+        <StatCard label="Firm" value={firm?.name ?? "…"} accent="border-gold" small />
       </div>
       <button
         onClick={() => navigate("/bilti")}
