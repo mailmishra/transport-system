@@ -22,6 +22,10 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/transport
       PORT: 8000
+      # Local-only: seeds realistic demo/stress-test data on first start
+      # (backend/app/scripts/seed_demo_data.py). Not set on Railway, so it
+      # stays off there by default -- see backend/app/config.py.
+      SEED_DEMO_DATA: "true"
     ports:
       - "8000:8000"
     depends_on:

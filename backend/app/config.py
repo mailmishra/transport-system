@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/transport"
     cors_origins: str = ""
 
+    # Local-dev-only: seeds realistic demo/stress-test data on container
+    # start (see app/scripts/seed_demo_data.py). Defaults off, so it's off
+    # on Railway/production unless explicitly set there -- docker-compose.yml
+    # is the only place this is turned on.
+    seed_demo_data: bool = False
+
     @field_validator("database_url")
     @classmethod
     def force_asyncpg_driver(cls, v: str) -> str:

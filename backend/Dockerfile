@@ -23,4 +23,8 @@ COPY --from=frontend-build /app/frontend/dist ../frontend_dist/
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Demo-data seeding (app/scripts/seed_demo_data.py) is gated by the
+# SEED_DEMO_DATA env var (off by default -- see app/config.py) and always
+# exits 0 even on failure, so `|| true` here is belt-and-suspenders: a
+# seeding problem must never be able to stop the app from starting.
+CMD ["sh", "-c", "alembic upgrade head && (python -m app.scripts.seed_demo_data || true) && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
