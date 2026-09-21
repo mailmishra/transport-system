@@ -11,7 +11,7 @@ import { useVehicleSearch } from "@/api/vehicles";
 import { useAgentSearch } from "@/api/agents";
 import { useTruckOwnerSearch } from "@/api/truckOwners";
 import { useBilti, useCreateBilti, useUpdateBilti } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { BiltiCreateInput, GstPaidBy } from "@/api/types";
 import { todayIso } from "@/lib/dates";
@@ -73,8 +73,7 @@ export function BiltiFormDrawer() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
   const { data: existing } = useBilti(id);
   const createBilti = useCreateBilti();
   const updateBilti = useUpdateBilti();

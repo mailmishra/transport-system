@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, buildQuery, type Page } from "./client";
 import { useLookupSearch } from "./lookups";
-import type { Agent, AgentBalance, AgentUpdateInput } from "./types";
+import type { Agent, AgentBalance, AgentStatement, AgentUpdateInput } from "./types";
 
 export function useAgentSearch(q: string) {
   return useLookupSearch<Agent>("agents", q);
@@ -44,6 +44,14 @@ export function useAgentBalance(id: string | undefined, firmId: string | undefin
   return useQuery({
     queryKey: ["agents", id, "balance", firmId],
     queryFn: () => api.get<AgentBalance>(`/agents/${id}/balance${buildQuery({ firm_id: firmId })}`),
+    enabled: !!id && !!firmId,
+  });
+}
+
+export function useAgentStatement(id: string | undefined, firmId: string | undefined) {
+  return useQuery({
+    queryKey: ["agents", id, "statement", firmId],
+    queryFn: () => api.get<AgentStatement>(`/agents/${id}/statement${buildQuery({ firm_id: firmId })}`),
     enabled: !!id && !!firmId,
   });
 }

@@ -23,6 +23,21 @@
   body {
     background: #fff;
   }
+  main {
+    padding: 0 !important;
+  }
+  /* Without this, Chrome/Firefox/Safari all default to stripping every
+     background-color and background-image when printing (the "Background
+     graphics" checkbox in the print dialog is off by default) -- so the
+     navy letterhead band and navy table headers would silently vanish
+     from every "Save as PDF" unless the person printing happens to find
+     and enable that checkbox themselves. This CSS property makes the
+     browser print backgrounds by default instead of requiring that. */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
   @page {
     size: A4;
     margin: 12mm;

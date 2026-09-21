@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table/data-table";
@@ -10,7 +11,7 @@ import { FormError } from "@/components/ui/field-error";
 import { useAgentList, useAgentBalance } from "@/api/agents";
 import { useAgentPaymentList, useCreateAgentPayment } from "@/api/agentPayments";
 import { useBiltiList } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { Agent, AgentPayment, Bilti } from "@/api/types";
 import { rupees } from "@/lib/money";
@@ -27,8 +28,7 @@ import { can } from "@/components/permissions/can";
  * into that agent's ledger detail below.
  */
 export function AgentLedgerPage() {
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [agent, setAgent] = React.useState<Agent | null>(null);
 
@@ -160,14 +160,19 @@ function AgentLedgerDetail({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <button
-          onClick={onBack}
-          className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted hover:text-navy"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> All Agents
-        </button>
-        <h1 className="text-[19px] font-bold text-navy">{agent.name}</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <button
+            onClick={onBack}
+            className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted hover:text-navy"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> All Agents
+          </button>
+          <h1 className="text-[19px] font-bold text-navy">{agent.name}</h1>
+        </div>
+        <Button asChild variant="secondary">
+          <Link to={`/agent-ledger/${agent.id}/print`}>Print Statement</Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-3">

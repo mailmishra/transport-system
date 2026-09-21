@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, buildQuery, type Page } from "./client";
 import { useLookupSearch } from "./lookups";
-import type { TruckOwner, TruckOwnerBalance, TruckOwnerUpdateInput } from "./types";
+import type { TruckOwner, TruckOwnerBalance, TruckOwnerStatement, TruckOwnerUpdateInput } from "./types";
 
 export function useTruckOwnerSearch(q: string) {
   return useLookupSearch<TruckOwner>("truck-owners", q);
@@ -45,6 +45,15 @@ export function useTruckOwnerBalance(id: string | undefined, firmId: string | un
     queryKey: ["truck-owners", id, "balance", firmId],
     queryFn: () =>
       api.get<TruckOwnerBalance>(`/truck-owners/${id}/balance${buildQuery({ firm_id: firmId })}`),
+    enabled: !!id && !!firmId,
+  });
+}
+
+export function useTruckOwnerStatement(id: string | undefined, firmId: string | undefined) {
+  return useQuery({
+    queryKey: ["truck-owners", id, "statement", firmId],
+    queryFn: () =>
+      api.get<TruckOwnerStatement>(`/truck-owners/${id}/statement${buildQuery({ firm_id: firmId })}`),
     enabled: !!id && !!firmId,
   });
 }

@@ -1,69 +1,79 @@
 # Graph Report - transport-system  (2026-09-21)
 
 ## Corpus Check
-- Corpus is ~15,298 words - fits in a single context window. You may not need a graph.
+- 1 files · ~16,074 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 506 nodes · 1364 edges · 39 communities (18 shown, 21 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 106 edges (avg confidence: 0.94)
-- Token cost: 0 input · 0 output
+- 526 nodes · 1402 edges · 48 communities (26 shown, 22 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.94)
+- Token cost: 84,490 input · 0 output
 
 ## Community Hubs (Navigation)
-- Bilti/Loading Slip Schemas
-- Loading Slip API & Firm Deps
-- Bilti/Ledger Integration Tests
-- Frontend App (index.html) & README
-- DB Base Models & Engine Setup
-- Migration & Config Tests
-- Bilti CRUD & Router
-- Loading Slip & Vehicle Models
-- Agent Model & Router
-- Truck Owner Model & Router
-- Agent Payments
-- Truck Owner Payments
-- Receipts
-- Alembic Migrations (0001-0003)
-- README Business Docs
-- Railway Deployment Config
+- Pydantic Schema Layer
+- Backend Test Setup
+- Bilti CRUD Layer
+- Agent Payment & Firm CRUD
+- DB Models & Migration Runner
+- Loading Slip CRUD/Router
+- Receipt CRUD/Router
+- Vehicle CRUD & App Entry
+- Agent CRUD/Router
+- Truck Owner CRUD/Router
+- Truck Owner Payment CRUD/Router
+- Migration Backfill Regression Tests
+- Settings & Config Tests
+- Concept App: Bilti/Loading Create Flow
+- Concept App: Reports Suite
+- Alembic Migration Scripts
+- Concept App: Form Validation & API Client
+- Ledger Screens & Get-or-Create Testing Strategy
+- Railway Deploy Config
+- Concept App: Print/Letterhead Views
+- Hidden Freight Difference (FD) Feature
 - PWA Manifest
-- Concept Prototype README
-- Docker Compose (Local Dev)
-- Backend Requirements
-- Backend Requirements
-- Dev Requirements
-- Dev Requirements
-- Backend Requirements
-- Backend Requirements
-- Backend Requirements
-- Concept Prototype Notes
-- Concept Prototype Notes
-- Concept Prototype Notes
-- Concept Prototype Notes
-- Concept Prototype Notes
-- README Fragment
+- Business Workflow Steps
+- Concept App: Screen Router & Datalists
+- System Architecture Overview
+- Concept App: Owner Payments
+- Docker Compose Services
+- Alembic Migrations (concept node)
+- asyncpg dependency
+- pytest dependency
+- testcontainers dependency
+- FastAPI dependency
+- Pydantic v2 dependency
+- async SQLAlchemy 2.0 dependency
+- Prototype SPA (legacy concept)
+- LocalStorage Limitation Note
+- Shivam Transport Company (seed firm)
+- Shivsakti Transport Company (seed firm)
+- Sri Krishna Transport Company (seed firm)
+- PWA Starter Manifest Note
+- firms DB table
 
 ## God Nodes (most connected - your core abstractions)
 1. `get_firm_id()` - 34 edges
-2. `unique()` - 26 edges
-3. `create_bilti()` - 26 edges
+2. `create_bilti()` - 26 edges
+3. `unique()` - 26 edges
 4. `Base` - 21 edges
-5. `Bilti` - 20 edges
-6. `Firm` - 20 edges
-7. `UUIDPKMixin` - 19 edges
-8. `TimestampMixin` - 19 edges
+5. `Firm` - 20 edges
+6. `Bilti` - 20 edges
+7. `TimestampMixin` - 19 edges
+8. `UUIDPKMixin` - 19 edges
 9. `LoadingSlip` - 19 edges
 10. `Agent` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Ledger Balances Computed, Not Stored` --semantically_similar_to--> `agentLedger()`  [INFERRED] [semantically similar]
-  README.md → concept/index.html
-- `Ledger Balances Computed, Not Stored` --semantically_similar_to--> `ownerLedger()`  [INFERRED] [semantically similar]
+- `Ledger Balances Computed, Not Stored` --semantically_similar_to--> `Agent / Dalal Ledger screen`  [INFERRED] [semantically similar]
   README.md → concept/index.html
 - `grand_total / topay Computed Fields` --semantically_similar_to--> `updateBiltiTotals()`  [INFERRED] [semantically similar]
   README.md → concept/index.html
-- `truck_owners Table` --shares_data_with--> `ownerLedger()`  [INFERRED]
+- `Ledger Balances Computed, Not Stored` --semantically_similar_to--> `Truck Owner Ledger screen`  [INFERRED] [semantically similar]
   README.md → concept/index.html
-- `loading_slips Table` --shares_data_with--> `addLoading()`  [INFERRED]
+- `agent_payments Table` --shares_data_with--> `addAgentPayment()`  [INFERRED]
+  README.md → concept/index.html
+- `agents Table` --shares_data_with--> `Agent / Dalal Ledger screen`  [INFERRED]
   README.md → concept/index.html
 
 ## Import Cycles
@@ -71,103 +81,135 @@
 
 ## Hyperedges (group relationships)
 - **Documented Transport Workflow (Loading Slip to Reports)** — concept_readme_loading_slip, concept_readme_bilti_gr, concept_readme_agent_dalal_ledger, concept_readme_truck_owner_ledger, concept_readme_final_receipt, concept_readme_reports [EXTRACTED 1.00]
-- **Documented Transport Workflow Screens** — readme_workflow, concept_index_loadingform, concept_index_biltiform, concept_index_agentledger, concept_index_ownerledger, concept_index_receiptform [INFERRED 0.85]
-- **Reports Dispatch Pattern** — concept_index_reports, concept_index_reportfirmwise, concept_index_reportbiltiwise, concept_index_reportparty, concept_index_reportagent, concept_index_reportfd, concept_index_reportowner, concept_index_reportlorry, concept_index_reportadvance, concept_index_reportreceipt, concept_index_reportoutstanding, concept_index_reportdaybook [EXTRACTED 1.00]
-- **Fetch API Wrapper Functions** — concept_index_apirequest, concept_index_apiget, concept_index_apipost, concept_index_apipatch, concept_index_apidelete [EXTRACTED 1.00]
+- **Firm-scoped create-and-print form submission pattern** — concept_index_addloading, concept_index_addbilti, concept_index_addagentpayment, concept_index_addownerpayment, concept_index_addreceipt, concept_index_savefirmdetails [INFERRED 0.85]
+- **Fetch-then-render printable letterhead document pattern** — concept_index_printloadingslip, concept_index_printbilti, concept_index_printreceipt, concept_index_loadingslipprintview, concept_index_biltiprintview, concept_index_receiptprintview [INFERRED 0.85]
+- **REPORTS registry driving pluggable report views** — concept_index_reports, concept_index_showreport, concept_index_reporttable, concept_index_reportfirmwise, concept_index_reportbiltiwise, concept_index_reportparty, concept_index_reportagent, concept_index_reportfd, concept_index_reportowner, concept_index_reportlorry, concept_index_reportadvance, concept_index_reportreceipt, concept_index_reportoutstanding, concept_index_reportdaybook [EXTRACTED 1.00]
 
-## Communities (39 total, 21 thin omitted)
+## Communities (48 total, 22 thin omitted)
 
-### Community 0 - "Bilti/Loading Slip Schemas"
-Cohesion: 0.07
-Nodes (49): AgentRead, AgentPaymentBase, AgentPaymentRead, BaseModel, field_validator, BiltiBase, _BiltiChargeFieldsMixin, BiltiCreate (+41 more)
+### Community 0 - "Pydantic Schema Layer"
+Cohesion: 0.08
+Nodes (42): AgentRead, AgentPaymentBase, AgentPaymentRead, BaseModel, field_validator, BiltiBase, _BiltiChargeFieldsMixin, BiltiCreate (+34 more)
 
-### Community 1 - "Loading Slip API & Firm Deps"
-Cohesion: 0.09
-Nodes (45): AsyncSession, update(), Actor, get_current_actor(), get_db(), AsyncSession, Stub auth dependency. No auth is enforced yet. This is the single place a…, healthz() (+37 more)
+### Community 1 - "Backend Test Setup"
+Cohesion: 0.12
+Nodes (41): get_firm_id(), pytest_configure(), pytest_unconfigure(), Session-wide test setup. A single real Postgres container (via testcontainers)…, The first seeded firm's id (`firms` is seeded by migration 0001)., _run_migrations_to(), Walks the actual documented business workflow end to end against the running…, test_full_workflow() (+33 more)
 
-### Community 2 - "Bilti/Ledger Integration Tests"
-Cohesion: 0.10
-Nodes (44): client(), get_firm_id(), pytest_configure(), pytest_unconfigure(), Session-wide test setup. A single real Postgres container (via testcontainers)…, The first seeded firm's id (`firms` is seeded by migration 0001)., One TestClient (one background portal thread, one event loop, one DB engine)…, _run_migrations_to() (+36 more)
+### Community 2 - "Bilti CRUD Layer"
+Cohesion: 0.12
+Nodes (34): get_or_create_by_name(), create(), get(), list_(), AsyncSession, UUID, soft_delete(), update() (+26 more)
 
-### Community 3 - "Frontend App (index.html) & README"
-Cohesion: 0.05
-Nodes (42): addAgentPayment(), addBilti(), addLoading(), addOwnerPayment(), addReceipt(), agentLedger(), apiGet(), apiPatch() (+34 more)
+### Community 3 - "Agent Payment & Firm CRUD"
+Cohesion: 0.12
+Nodes (30): create(), get(), list_(), AsyncSession, UUID, soft_delete(), AsyncSession, update() (+22 more)
 
-### Community 4 - "DB Base Models & Engine Setup"
-Cohesion: 0.32
-Nodes (20): do_run_migrations(), run_migrations_online(), Base, Agent, AgentPayment, ActorTrackedMixin, SoftDeleteMixin, TimestampMixin (+12 more)
+### Community 4 - "DB Models & Migration Runner"
+Cohesion: 0.31
+Nodes (21): do_run_migrations(), run_migrations_online(), get_settings(), Base, Agent, AgentPayment, ActorTrackedMixin, SoftDeleteMixin (+13 more)
 
-### Community 5 - "Migration & Config Tests"
-Cohesion: 0.09
-Nodes (27): asyncio, asyncpg, get_settings(), field_validator, Settings, _fetch_backfilled(), _fetch_vehicle_backfilled(), _insert_legacy_bilti() (+19 more)
+### Community 5 - "Loading Slip CRUD/Router"
+Cohesion: 0.18
+Nodes (25): create(), get(), list_(), AsyncSession, date, UUID, soft_delete(), update() (+17 more)
 
-### Community 6 - "Bilti CRUD & Router"
-Cohesion: 0.21
-Nodes (24): get_or_create_by_name(), create(), get(), list_(), AsyncSession, UUID, soft_delete(), update() (+16 more)
+### Community 6 - "Receipt CRUD/Router"
+Cohesion: 0.17
+Nodes (21): create(), get(), list_(), AsyncSession, UUID, soft_delete(), create_receipt(), delete_receipt() (+13 more)
 
-### Community 7 - "Loading Slip & Vehicle Models"
+### Community 7 - "Vehicle CRUD & App Entry"
 Cohesion: 0.15
-Nodes (24): create(), get(), list_(), AsyncSession, date, UUID, soft_delete(), update() (+16 more)
+Nodes (20): get(), list_(), AsyncSession, UUID, update(), healthz(), get, _get_or_404() (+12 more)
 
-### Community 8 - "Agent Model & Router"
+### Community 8 - "Agent CRUD/Router"
 Cohesion: 0.25
 Nodes (17): get(), list_(), AsyncSession, UUID, update(), agent_balance(), get_agent(), _get_or_404() (+9 more)
 
-### Community 9 - "Truck Owner Model & Router"
+### Community 9 - "Truck Owner CRUD/Router"
 Cohesion: 0.25
 Nodes (17): get(), list_(), AsyncSession, UUID, update(), _get_or_404(), get_truck_owner(), list_truck_owners() (+9 more)
 
-### Community 10 - "Agent Payments"
+### Community 10 - "Truck Owner Payment CRUD/Router"
 Cohesion: 0.24
-Nodes (15): create(), get(), list_(), AsyncSession, UUID, soft_delete(), delete_agent_payment(), get_agent_payment() (+7 more)
+Nodes (17): create(), get(), list_(), AsyncSession, UUID, soft_delete(), create_truck_owner_payment(), delete_truck_owner_payment() (+9 more)
 
-### Community 11 - "Truck Owner Payments"
-Cohesion: 0.24
-Nodes (15): create(), get(), list_(), AsyncSession, UUID, soft_delete(), delete_truck_owner_payment(), _get_or_404() (+7 more)
+### Community 11 - "Migration Backfill Regression Tests"
+Cohesion: 0.17
+Nodes (15): asyncio, asyncpg, _fetch_backfilled(), _fetch_vehicle_backfilled(), _insert_legacy_bilti(), _insert_legacy_vehicle_bilti(), Regression test for the 0001 -> 0002 backfill specifically. Builds a…, Same regression, for the 0002 -> 0003 vehicle_no -> vehicles backfill. (+7 more)
 
-### Community 12 - "Receipts"
-Cohesion: 0.26
-Nodes (14): create(), get(), list_(), AsyncSession, UUID, soft_delete(), delete_receipt(), _get_or_404() (+6 more)
+### Community 12 - "Settings & Config Tests"
+Cohesion: 0.19
+Nodes (11): field_validator, Settings, No DB needed - Settings is a plain Pydantic model., test_already_asyncpg_scheme_is_left_alone(), test_cors_origin_list_empty_by_default(), test_cors_origin_list_splits_and_strips(), test_plain_postgres_scheme_gets_asyncpg_driver(), test_postgresql_scheme_gets_asyncpg_driver() (+3 more)
 
-### Community 13 - "Alembic Migrations (0001-0003)"
+### Community 13 - "Concept App: Bilti/Loading Create Flow"
+Cohesion: 0.18
+Nodes (12): addBilti(), addLoading(), Backend API: /bilties, /bilties/{id}/print, Backend API: /loading-slips, Dashboard screen, Firm-scoped document/ledger inheritance, Firm Setup screen, printBilti(id) (+4 more)
+
+### Community 14 - "Concept App: Reports Suite"
+Cohesion: 0.15
+Nodes (4): reportFirmWise(), reports() — Reports screen, reportTable(title, headCells, rows, colCount), showReport(id)
+
+### Community 15 - "Alembic Migration Scripts"
 Cohesion: 0.23
 Nodes (3): alembic, sqlalchemy_dialects, typing
 
-### Community 14 - "README Business Docs"
-Cohesion: 0.18
-Nodes (11): concept/index.html (Single-File PWA Frontend), Single-Service FastAPI+Static Architecture, FastAPI Backend (backend/app), Railway Deployment (single service + managed Postgres), concept/index.html Frontend PWA, No Auth Yet — Deliberate, Stubbed for Future Supabase Auth, No Browser/UI Test — API Layer Is Where Logic Lives, Session-Scoped client Fixture (avoids anyio/asyncpg portal bug) (+3 more)
+### Community 16 - "Concept App: Form Validation & API Client"
+Cohesion: 0.25
+Nodes (10): addAgentPayment(), Agent / Dalal Ledger screen, Backend API: PATCH /firms/{id}, apiRequest / apiGet / apiPost / apiPatch / apiDelete (API client layer), applyFormError(e, fieldMap), Inline per-field validation (design pattern), lastErrorBanner(msg), saveFirmDetails() (+2 more)
 
-### Community 15 - "Railway Deployment Config"
+### Community 17 - "Ledger Screens & Get-or-Create Testing Strategy"
+Cohesion: 0.22
+Nodes (10): Truck Owner Ledger screen, agents Table, Get-or-Create Name Resolution (agent/truck_owner/vehicle), Ledger Balances Computed, Not Stored, test_migration_backfill.py Regression Guard, No Browser/UI Test — API Layer Is Where Logic Lives, Session-Scoped client Fixture (avoids anyio/asyncpg portal bug), Testing Strategy: Real Postgres via testcontainers, no mocks (+2 more)
+
+### Community 18 - "Railway Deploy Config"
 Cohesion: 0.22
 Nodes (8): build, builder, dockerfilePath, deploy, healthcheckPath, healthcheckTimeout, restartPolicyType, $schema
 
-### Community 16 - "PWA Manifest"
+### Community 19 - "Concept App: Print/Letterhead Views"
+Cohesion: 0.32
+Nodes (8): addReceipt(), Backend API: /receipts, loadingSlipPrintView(x, firm), Printable letterhead document styling (gr-doc), printLoadingSlip(id), printReceipt(id), receiptPrintView(r, bilti, firm), receipts Table
+
+### Community 20 - "Hidden Freight Difference (FD) Feature"
+Cohesion: 0.29
+Nodes (8): Bilti / GR screen, biltiPrintView(b, firm), Hidden Freight Difference (FD), reportFD(), updateBiltiTotals(), GET /bilties/{id}/print (Omits FD), grand_total / topay Computed Fields, Freight Difference (FD) Hidden Field
+
+### Community 21 - "PWA Manifest"
 Cohesion: 0.25
 Nodes (7): background_color, display, icons, name, short_name, start_url, theme_color
 
-### Community 17 - "Concept Prototype README"
+### Community 22 - "Business Workflow Steps"
 Cohesion: 0.29
 Nodes (8): Agent/Dalal Ledger (workflow step), Bilti / GR (workflow step), Dalali (brokerage fee, visible on Bilti), Final Receipt (workflow step), FD - Freight Difference (hidden accounting field), Loading Slip (workflow step), Reports (workflow step), Truck Owner Ledger (workflow step)
 
+### Community 23 - "Concept App: Screen Router & Datalists"
+Cohesion: 0.29
+Nodes (7): Backend API: /firms, datalists(), Datalist get-or-create UX pattern, init(), Loading Slip screen, Final Receipt screen, show(name) — screen router
+
+### Community 24 - "System Architecture Overview"
+Cohesion: 0.29
+Nodes (7): Single-Service FastAPI+Static Architecture, FastAPI Backend (backend/app), Railway Deployment (single service + managed Postgres), concept/index.html Frontend PWA, No Auth Yet — Deliberate, Stubbed for Future Supabase Auth, Transport System (Project), Loading Slip → Bilti/GR → Agent Ledger → Truck Owner Ledger → Final Receipt → Reports Workflow
+
+### Community 25 - "Concept App: Owner Payments"
+Cohesion: 0.40
+Nodes (5): addOwnerPayment(), Backend API: /agent-payments, Backend API: /truck-owner-payments, refreshData(), truck_owner_payments Table
+
 ## Knowledge Gaps
-- **38 isolated node(s):** `name`, `short_name`, `start_url`, `display`, `background_color` (+33 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 126 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **45 isolated node(s):** `builder`, `dockerfilePath`, `healthcheckPath`, `healthcheckTimeout`, `restartPolicyType` (+40 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 136 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `get_db()` connect `Loading Slip API & Firm Deps` to `Agent Model & Router`, `Truck Owner Model & Router`, `Bilti/Ledger Integration Tests`, `Bilti CRUD & Router`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
-- **Why does `get_settings()` connect `Migration & Config Tests` to `Loading Slip API & Firm Deps`, `DB Base Models & Engine Setup`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `Firm` connect `Loading Slip API & Firm Deps` to `DB Base Models & Engine Setup`, `Bilti CRUD & Router`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **What connects `name`, `short_name`, `start_url` to the rest of the system?**
-  _38 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Bilti/Loading Slip Schemas` be split into smaller, more focused modules?**
-  _Cohesion score 0.06606990622335891 - nodes in this community are weakly interconnected._
-- **Should `Loading Slip API & Firm Deps` be split into smaller, more focused modules?**
-  _Cohesion score 0.08646616541353383 - nodes in this community are weakly interconnected._
-- **Should `Bilti/Ledger Integration Tests` be split into smaller, more focused modules?**
-  _Cohesion score 0.10168350168350168 - nodes in this community are weakly interconnected._
+- **Why does `get_db()` connect `Bilti CRUD Layer` to `Backend Test Setup`, `Agent Payment & Firm CRUD`, `Loading Slip CRUD/Router`, `Receipt CRUD/Router`, `Vehicle CRUD & App Entry`, `Agent CRUD/Router`, `Truck Owner CRUD/Router`, `Truck Owner Payment CRUD/Router`?**
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `get_settings()` connect `DB Models & Migration Runner` to `Migration Backfill Regression Tests`, `Settings & Config Tests`, `Vehicle CRUD & App Entry`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `Firm` connect `Agent Payment & Firm CRUD` to `Bilti CRUD Layer`, `DB Models & Migration Runner`, `Loading Slip CRUD/Router`, `Receipt CRUD/Router`, `Truck Owner Payment CRUD/Router`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **What connects `builder`, `dockerfilePath`, `healthcheckPath` to the rest of the system?**
+  _45 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Pydantic Schema Layer` be split into smaller, more focused modules?**
+  _Cohesion score 0.07831677381648158 - nodes in this community are weakly interconnected._
+- **Should `Backend Test Setup` be split into smaller, more focused modules?**
+  _Cohesion score 0.11529411764705882 - nodes in this community are weakly interconnected._
+- **Should `Bilti CRUD Layer` be split into smaller, more focused modules?**
+  _Cohesion score 0.12091038406827881 - nodes in this community are weakly interconnected._

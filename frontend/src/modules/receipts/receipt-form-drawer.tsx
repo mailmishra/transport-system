@@ -9,7 +9,7 @@ import { Section, Field } from "@/components/form/section";
 import { AsyncCombobox } from "@/components/combobox/async-combobox";
 import { useBiltiSearch } from "@/api/bilties";
 import { useCreateReceipt } from "@/api/receipts";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { Bilti, ReceiptCreateInput } from "@/api/types";
 import { rupees } from "@/lib/money";
@@ -37,8 +37,7 @@ const EMPTY: FormValues = {
  */
 export function ReceiptFormDrawer() {
   const navigate = useNavigate();
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
   const createReceipt = useCreateReceipt();
   const [selectedBilti, setSelectedBilti] = React.useState<Bilti | null>(null);
 

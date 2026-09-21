@@ -54,6 +54,9 @@ async def get(db: AsyncSession, slip_id: uuid.UUID) -> LoadingSlip | None:
 async def list_(
     db: AsyncSession,
     firm_id: uuid.UUID | None = None,
+    vehicle_id: uuid.UUID | None = None,
+    truck_owner_id: uuid.UUID | None = None,
+    agent_id: uuid.UUID | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
     q: str | None = None,
@@ -64,6 +67,12 @@ async def list_(
     stmt = select(LoadingSlip).where(LoadingSlip.is_deleted.is_(False))
     if firm_id is not None:
         stmt = stmt.where(LoadingSlip.firm_id == firm_id)
+    if vehicle_id is not None:
+        stmt = stmt.where(LoadingSlip.vehicle_id == vehicle_id)
+    if truck_owner_id is not None:
+        stmt = stmt.where(LoadingSlip.truck_owner_id == truck_owner_id)
+    if agent_id is not None:
+        stmt = stmt.where(LoadingSlip.agent_id == agent_id)
     if date_from is not None:
         stmt = stmt.where(LoadingSlip.slip_date >= date_from)
     if date_to is not None:

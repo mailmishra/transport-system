@@ -38,6 +38,9 @@ async def create_loading_slip(
 @router.get("", response_model=Page[LoadingSlipRead])
 async def list_loading_slips(
     firm_id: uuid.UUID | None = None,
+    vehicle_id: uuid.UUID | None = None,
+    truck_owner_id: uuid.UUID | None = None,
+    agent_id: uuid.UUID | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
     q: str | None = None,
@@ -47,7 +50,8 @@ async def list_loading_slips(
     db: AsyncSession = Depends(get_db),
 ):
     items, total, page, limit = await crud.list_(
-        db, firm_id=firm_id, date_from=date_from, date_to=date_to, q=q, sort=sort, page=page, limit=limit
+        db, firm_id=firm_id, vehicle_id=vehicle_id, truck_owner_id=truck_owner_id, agent_id=agent_id,
+        date_from=date_from, date_to=date_to, q=q, sort=sort, page=page, limit=limit,
     )
     return Page(items=items, total=total, page=page, limit=limit)
 

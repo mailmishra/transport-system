@@ -38,6 +38,73 @@ def test_agent_balance_is_accrued_minus_paid(client):
     assert body["balance"] == "650.00"
 
 
+def test_agent_statement_is_chronological_with_running_balance(client):
+    firm_id = get_firm_id(client)
+    agent_name = unique("Mahesh")
+    b1 = create_bilti(
+        client, firm_id, agent_name=agent_name, bilti_date="2026-02-01", dalali=500, freight_difference=250
+    )
+    agent_id = b1["agent"]["id"]
+    pay = client.post(
+        "/api/agent-payments",
+        json={"firm_id": firm_id, "agent_id": agent_id, "amount": 300, "payment_date": "2026-02-05"},
+    )
+    assert pay.status_code == 201
+    b2 = create_bilti(
+        client, firm_id, agent_name=agent_name, bilti_date="2026-02-10", dalali=200, freight_difference=0
+    )
+    assert b2["agent"]["id"] == agent_id
+
+    res = client.get(f"/api/agents/{agent_id}/statement", params={"firm_id": firm_id})
+    assert res.status_code == 200
+    body = res.json()
+
+    assert [line["date"] for line in body["lines"]] == ["2026-02-01", "2026-02-05", "2026-02-10"]
+    # running balance: +750, -300 -> 450, +200 -> 650
+    assert [line["balance"] for line in body["lines"]] == ["750.00", "450.00", "650.00"]
+    assert body["total_accrued"] == "950.00"
+    assert body["total_paid"] == "300.00"
+    assert body["closing_balance"] == "650.00"
+
+
+def test_truck_owner_statement_is_chronological_with_running_balance(client):
+    firm_id = get_firm_id(client)
+    owner_name = unique("Suresh")
+    bilti = create_bilti(
+        client,
+        firm_id,
+        truck_owner_name=owner_name,
+        bilti_date="2026-03-01",
+        freight=15000,
+        advance_to_owner=2000,
+    )
+    owner_id = bilti["truck_owner"]["id"]
+    pay = client.post(
+        "/api/truck-owner-payments",
+        json={
+            "firm_id": firm_id,
+            "truck_owner_id": owner_id,
+            "bilti_id": bilti["id"],
+            "amount": 1000,
+            "payment_date": "2026-03-05",
+        },
+    )
+    assert pay.status_code == 201
+
+    res = client.get(f"/api/truck-owners/{owner_id}/statement", params={"firm_id": firm_id})
+    assert res.status_code == 200
+    body = res.json()
+
+    assert [line["date"] for line in body["lines"]] == ["2026-03-01", "2026-03-05"]
+    # 15000 freight - 2000 advance = 13000, then -1000 payment = 12000
+    assert body["lines"][0]["balance"] == "13000.00"
+    assert body["lines"][1]["balance"] == "12000.00"
+    assert body["total_freight"] == "15000.00"
+    assert body["total_advance"] == "2000.00"
+    assert body["total_paid"] == "1000.00"
+    assert body["closing_balance"] == "12000.00"
+
+
 def test_agent_payment_amount_must_be_positive(client):
     firm_id = get_firm_id(client)
     bilti = create_bilti(client, firm_id, agent_name=unique("Agent"))

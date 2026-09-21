@@ -5,7 +5,7 @@ import { FileDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { useBiltiList, useDeleteBilti } from "@/api/bilties";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import type { Bilti } from "@/api/types";
 import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
@@ -19,8 +19,7 @@ const SORT_MAP: Record<string, string> = {
 
 export function BiltiListPage() {
   const navigate = useNavigate();
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");

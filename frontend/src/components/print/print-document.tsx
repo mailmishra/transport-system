@@ -71,8 +71,8 @@ export function PrintDocument({
               className="h-14 w-14 flex-shrink-0 rounded border border-white/30 bg-white/5 object-contain p-1"
             />
           )}
-          <div className="flex-grow">
-            <div className="text-2xl font-extrabold tracking-wide">{firm?.name ?? ""}</div>
+          <div className="flex-grow" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+            <div className="text-2xl font-bold tracking-wide">{firm?.name ?? ""}</div>
             {firm?.address && <div className="mt-1 text-[11.5px] opacity-90">{firm.address}</div>}
             {firm?.jurisdiction_text && (
               <div className="mt-1.5 text-[10px] uppercase tracking-wide opacity-70">
@@ -129,6 +129,34 @@ export function PrintDocument({
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** A bold "Label:" against a plain value, matching the approved Template A
+ * mockup's field convention (e.g. "**From:** Katni, MP") -- plain string
+ * concatenation like `From: ${x}` gives the label and value identical
+ * weight, which is the "no distinction" gap this exists to close. Renders
+ * nothing when `value` is empty, so callers can pass it directly into a
+ * conditional without an extra guard.
+ */
+export function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  if (value === null || value === undefined || value === "") return null;
+  return (
+    <span>
+      <b className="font-semibold">{label}:</b> {value}
+    </span>
+  );
+}
+
+/** Two Fields (or any inline content) spaced to the document's edges --
+ * the standard body-row layout throughout every print view's content. */
+export function FieldRow({ left, right }: { left?: React.ReactNode; right?: React.ReactNode }) {
+  if (!left && !right) return null;
+  return (
+    <div className="my-1.5 flex justify-between text-[12.5px]">
+      <span>{left}</span>
+      <span>{right}</span>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,6 +61,9 @@ async def list_(
     firm_id: uuid.UUID | None = None,
     agent_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
+    vehicle_id: uuid.UUID | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
     q: str | None = None,
     sort: str | None = None,
     page: int = 1,
@@ -72,6 +76,12 @@ async def list_(
         stmt = stmt.where(Bilti.agent_id == agent_id)
     if truck_owner_id is not None:
         stmt = stmt.where(Bilti.truck_owner_id == truck_owner_id)
+    if vehicle_id is not None:
+        stmt = stmt.where(Bilti.vehicle_id == vehicle_id)
+    if date_from is not None:
+        stmt = stmt.where(Bilti.bilti_date >= date_from)
+    if date_to is not None:
+        stmt = stmt.where(Bilti.bilti_date <= date_to)
     if q:
         needle = f"%{q.strip()}%"
         stmt = stmt.where(

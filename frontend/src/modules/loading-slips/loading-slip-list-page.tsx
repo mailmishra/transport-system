@@ -5,7 +5,7 @@ import { FileDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { useLoadingSlipList, useDeleteLoadingSlip } from "@/api/loadingSlips";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import type { LoadingSlip } from "@/api/types";
 import { formatDate } from "@/lib/dates";
 import { can } from "@/components/permissions/can";
@@ -14,8 +14,7 @@ const SORT_MAP: Record<string, string> = { slip_date: "slip_date" };
 
 export function LoadingSlipListPage() {
   const navigate = useNavigate();
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
 
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");

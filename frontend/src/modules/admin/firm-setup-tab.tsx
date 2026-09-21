@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/field-error";
-import { useFirms, useUpdateFirm, useUploadFirmLogo } from "@/api/firms";
+import { useUpdateFirm, useUploadFirmLogo } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { Firm } from "@/api/types";
 
@@ -29,11 +30,10 @@ const EMPTY_VALUES: FormValues = {
   bank_name: "", bank_branch: "", bank_account_no: "", bank_ifsc: "",
 };
 
-/** Single-firm setup -- Phase 1's AppShell already hardcodes firms?.[0] as
- * "the" firm with no switcher UI, so this edits that same firm rather than
- * reintroducing concept/index.html's firm-switcher (multi-firm switching
- * was never carried into the React app; out of scope here too). firm.name
- * is not editable -- FirmUpdate excludes it (Firm.name is unique in the DB).
+/** Edits whichever firm is currently selected in the AppShell's Firm
+ * dropdown (state/selected-firm.tsx) -- switch firms there to edit a
+ * different one. firm.name is not editable -- FirmUpdate excludes it
+ * (Firm.name is unique in the DB).
  *
  * This is the source of everything PrintDocument (components/print/) puts
  * on a printed document's letterhead -- the live preview below mirrors
@@ -41,8 +41,7 @@ const EMPTY_VALUES: FormValues = {
  * anything.
  */
 export function FirmSetupTab() {
-  const { data: firms } = useFirms();
-  const firm = firms?.[0];
+  const { firm } = useSelectedFirm();
   const updateFirm = useUpdateFirm();
   const uploadLogo = useUploadFirmLogo();
   const [logoError, setLogoError] = React.useState<string | null>(null);

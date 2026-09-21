@@ -11,7 +11,7 @@ import { useVehicleSearch } from "@/api/vehicles";
 import { useAgentSearch } from "@/api/agents";
 import { useTruckOwnerSearch } from "@/api/truckOwners";
 import { useLoadingSlip, useCreateLoadingSlip, useUpdateLoadingSlip } from "@/api/loadingSlips";
-import { useFirms } from "@/api/firms";
+import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { LoadingSlipCreateInput } from "@/api/types";
 import { todayIso } from "@/lib/dates";
@@ -50,8 +50,7 @@ export function LoadingSlipFormDrawer() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
-  const { data: firms } = useFirms();
-  const firmId = firms?.[0]?.id;
+  const { firmId } = useSelectedFirm();
   const { data: existing } = useLoadingSlip(id);
   const createSlip = useCreateLoadingSlip();
   const updateSlip = useUpdateLoadingSlip();

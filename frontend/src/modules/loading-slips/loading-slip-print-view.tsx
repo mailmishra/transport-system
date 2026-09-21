@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useLoadingSlip } from "@/api/loadingSlips";
 import { useFirms } from "@/api/firms";
 import { rupees } from "@/lib/money";
-import { PrintDocument } from "@/components/print/print-document";
+import { PrintDocument, Field, FieldRow } from "@/components/print/print-document";
 
 /** Body content only -- letterhead/footer come from PrintDocument. Keeps
  * the bilingual (Hindi) loading-instruction sentence, which is the
@@ -31,7 +31,7 @@ export function LoadingSlipPrintView() {
       backHref="/loading-slips"
       showSignatures={false}
     >
-      <Row left={s.agent ? `Through: ${s.agent.name}` : ""} right="" />
+      {s.agent && <FieldRow left={<Field label="Through" value={s.agent.name} />} />}
 
       <div className="my-2.5 flex items-baseline justify-between rounded border border-[#e5e8eb] bg-background px-3 py-2">
         <b className="text-navy">Loading Instruction</b>
@@ -50,20 +50,10 @@ export function LoadingSlipPrintView() {
         <b>{s.quantity_weight}</b> चढ़ (कट्टी {s.package_count || "—"}) लोड करवाने की कृपा करें।
       </p>
 
-      <Row left={`From: ${s.loading_point}`} right={`To: ${s.destination}`} />
+      <FieldRow left={<Field label="From" value={s.loading_point} />} right={<Field label="To" value={s.destination} />} />
 
-      {advanceAmount > 0 && <Row left={`Advance: ${rupees(s.advance_amount)}`} right="" />}
-      {s.advance_note && <Row left={`Notes: ${s.advance_note}`} right="" />}
+      {advanceAmount > 0 && <FieldRow left={<Field label="Advance" value={rupees(s.advance_amount)} />} />}
+      {s.advance_note && <FieldRow left={<Field label="Notes" value={s.advance_note} />} />}
     </PrintDocument>
-  );
-}
-
-function Row({ left, right }: { left: string; right: string }) {
-  if (!left && !right) return null;
-  return (
-    <div className="my-1.5 flex justify-between text-[12.5px]">
-      <span>{left}</span>
-      <span>{right}</span>
-    </div>
   );
 }
