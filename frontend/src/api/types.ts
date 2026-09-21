@@ -310,3 +310,57 @@ export interface BiltiCreateInput {
 }
 
 export type BiltiUpdateInput = Partial<BiltiCreateInput>;
+
+export interface DayBookEntry {
+  date: string;
+  kind: "receipt" | "agent_payment" | "truck_owner_payment";
+  particulars: string;
+  reference: string | null;
+  inflow: string;
+  outflow: string;
+}
+
+export interface DayBookReport {
+  firm_id: string;
+  date_from: string | null;
+  date_to: string | null;
+  entries: DayBookEntry[];
+  total_inflow: string;
+  total_outflow: string;
+  net: string;
+}
+
+export interface OutstandingSummary {
+  firm_id: string;
+  total_receivable: string;
+  total_received: string;
+  net_receivable: string;
+  total_agent_payable: string;
+  total_truck_owner_payable: string;
+}
+
+export interface GstReportRow {
+  gst_paid_by: string | null;
+  bilti_count: number;
+  total_freight: string;
+  total_grand_total: string;
+}
+
+export interface VehicleActivityRow {
+  vehicle_id: string;
+  vehicle_no: string;
+  trip_count: number;
+  total_freight: string;
+}
+
+export interface ReceivableRow {
+  bilti_id: string;
+  bilti_no: string;
+  bilti_date: string;
+  consignor: string;
+  consignee: string;
+  topay: string;
+  received: string;
+  outstanding: string;
+  days_outstanding: number;
+}

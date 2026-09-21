@@ -14,7 +14,7 @@ import { ReceiptListPage } from "@/modules/receipts/receipt-list-page";
 import { ReceiptFormDrawer } from "@/modules/receipts/receipt-form-drawer";
 import { ReceiptPrintView } from "@/modules/receipts/receipt-print-view";
 import { AdminPage } from "@/modules/admin/admin-page";
-import { ComingSoon } from "@/modules/coming-soon";
+import { ReportsPage } from "@/modules/reports/reports-page";
 import { DashboardPage } from "@/modules/dashboard-page";
 
 export default function App() {
@@ -44,9 +44,7 @@ export default function App() {
 
         <Route path="/admin" element={<AdminPage />} />
 
-        {/* Reports stays out of scope (client-side aggregation over the
-            same data these modules already expose) until requested. */}
-        <Route path="/reports" element={<ComingSoon title="Reports" />} />
+        <Route path="/reports" element={<ReportsPage />} />
       </Routes>
     </AppShell>
   );
