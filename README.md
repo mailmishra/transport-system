@@ -10,13 +10,20 @@ Loading Slip → Bilti/GR → Agent/Dalal Ledger → Truck Owner Ledger → Fina
 
 The app started as a single-file offline PWA prototype (`concept/index.html`,
 storing everything in `localStorage`), then grew a real FastAPI + Postgres
-backend behind it. As of this pass, the prototype is being retired in favor
-of a real React frontend (`frontend/`) — the reason: `concept/index.html`
-rendered every "recent records" table in full on the same page as its own
-create form (no pagination, sort, or search; lookups shipped as complete
-preloaded lists), which stopped scaling once there was real transaction
-volume. `concept/index.html` stays in the repo for reference but is no
-longer built or served.
+backend behind it. That prototype has since been removed from the repo in
+favor of a real React frontend (`frontend/`) — the reason: it rendered
+every "recent records" table in full on the same page as its own create
+form (no pagination, sort, or search; lookups shipped as complete preloaded
+lists), which stopped scaling once there was real transaction volume. It
+also registered a service worker with a cache-first fetch strategy, which
+turned out to be a real problem on its own: any browser that had loaded it
+kept getting served its stale cached page on refresh indefinitely, even
+long after the React frontend replaced it at the same origin, since an
+installed service worker outlives whatever the server serves next. `GET
+/sw.js` (`backend/app/main.py`) now serves a one-time replacement that
+unregisters that service worker and clears its caches wherever it's still
+installed -- keep it in place; removing it would leave any
+still-affected browser stuck.
 
 ## Architecture
 
@@ -101,8 +108,6 @@ backend/
   Dockerfile                        # multi-stage: builds frontend/, then Python
 frontend/                             # React SPA (see frontend/README.md)
   src/
-concept/                                # retired prototype, kept for reference
-  index.html
 docker-compose.yml                        # local dev: postgres + backend (+ built frontend)
 railway.json                                # Railway build/deploy config
 ```
@@ -183,9 +188,10 @@ managed Postgres plugin. Config lives in `railway.json` at the repo root
 2. **Provision Postgres**: in the Railway project → *New* → *Provision
    PostgreSQL*.
 3. **Add the backend service**: *New* → *GitHub Repo* → select this repo.
-   Leave the root directory as `/` — the Dockerfile does
-   `COPY backend/ ...` and `COPY concept/ ...` as siblings, so it needs the
-   repo root as build context. `railway.json` is auto-detected from there.
+   Leave the root directory as `/` — the Dockerfile's first stage builds
+   `frontend/` and its second stage does `COPY backend/ ...` alongside the
+   built frontend, so it needs the repo root as build context. `railway.json`
+   is auto-detected from there.
 4. **Wire the database in**: on the backend service → *Variables* → add
    `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (Railway's reference-variable
    syntax, resolves to the Postgres service's connection string
@@ -253,7 +259,7 @@ run (an exact alternating pass/fail pattern) due to an interaction between
 portal+engine got created and torn down for every test. One portal for the
 whole session avoids the create/teardown cycle that triggered it.
 
-**Not covered**: no browser/UI test — `concept/index.html` is a thin
-`fetch()` layer over this same API with no independent logic, so the API
-layer is where the tests live. No CI wiring yet (nothing runs these
-automatically on push) — worth adding once there's a place to run them.
+**Not covered**: no automated browser/UI test for the React frontend yet
+(manual verification only) — the API layer is where the automated tests
+live for now. No CI wiring yet (nothing runs these automatically on push)
+— worth adding once there's a place to run them.

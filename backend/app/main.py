@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -55,6 +55,40 @@ app.mount("/media", StaticFiles(directory=str(MEDIA_DIR)), name="media")
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
+
+
+# The retired concept/index.html prototype (git history only -- it's no
+# longer built or served, see FRONTEND_DIR below) registered a service
+# worker at "/" with a cache-first fetch handler. That registration is
+# permanent in any browser that loaded it before the React SPA replaced
+# concept/ at this origin: it keeps intercepting navigation and serving
+# its own stale cached index.html forever, regardless of what the server
+# now returns, since a service worker -- once installed -- is the
+# browser's source of truth for its scope until something replaces it.
+# This route is that replacement: any such browser's routine SW update
+# check fetches this, and it immediately unregisters itself, clears every
+# cache, and reloads every open tab -- one-time cleanup, inert for anyone
+# who never had the old prototype's service worker in the first place.
+_SW_KILL_SWITCH = """
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    Promise.all([
+      self.registration.unregister(),
+      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))),
+    ]).then(() =>
+      self.clients.matchAll({ type: "window" }).then((clients) => {
+        clients.forEach((client) => client.navigate(client.url));
+      })
+    )
+  );
+});
+"""
+
+
+@app.get("/sw.js")
+async def service_worker_kill_switch():
+    return Response(content=_SW_KILL_SWITCH, media_type="application/javascript")
 
 
 class SPAStaticFiles(StaticFiles):
