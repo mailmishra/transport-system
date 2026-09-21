@@ -44,8 +44,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Brand bar */}
-      <div className="flex h-[54px] flex-shrink-0 items-center gap-3 bg-navy px-4 sm:gap-5 sm:px-6">
+      {/* Brand bar -- plain divs, not <header>/<nav>, so index.css's
+          @media print rule (which targets those tags + .no-print) needs
+          this class explicitly or the whole chrome bleeds into every
+          printed document. */}
+      <div className="no-print flex h-[54px] flex-shrink-0 items-center gap-3 bg-navy px-4 sm:gap-5 sm:px-6">
         <div className="flex h-6 w-6 items-center justify-center rounded bg-gold text-[11px] font-bold text-navy sm:h-[26px] sm:w-[26px] sm:text-[13px]">
           SK
         </div>
@@ -83,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Desktop tab nav */}
-      <div className="hidden h-11 flex-shrink-0 items-stretch gap-0.5 border-b-2 border-navy bg-white px-5 sm:flex">
+      <div className="no-print hidden h-11 flex-shrink-0 items-stretch gap-0.5 border-b-2 border-navy bg-white px-5 sm:flex">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -101,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile search row */}
-      <div className="flex-shrink-0 px-4 pb-2 pt-3 sm:hidden">
+      <div className="no-print flex-shrink-0 px-4 pb-2 pt-3 sm:hidden">
         <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2.5">
           <Search className="h-3.5 w-3.5 text-muted" />
           <span className="text-xs text-muted">Search GR, party, vehicle…</span>
@@ -113,14 +116,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile FAB */}
       <button
         onClick={() => navigate("/bilti/new")}
-        className="fixed bottom-24 right-4 flex h-[54px] w-[54px] items-center justify-center rounded-xl bg-gold shadow-lg shadow-gold/40 sm:hidden"
+        className="no-print fixed bottom-24 right-4 flex h-[54px] w-[54px] items-center justify-center rounded-xl bg-gold shadow-lg shadow-gold/40 sm:hidden"
         aria-label="New Bilti"
       >
         <Plus className="h-5 w-5 text-navy" strokeWidth={2.8} />
       </button>
 
       {/* Mobile bottom tab bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex h-[78px] border-t border-border bg-white pt-2.5 sm:hidden">
+      <div className="no-print fixed inset-x-0 bottom-0 z-30 flex h-[78px] border-t border-border bg-white pt-2.5 sm:hidden">
         {NAV_ITEMS.filter((i) => i.mobile).map((item) => (
           <NavLink
             key={item.to}

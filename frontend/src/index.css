@@ -23,6 +23,9 @@
   body {
     background: #fff;
   }
+  main {
+    padding: 0 !important;
+  }
   @page {
     size: A4;
     margin: 12mm;
