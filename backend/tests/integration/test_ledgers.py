@@ -127,8 +127,8 @@ def test_receipt_create_and_list_by_bilti(client):
     assert created.status_code == 201
 
     listed = client.get("/api/receipts", params={"bilti_id": bilti["id"]})
-    assert len(listed.json()) == 1
-    assert listed.json()[0]["amount"] == "5000.00"
+    assert len(listed.json()["items"]) == 1
+    assert listed.json()["items"][0]["amount"] == "5000.00"
 
 
 def test_agent_and_truck_owner_can_be_renamed_via_patch(client):

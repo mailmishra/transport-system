@@ -108,15 +108,15 @@ def test_full_workflow(client):
     )
     receipts_for_bilti = (
         client.get("/api/receipts", params={"bilti_id": bilti["id"]})
-    ).json()
+    ).json()["items"]
     assert sum(float(r["amount"]) for r in receipts_for_bilti) == 15000.0
 
     # 6. Reports: this Bilti's freight is now fully received for the firm.
     #    (Reports itself is computed client-side from these same endpoints -
     #    the receipts+bilties data proven correct above is exactly what it
     #    aggregates, so there's no separate reports endpoint to hit here.)
-    all_bilties = (client.get("/api/bilties", params={"firm_id": firm_id})).json()
-    all_receipts = (client.get("/api/receipts", params={"firm_id": firm_id})).json()
+    all_bilties = (client.get("/api/bilties", params={"firm_id": firm_id})).json()["items"]
+    all_receipts = (client.get("/api/receipts", params={"firm_id": firm_id})).json()["items"]
     firm_freight = sum(float(b["freight"]) for b in all_bilties if b["id"] == bilti["id"])
     firm_received = sum(float(r["amount"]) for r in all_receipts if r["bilti_id"] == bilti["id"])
     assert firm_freight == firm_received == 15000.0

@@ -1,16 +1,19 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import agent as agent_crud
 from app.crud import truck_owner as truck_owner_crud
 from app.crud import vehicle as vehicle_crud
 from app.models.loading_slip import LoadingSlip
+from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.loading_slip import LoadingSlipCreate, LoadingSlipUpdate
 
 _NAME_FIELDS = {"vehicle_no", "truck_owner_name", "agent_name"}
+_SORTABLE = {"slip_date": LoadingSlip.slip_date}
+_DEFAULT_SORT = [LoadingSlip.slip_date.desc(), LoadingSlip.created_at.desc()]
 
 
 async def create(
@@ -53,7 +56,11 @@ async def list_(
     firm_id: uuid.UUID | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
-) -> list[LoadingSlip]:
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+) -> tuple[list[LoadingSlip], int, int, int]:
     stmt = select(LoadingSlip).where(LoadingSlip.is_deleted.is_(False))
     if firm_id is not None:
         stmt = stmt.where(LoadingSlip.firm_id == firm_id)
@@ -61,8 +68,13 @@ async def list_(
         stmt = stmt.where(LoadingSlip.slip_date >= date_from)
     if date_to is not None:
         stmt = stmt.where(LoadingSlip.slip_date <= date_to)
-    stmt = stmt.order_by(LoadingSlip.slip_date.desc(), LoadingSlip.created_at.desc())
-    return list((await db.execute(stmt)).scalars().all())
+    if q:
+        needle = f"%{q.strip()}%"
+        stmt = stmt.where(
+            or_(LoadingSlip.goods_description.ilike(needle), LoadingSlip.loading_point.ilike(needle))
+        )
+    stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
+    return await paginate(db, stmt, page, limit)
 
 
 async def update(

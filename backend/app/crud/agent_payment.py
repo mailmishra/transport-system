@@ -4,7 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.agent_payment import AgentPayment
+from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.agent_payment import AgentPaymentCreate
+
+_SORTABLE = {"payment_date": AgentPayment.payment_date, "amount": AgentPayment.amount}
+_DEFAULT_SORT = [AgentPayment.payment_date.desc(), AgentPayment.created_at.desc()]
 
 
 async def create(db: AsyncSession, data: AgentPaymentCreate, created_by: str | None) -> AgentPayment:
@@ -23,15 +27,20 @@ async def get(db: AsyncSession, payment_id: uuid.UUID) -> AgentPayment | None:
 
 
 async def list_(
-    db: AsyncSession, firm_id: uuid.UUID | None = None, agent_id: uuid.UUID | None = None
-) -> list[AgentPayment]:
+    db: AsyncSession,
+    firm_id: uuid.UUID | None = None,
+    agent_id: uuid.UUID | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+) -> tuple[list[AgentPayment], int, int, int]:
     stmt = select(AgentPayment).where(AgentPayment.is_deleted.is_(False))
     if firm_id is not None:
         stmt = stmt.where(AgentPayment.firm_id == firm_id)
     if agent_id is not None:
         stmt = stmt.where(AgentPayment.agent_id == agent_id)
-    stmt = stmt.order_by(AgentPayment.payment_date.desc(), AgentPayment.created_at.desc())
-    return list((await db.execute(stmt)).scalars().all())
+    stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
+    return await paginate(db, stmt, page, limit)
 
 
 async def soft_delete(db: AsyncSession, obj: AgentPayment) -> None:

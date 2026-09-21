@@ -7,6 +7,7 @@ from app.crud import bilti as bilti_crud
 from app.crud import receipt as crud
 from app.deps import Actor, get_current_actor, get_db
 from app.models.firm import Firm
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.receipt import ReceiptCreate, ReceiptRead
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
@@ -32,13 +33,20 @@ async def create_receipt(
     return await crud.create(db, data, created_by=actor.id)
 
 
-@router.get("", response_model=list[ReceiptRead])
+@router.get("", response_model=Page[ReceiptRead])
 async def list_receipts(
     firm_id: uuid.UUID | None = None,
     bilti_id: uuid.UUID | None = None,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, bilti_id=bilti_id)
+    items, total, page, limit = await crud.list_(
+        db, firm_id=firm_id, bilti_id=bilti_id, q=q, sort=sort, page=page, limit=limit
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{receipt_id}", response_model=ReceiptRead)

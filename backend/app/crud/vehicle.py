@@ -4,7 +4,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.vehicle import Vehicle
+from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.vehicle import VehicleUpdate
+
+_SORTABLE = {"vehicle_no": Vehicle.vehicle_no}
+_DEFAULT_SORT = [Vehicle.vehicle_no.asc()]
 
 
 async def get_or_create_by_no(db: AsyncSession, vehicle_no: str) -> Vehicle:
@@ -23,11 +27,21 @@ async def get(db: AsyncSession, vehicle_id: uuid.UUID) -> Vehicle | None:
     return await db.get(Vehicle, vehicle_id)
 
 
-async def list_(db: AsyncSession, active_only: bool = False) -> list[Vehicle]:
-    stmt = select(Vehicle).order_by(Vehicle.vehicle_no)
+async def list_(
+    db: AsyncSession,
+    active_only: bool = False,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+) -> tuple[list[Vehicle], int, int, int]:
+    stmt = select(Vehicle)
     if active_only:
         stmt = stmt.where(Vehicle.is_active.is_(True))
-    return list((await db.execute(stmt)).scalars().all())
+    if q:
+        stmt = stmt.where(Vehicle.vehicle_no.ilike(f"%{q.strip()}%"))
+    stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
+    return await paginate(db, stmt, page, limit)
 
 
 async def update(db: AsyncSession, obj: Vehicle, data: VehicleUpdate) -> Vehicle:

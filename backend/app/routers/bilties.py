@@ -7,6 +7,7 @@ from app.crud import bilti as crud
 from app.deps import Actor, get_current_actor, get_db
 from app.models.firm import Firm
 from app.models.loading_slip import LoadingSlip
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.bilti import BiltiCreate, BiltiPrint, BiltiRead, BiltiUpdate
 
 router = APIRouter(prefix="/bilties", tags=["bilties"])
@@ -49,14 +50,22 @@ async def create_bilti(
         raise
 
 
-@router.get("", response_model=list[BiltiRead])
+@router.get("", response_model=Page[BiltiRead])
 async def list_bilties(
     firm_id: uuid.UUID | None = None,
     agent_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_(db, firm_id=firm_id, agent_id=agent_id, truck_owner_id=truck_owner_id)
+    items, total, page, limit = await crud.list_(
+        db, firm_id=firm_id, agent_id=agent_id, truck_owner_id=truck_owner_id,
+        q=q, sort=sort, page=page, limit=limit,
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{bilti_id}", response_model=BiltiRead)

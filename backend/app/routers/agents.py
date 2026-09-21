@@ -9,6 +9,7 @@ from app.crud import agent as crud
 from app.deps import get_db
 from app.models.agent_payment import AgentPayment
 from app.models.bilti import Bilti
+from app.pagination import DEFAULT_LIMIT, Page
 from app.schemas.agent import AgentBalance, AgentRead, AgentUpdate
 
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -21,9 +22,19 @@ async def _get_or_404(db: AsyncSession, agent_id: uuid.UUID):
     return obj
 
 
-@router.get("", response_model=list[AgentRead])
-async def list_agents(active_only: bool = False, db: AsyncSession = Depends(get_db)):
-    return await crud.list_(db, active_only=active_only)
+@router.get("", response_model=Page[AgentRead])
+async def list_agents(
+    active_only: bool = False,
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+    db: AsyncSession = Depends(get_db),
+):
+    items, total, page, limit = await crud.list_(
+        db, active_only=active_only, q=q, sort=sort, page=page, limit=limit
+    )
+    return Page(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/{agent_id}", response_model=AgentRead)

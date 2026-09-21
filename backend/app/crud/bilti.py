@@ -1,13 +1,17 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import agent as agent_crud
 from app.crud import truck_owner as truck_owner_crud
 from app.crud import vehicle as vehicle_crud
 from app.models.bilti import Bilti
+from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.bilti import BiltiCreate, BiltiUpdate
+
+_SORTABLE = {"bilti_date": Bilti.bilti_date, "bilti_no": Bilti.bilti_no, "freight": Bilti.freight}
+_DEFAULT_SORT = [Bilti.bilti_date.desc(), Bilti.created_at.desc()]
 
 _NAME_FIELDS = {"vehicle_no", "palti_vehicle_no", "truck_owner_name", "agent_name"}
 
@@ -56,7 +60,11 @@ async def list_(
     firm_id: uuid.UUID | None = None,
     agent_id: uuid.UUID | None = None,
     truck_owner_id: uuid.UUID | None = None,
-) -> list[Bilti]:
+    q: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    limit: int = DEFAULT_LIMIT,
+) -> tuple[list[Bilti], int, int, int]:
     stmt = select(Bilti).where(Bilti.is_deleted.is_(False))
     if firm_id is not None:
         stmt = stmt.where(Bilti.firm_id == firm_id)
@@ -64,8 +72,13 @@ async def list_(
         stmt = stmt.where(Bilti.agent_id == agent_id)
     if truck_owner_id is not None:
         stmt = stmt.where(Bilti.truck_owner_id == truck_owner_id)
-    stmt = stmt.order_by(Bilti.bilti_date.desc(), Bilti.created_at.desc())
-    return list((await db.execute(stmt)).scalars().all())
+    if q:
+        needle = f"%{q.strip()}%"
+        stmt = stmt.where(
+            or_(Bilti.bilti_no.ilike(needle), Bilti.consignor.ilike(needle), Bilti.consignee.ilike(needle))
+        )
+    stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
+    return await paginate(db, stmt, page, limit)
 
 
 async def update(db: AsyncSession, obj: Bilti, data: BiltiUpdate) -> Bilti:

@@ -43,7 +43,7 @@ def test_vehicle_appears_in_list_and_get(client):
     vehicle_id = created["vehicle"]["id"]
 
     listed = client.get("/api/vehicles")
-    assert any(v["id"] == vehicle_id for v in listed.json())
+    assert any(v["id"] == vehicle_id for v in listed.json()["items"])
 
     got = client.get(f"/api/vehicles/{vehicle_id}")
     assert got.status_code == 200

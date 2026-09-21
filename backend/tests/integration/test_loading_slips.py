@@ -17,7 +17,7 @@ def test_create_get_list_loading_slip(client):
     assert got.json()["vehicle"]["vehicle_no"] == created["vehicle"]["vehicle_no"]
 
     listed = client.get("/api/loading-slips", params={"firm_id": firm_id})
-    assert any(x["id"] == created["id"] for x in listed.json())
+    assert any(x["id"] == created["id"] for x in listed.json()["items"])
 
 
 def test_blank_required_field_returns_422(client):
@@ -68,5 +68,5 @@ def test_update_and_soft_delete(client):
 
     # soft-deleted: gone from the list, 404 on direct get
     listed = client.get("/api/loading-slips", params={"firm_id": firm_id})
-    assert not any(x["id"] == created["id"] for x in listed.json())
+    assert not any(x["id"] == created["id"] for x in listed.json()["items"])
     assert (client.get(f"/api/loading-slips/{created['id']}")).status_code == 404
