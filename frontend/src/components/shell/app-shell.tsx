@@ -8,6 +8,7 @@ import {
   Plus,
   Receipt,
   Search,
+  Settings,
   Truck,
   Users,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { to: "/truck-owner-ledger", label: "Truck Owner Ledger", icon: Truck, mobile: false },
   { to: "/receipts", label: "Receipts", icon: Receipt, mobile: true },
   { to: "/reports", label: "Reports", icon: LayoutDashboard, mobile: false },
+  { to: "/admin", label: "Admin", icon: Settings, mobile: false },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

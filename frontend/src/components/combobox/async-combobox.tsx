@@ -16,6 +16,13 @@ interface AsyncComboboxProps<T> {
   id?: string;
   invalid?: boolean;
   required?: boolean;
+  /** Fires when the user picks an existing row from the list (as opposed to
+   * typing free text) -- lets a caller capture the underlying record (e.g.
+   * its id) for fields that are a real FK rather than a get-or-create
+   * text field, without changing what onChange/value carry (still a
+   * display string, for consistency with the free-text lookups).
+   */
+  onSelectItem?: (item: T) => void;
 }
 
 /** Async-searchable lookup: types into a real text input (so any value is
@@ -35,6 +42,7 @@ export function AsyncCombobox<T>({
   id,
   invalid,
   required,
+  onSelectItem,
 }: AsyncComboboxProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [debounced, setDebounced] = React.useState(value);
@@ -91,6 +99,7 @@ export function AsyncCombobox<T>({
                 key={i}
                 onClick={() => {
                   onChange(label);
+                  onSelectItem?.(it);
                   setOpen(false);
                 }}
                 className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-background"

@@ -32,6 +32,19 @@ export function useBiltiList(params: BiltiListParams) {
   });
 }
 
+/** Debounced search over Bilti/GR no., consignor, consignee -- backs the
+ * Receipt form's "which Bilti is this against" picker, same AsyncCombobox
+ * pattern as the Vehicle/Agent/TruckOwner lookups (but against a real FK,
+ * not a get-or-create text field).
+ */
+export function useBiltiSearch(q: string) {
+  return useQuery({
+    queryKey: ["bilties", "lookup", q],
+    queryFn: () => api.get<Page<Bilti>>(`/bilties${buildQuery({ q, limit: 10 })}`),
+    placeholderData: (prev) => prev,
+  });
+}
+
 export function useBilti(id: string | undefined) {
   return useQuery({
     queryKey: ["bilties", id],

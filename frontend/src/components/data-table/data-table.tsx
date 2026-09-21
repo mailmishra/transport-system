@@ -23,12 +23,18 @@ interface DataTableProps<T> {
   onPageChange: (page: number) => void;
   sorting: SortingState;
   onSortingChange: (sorting: SortingState) => void;
-  search: string;
-  onSearchChange: (q: string) => void;
+  search?: string;
+  onSearchChange?: (q: string) => void;
   searchPlaceholder?: string;
   isLoading?: boolean;
   onRowClick?: (row: T) => void;
   toolbarExtra?: React.ReactNode;
+  /** Sub-tables scoped to a single record (e.g. one agent's bilti/payment
+   * history on the Ledger pages) have no backend `q` filter to search
+   * against -- omit search/onSearchChange and this hides the toolbar
+   * entirely rather than showing an input that looks editable but isn't.
+   */
+  hideSearch?: boolean;
 }
 
 export function DataTable<T>({
@@ -46,6 +52,7 @@ export function DataTable<T>({
   isLoading,
   onRowClick,
   toolbarExtra,
+  hideSearch,
 }: DataTableProps<T>) {
   const pageCount = Math.max(1, Math.ceil(total / limit));
 
@@ -65,16 +72,18 @@ export function DataTable<T>({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2 rounded border border-border bg-white px-3 py-2">
-        <Search className="h-3.5 w-3.5 text-muted" />
-        <input
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={searchPlaceholder}
-          className="flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-muted"
-        />
-        {toolbarExtra}
-      </div>
+      {!hideSearch && (
+        <div className="flex items-center gap-2 rounded border border-border bg-white px-3 py-2">
+          <Search className="h-3.5 w-3.5 text-muted" />
+          <input
+            value={search}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+            placeholder={searchPlaceholder}
+            className="flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-muted"
+          />
+          {toolbarExtra}
+        </div>
+      )}
 
       <div className="overflow-hidden rounded border border-border bg-white">
         <table className="w-full text-sm">

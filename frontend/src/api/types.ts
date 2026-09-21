@@ -62,6 +62,122 @@ export interface LoadingSlip {
   updated_at: string;
 }
 
+export interface LoadingSlipCreateInput {
+  firm_id: string;
+  slip_date: string;
+  vehicle_no: string;
+  truck_owner_name?: string | null;
+  agent_name?: string | null;
+  loading_point: string;
+  destination: string;
+  goods_description: string;
+  quantity_weight: string;
+  package_count?: string | null;
+  advance_amount?: number;
+  advance_note?: string | null;
+}
+
+export type LoadingSlipUpdateInput = Partial<LoadingSlipCreateInput>;
+
+export interface AgentPayment {
+  id: string;
+  firm_id: string;
+  agent: Agent;
+  amount: string;
+  payment_date: string;
+  mode: string | null;
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgentPaymentCreateInput {
+  firm_id: string;
+  agent_id: string;
+  amount: number;
+  payment_date: string;
+  mode?: string | null;
+  remarks?: string | null;
+}
+
+export interface AgentBalance {
+  agent: Agent;
+  firm_id: string;
+  total_accrued: string;
+  total_paid: string;
+  balance: string;
+}
+
+export interface TruckOwnerPayment {
+  id: string;
+  firm_id: string;
+  truck_owner: TruckOwner;
+  amount: string;
+  payment_date: string;
+  mode: string | null;
+  remarks: string | null;
+  bilti_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TruckOwnerPaymentCreateInput {
+  firm_id: string;
+  truck_owner_id: string;
+  amount: number;
+  payment_date: string;
+  mode?: string | null;
+  remarks?: string | null;
+  bilti_id?: string | null;
+}
+
+export interface TruckOwnerBalance {
+  truck_owner: TruckOwner;
+  firm_id: string;
+  total_freight: string;
+  total_advance: string;
+  total_paid: string;
+  balance: string;
+}
+
+export interface Receipt {
+  id: string;
+  firm_id: string;
+  bilti_id: string;
+  amount: string;
+  receipt_date: string;
+  received_from: string;
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReceiptCreateInput {
+  firm_id: string;
+  bilti_id: string;
+  amount: number;
+  receipt_date: string;
+  received_from: string;
+  remarks?: string | null;
+}
+
+export interface AgentUpdateInput {
+  name?: string;
+  phone?: string | null;
+  is_active?: boolean;
+}
+
+export interface TruckOwnerUpdateInput {
+  name?: string;
+  phone?: string | null;
+  is_active?: boolean;
+}
+
+export interface VehicleUpdateInput {
+  vehicle_no?: string;
+  is_active?: boolean;
+}
+
 export type GstPaidBy = "consignor" | "consignee" | "transporter" | "exempted";
 
 export interface Bilti {
