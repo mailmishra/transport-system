@@ -4,6 +4,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.ledger_statement import LedgerStatementLine
+
 
 class TruckOwnerRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -29,3 +31,13 @@ class TruckOwnerBalance(BaseModel):
     total_advance: Decimal
     total_paid: Decimal
     balance: Decimal
+
+
+class TruckOwnerStatement(BaseModel):
+    truck_owner: TruckOwnerRead
+    firm_id: uuid.UUID
+    lines: list[LedgerStatementLine]
+    total_freight: Decimal
+    total_advance: Decimal
+    total_paid: Decimal
+    closing_balance: Decimal

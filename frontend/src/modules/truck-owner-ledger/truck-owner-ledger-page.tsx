@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table/data-table";
@@ -160,14 +161,19 @@ function TruckOwnerLedgerDetail({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <button
-          onClick={onBack}
-          className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted hover:text-navy"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> All Truck Owners
-        </button>
-        <h1 className="text-[19px] font-bold text-navy">{owner.name}</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <button
+            onClick={onBack}
+            className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted hover:text-navy"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> All Truck Owners
+          </button>
+          <h1 className="text-[19px] font-bold text-navy">{owner.name}</h1>
+        </div>
+        <Button asChild variant="secondary">
+          <Link to={`/truck-owner-ledger/${owner.id}/print`}>Print Statement</Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

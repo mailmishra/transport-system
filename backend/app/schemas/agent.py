@@ -4,6 +4,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.ledger_statement import LedgerStatementLine
+
 
 class AgentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -28,3 +30,12 @@ class AgentBalance(BaseModel):
     total_accrued: Decimal
     total_paid: Decimal
     balance: Decimal
+
+
+class AgentStatement(BaseModel):
+    agent: AgentRead
+    firm_id: uuid.UUID
+    lines: list[LedgerStatementLine]
+    total_accrued: Decimal
+    total_paid: Decimal
+    closing_balance: Decimal

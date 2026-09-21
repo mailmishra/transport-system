@@ -10,7 +10,8 @@ from app.deps import get_db
 from app.models.agent_payment import AgentPayment
 from app.models.bilti import Bilti
 from app.pagination import DEFAULT_LIMIT, Page
-from app.schemas.agent import AgentBalance, AgentRead, AgentUpdate
+from app.schemas.agent import AgentBalance, AgentRead, AgentStatement, AgentUpdate
+from app.schemas.ledger_statement import LedgerStatementLine
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -70,4 +71,78 @@ async def agent_balance(agent_id: uuid.UUID, firm_id: uuid.UUID, db: AsyncSessio
         total_accrued=total_accrued,
         total_paid=total_paid,
         balance=total_accrued - total_paid,
+    )
+
+
+@router.get("/{agent_id}/statement", response_model=AgentStatement)
+async def agent_statement(agent_id: uuid.UUID, firm_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Chronological accrual+payment ledger with a running balance, for the
+    Ledger Statement PDF (components/print/print-document.tsx). Pulls every
+    matching row rather than paging through the generic bilti/payment list
+    endpoints (capped at pagination.MAX_LIMIT) -- a statement must be
+    complete, not a page of one.
+    """
+    obj = await _get_or_404(db, agent_id)
+
+    bilti_stmt = (
+        select(Bilti)
+        .where(Bilti.agent_id == agent_id, Bilti.firm_id == firm_id, Bilti.is_deleted.is_(False))
+        .order_by(Bilti.bilti_date)
+    )
+    bilties = (await db.execute(bilti_stmt)).scalars().all()
+
+    payment_stmt = (
+        select(AgentPayment)
+        .where(
+            AgentPayment.agent_id == agent_id,
+            AgentPayment.firm_id == firm_id,
+            AgentPayment.is_deleted.is_(False),
+        )
+        .order_by(AgentPayment.payment_date)
+    )
+    payments = (await db.execute(payment_stmt)).scalars().all()
+
+    entries = [
+        (
+            b.bilti_date,
+            f"Bilti {b.bilti_no} — Dalali/FD",
+            b.bilti_no,
+            b.dalali + b.freight_difference,
+            Decimal("0"),
+        )
+        for b in bilties
+    ] + [
+        (
+            p.payment_date,
+            f"Payment{f' ({p.mode})' if p.mode else ''}",
+            p.remarks,
+            Decimal("0"),
+            p.amount,
+        )
+        for p in payments
+    ]
+    entries.sort(key=lambda e: e[0])
+
+    running = Decimal("0")
+    lines: list[LedgerStatementLine] = []
+    total_accrued = Decimal("0")
+    total_paid = Decimal("0")
+    for entry_date, particulars, reference, debit, credit in entries:
+        running += debit - credit
+        total_accrued += debit
+        total_paid += credit
+        lines.append(
+            LedgerStatementLine(
+                date=entry_date, particulars=particulars, reference=reference,
+                debit=debit, credit=credit, balance=running,
+            )
+        )
+
+    return AgentStatement(
+        agent=obj,
+        firm_id=firm_id,
+        lines=lines,
+        total_accrued=total_accrued,
+        total_paid=total_paid,
+        closing_balance=running,
     )

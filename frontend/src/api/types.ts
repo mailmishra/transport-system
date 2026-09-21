@@ -145,6 +145,34 @@ export interface TruckOwnerBalance {
   balance: string;
 }
 
+export interface LedgerStatementLine {
+  date: string;
+  particulars: string;
+  reference: string | null;
+  debit: string;
+  credit: string;
+  balance: string;
+}
+
+export interface AgentStatement {
+  agent: Agent;
+  firm_id: string;
+  lines: LedgerStatementLine[];
+  total_accrued: string;
+  total_paid: string;
+  closing_balance: string;
+}
+
+export interface TruckOwnerStatement {
+  truck_owner: TruckOwner;
+  firm_id: string;
+  lines: LedgerStatementLine[];
+  total_freight: string;
+  total_advance: string;
+  total_paid: string;
+  closing_balance: string;
+}
+
 export interface Receipt {
   id: string;
   firm_id: string;
