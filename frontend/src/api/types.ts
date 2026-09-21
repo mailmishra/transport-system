@@ -16,6 +16,11 @@ export interface Firm {
   bank_name: string | null;
   bank_branch: string | null;
   bank_ifsc: string | null;
+  logo_url: string | null;
+  gstin: string | null;
+  signatory_name: string | null;
+  signatory_designation: string | null;
+  jurisdiction_text: string | null;
 }
 
 export interface Vehicle {

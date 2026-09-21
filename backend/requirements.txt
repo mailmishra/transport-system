@@ -5,6 +5,7 @@ asyncpg==0.30.0
 alembic==1.14.0
 pydantic==2.10.4
 pydantic-settings==2.7.1
+python-multipart==0.0.20
 # Only used by app/scripts/seed_demo_data.py (Starlette's TestClient
 # requires it) -- that script is a no-op unless SEED_DEMO_DATA is set, but
 # it needs to import cleanly in the production image regardless.

@@ -42,6 +42,13 @@ api.include_router(truck_owner_payments.router)
 api.include_router(receipts.router)
 app.mount("/api", api)
 
+# Uploaded firm logos (see routers/firms.py's MEDIA_DIR) -- must be mounted
+# before the SPA catch-all below, or SPAStaticFiles' 404->index.html
+# fallback would swallow /media/* requests.
+MEDIA_DIR = Path(__file__).resolve().parent.parent / "media"
+MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=str(MEDIA_DIR)), name="media")
+
 
 @app.get("/healthz")
 async def healthz():

@@ -17,3 +17,8 @@ class Firm(UUIDPKMixin, TimestampMixin, Base):
     bank_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     bank_branch: Mapped[str | None] = mapped_column(String(200), nullable=True)
     bank_ifsc: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    gstin: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    signatory_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    signatory_designation: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    jurisdiction_text: Mapped[str | None] = mapped_column(String(200), nullable=True)
