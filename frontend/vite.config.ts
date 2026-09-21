@@ -16,6 +16,7 @@ export default defineConfig({
     // when running `npm run dev` against `docker compose up`'s backend.
     proxy: {
       "/api": "http://localhost:8000",
+      "/media": "http://localhost:8000",
     },
   },
 });

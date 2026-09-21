@@ -11,7 +11,7 @@ export function AdminPage() {
 
       <Tabs defaultValue="firm">
         <TabsList>
-          <TabsTrigger value="firm">Firm Setup</TabsTrigger>
+          <TabsTrigger value="firm">Firm Settings</TabsTrigger>
           <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="truck-owners">Truck Owners</TabsTrigger>
           <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
