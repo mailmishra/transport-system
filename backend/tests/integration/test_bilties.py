@@ -131,3 +131,50 @@ def test_soft_deleted_bilti_hidden_from_list_and_get(client):
     assert (client.get(f"/api/bilties/{created['id']}")).status_code == 404
     listed = client.get("/api/bilties", params={"firm_id": firm_id})
     assert not any(x["id"] == created["id"] for x in listed.json())
+
+
+def test_grand_total_and_topay_computed_from_charge_breakdown(client):
+    firm_id = get_firm_id(client)
+    created = create_bilti(
+        client,
+        firm_id,
+        freight=5000,
+        other_charges=100,
+        kanta_charges=50,
+        bahi_charges=20,
+        service_tax=30,
+        hamali=260,
+        p_freight=0,
+        advance_to_owner=1000,
+    )
+    # 5000 + 100 + 50 + 20 + 30 + 260 + 0
+    assert created["grand_total"] == "5460.00"
+    # grand_total - advance_to_owner
+    assert created["topay"] == "4460.00"
+
+    printable = client.get(f"/api/bilties/{created['id']}/print")
+    assert printable.json()["grand_total"] == "5460.00"
+    assert printable.json()["topay"] == "4460.00"
+
+
+def test_gst_paid_by_rejects_invalid_value(client):
+    firm_id = get_firm_id(client)
+    res = client.post(
+        "/api/bilties",
+        json={
+            "firm_id": firm_id,
+            "bilti_no": unique("B"),
+            "bilti_date": "2026-01-15",
+            "consignor": "A",
+            "consignee": "B",
+            "from_location": "C",
+            "to_location": "D",
+            "vehicle_no": unique("MP20"),
+            "truck_owner_name": unique("Owner"),
+            "goods_description": "G",
+            "weight": "1",
+            "freight": 100,
+            "gst_paid_by": "nobody",
+        },
+    )
+    assert res.status_code == 422

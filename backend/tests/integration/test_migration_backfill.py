@@ -88,6 +88,51 @@ async def _fetch_backfilled(asyncpg_dsn: str):
         await conn.close()
 
 
+async def _insert_legacy_vehicle_bilti(asyncpg_dsn: str) -> None:
+    conn = await asyncpg.connect(asyncpg_dsn)
+    try:
+        firm_id = await conn.fetchval("SELECT id FROM firms LIMIT 1")
+        owner_id = await conn.fetchval(
+            "INSERT INTO truck_owners (id, name) VALUES (gen_random_uuid(), 'Legacy Owner') "
+            "RETURNING id"
+        )
+        await conn.execute(
+            """
+            INSERT INTO bilties (
+                id, firm_id, bilti_no, bilti_date, consignor, consignee,
+                from_location, to_location, vehicle_no, truck_owner_id,
+                goods_description, weight, freight
+            ) VALUES (
+                gen_random_uuid(), $1, 'LEGACY-VEH-1', '2026-01-01', 'C1', 'C2',
+                'X', 'Y', '  mp01aa0001  ', $2, 'Goods', '1 ton', 1000
+            )
+            """,
+            firm_id,
+            owner_id,
+        )
+    finally:
+        await conn.close()
+
+
+async def _fetch_vehicle_backfilled(asyncpg_dsn: str):
+    conn = await asyncpg.connect(asyncpg_dsn)
+    try:
+        row = await conn.fetchrow(
+            """
+            SELECT v.vehicle_no AS vehicle_no
+            FROM bilties b
+            JOIN vehicles v ON v.id = b.vehicle_id
+            WHERE b.bilti_no = 'LEGACY-VEH-1'
+            """
+        )
+        cols = await conn.fetch(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'bilties'"
+        )
+        return row, {c["column_name"] for c in cols}
+    finally:
+        await conn.close()
+
+
 def test_backfill_normalizes_legacy_free_text_agent_and_owner():
     # Deliberately a *sync* test: alembic's env.py calls asyncio.run()
     # internally (see backend/alembic/env.py), which raises
@@ -118,3 +163,26 @@ def test_backfill_normalizes_legacy_free_text_agent_and_owner():
         assert "truck_owner" not in col_names
         assert "agent_id" in col_names
         assert "truck_owner_id" in col_names
+
+
+def test_backfill_normalizes_legacy_free_text_vehicle_no():
+    """Same regression, for the 0002 -> 0003 vehicle_no -> vehicles backfill."""
+    with PostgresContainer("postgres:16") as pg:
+        url = make_url(pg.get_connection_url())
+        alembic_url = url.set(drivername="postgresql+asyncpg").render_as_string(
+            hide_password=False
+        )
+        asyncpg_dsn = url.set(drivername="postgresql").render_as_string(hide_password=False)
+
+        _upgrade_to(alembic_url, "0002")
+        asyncio.run(_insert_legacy_vehicle_bilti(asyncpg_dsn))
+        _upgrade_to(alembic_url, "0003")
+        row, col_names = asyncio.run(_fetch_vehicle_backfilled(asyncpg_dsn))
+
+        assert row is not None, "backfill did not link the legacy bilti to vehicles"
+        # trimmed and case-normalized to whatever the first-seen casing was,
+        # matching the backfill's lower()/trim() join.
+        assert row["vehicle_no"].strip().lower() == "mp01aa0001"
+
+        assert "vehicle_no" not in col_names
+        assert "vehicle_id" in col_names

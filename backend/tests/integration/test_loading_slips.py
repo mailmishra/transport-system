@@ -14,7 +14,7 @@ def test_create_get_list_loading_slip(client):
 
     got = client.get(f"/api/loading-slips/{created['id']}")
     assert got.status_code == 200
-    assert got.json()["vehicle_no"] == created["vehicle_no"]
+    assert got.json()["vehicle"]["vehicle_no"] == created["vehicle"]["vehicle_no"]
 
     listed = client.get("/api/loading-slips", params={"firm_id": firm_id})
     assert any(x["id"] == created["id"] for x in listed.json())
