@@ -28,9 +28,17 @@ services:
       SEED_DEMO_DATA: "true"
     ports:
       - "8000:8000"
+    volumes:
+      # Uploaded firm logos (backend/app/routers/firms.py's MEDIA_DIR) --
+      # without this, every `docker compose up --build` recreates the
+      # container from scratch and silently wipes any uploaded logo file
+      # even though the DB still points to it (logo_url survives, the
+      # file doesn't).
+      - media_data:/srv/media
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   db_data:
+  media_data:
