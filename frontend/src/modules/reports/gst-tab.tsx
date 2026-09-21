@@ -2,6 +2,7 @@ import * as React from "react";
 import { useGstReport } from "@/api/reports";
 import { rupees } from "@/lib/money";
 import { DateRangeFilter } from "./date-range-filter";
+import { ExportCsvButton } from "./export-csv-button";
 
 const LABELS: Record<string, string> = {
   consignor: "Consignor",
@@ -16,7 +17,19 @@ export function GstTab({ firmId }: { firmId: string | undefined }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+      <div className="flex items-start justify-between gap-3">
+        <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+        <ExportCsvButton
+          filename="gst-report"
+          columns={[
+            { key: "gst_paid_by", header: "GST Paid By" },
+            { key: "bilti_count", header: "Bilti Count" },
+            { key: "total_freight", header: "Total Freight" },
+            { key: "total_grand_total", header: "Total Grand Total" },
+          ]}
+          rows={data}
+        />
+      </div>
 
       {isLoading && <p className="text-sm text-muted">Loading…</p>}
 

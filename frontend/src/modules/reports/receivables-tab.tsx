@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useReceivables } from "@/api/reports";
 import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
+import { ExportCsvButton } from "./export-csv-button";
 
 export function ReceivablesTab({ firmId }: { firmId: string | undefined }) {
   const { data, isLoading } = useReceivables(firmId);
@@ -14,11 +15,27 @@ export function ReceivablesTab({ firmId }: { firmId: string | undefined }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded border-l-4 border-gold bg-white px-4 py-3">
-        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-muted">
-          Total Outstanding ({data?.length ?? 0} bilties)
+      <div className="flex items-start justify-between gap-3">
+        <div className="rounded border-l-4 border-gold bg-white px-4 py-3">
+          <div className="text-[10.5px] font-semibold uppercase tracking-wide text-muted">
+            Total Outstanding ({data?.length ?? 0} bilties)
+          </div>
+          <div className="mt-1 text-xl font-extrabold text-navy">{rupees(totalOutstanding)}</div>
         </div>
-        <div className="mt-1 text-xl font-extrabold text-navy">{rupees(totalOutstanding)}</div>
+        <ExportCsvButton
+          filename="receivables"
+          columns={[
+            { key: "bilti_date", header: "Date" },
+            { key: "bilti_no", header: "Bilti" },
+            { key: "consignor", header: "Consignor" },
+            { key: "consignee", header: "Consignee" },
+            { key: "topay", header: "To Pay" },
+            { key: "received", header: "Received" },
+            { key: "outstanding", header: "Outstanding" },
+            { key: "days_outstanding", header: "Days Outstanding" },
+          ]}
+          rows={data}
+        />
       </div>
 
       <div className="overflow-hidden rounded border border-border bg-white">

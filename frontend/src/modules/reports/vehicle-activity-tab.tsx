@@ -2,6 +2,7 @@ import * as React from "react";
 import { useVehicleActivity } from "@/api/reports";
 import { rupees } from "@/lib/money";
 import { DateRangeFilter } from "./date-range-filter";
+import { ExportCsvButton } from "./export-csv-button";
 
 export function VehicleActivityTab({ firmId }: { firmId: string | undefined }) {
   const [range, setRange] = React.useState({ dateFrom: "", dateTo: "" });
@@ -9,7 +10,18 @@ export function VehicleActivityTab({ firmId }: { firmId: string | undefined }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+      <div className="flex items-start justify-between gap-3">
+        <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+        <ExportCsvButton
+          filename="vehicle-activity"
+          columns={[
+            { key: "vehicle_no", header: "Vehicle No." },
+            { key: "trip_count", header: "Trips" },
+            { key: "total_freight", header: "Total Freight" },
+          ]}
+          rows={data}
+        />
+      </div>
 
       {isLoading && <p className="text-sm text-muted">Loading…</p>}
 

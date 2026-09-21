@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { usePendingLoadingSlips } from "@/api/reports";
 import { formatDate } from "@/lib/dates";
+import { ExportCsvButton } from "./export-csv-button";
 
 export function PendingLoadingSlipsTab({ firmId }: { firmId: string | undefined }) {
   const { data, isLoading } = usePendingLoadingSlips(firmId);
@@ -9,11 +10,32 @@ export function PendingLoadingSlipsTab({ firmId }: { firmId: string | undefined 
     return <p className="text-sm text-muted">Loading…</p>;
   }
 
+  const exportRows = data?.map((slip) => ({
+    slip_date: slip.slip_date,
+    vehicle_no: slip.vehicle.vehicle_no,
+    loading_point: slip.loading_point,
+    destination: slip.destination,
+    truck_owner: slip.truck_owner?.name ?? "",
+  }));
+
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs text-muted">
-        Loading slips with no Bilti / GR raised against them yet -- a dispatch follow-up queue.
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs text-muted">
+          Loading slips with no Bilti / GR raised against them yet -- a dispatch follow-up queue.
+        </p>
+        <ExportCsvButton
+          filename="pending-loading-slips"
+          columns={[
+            { key: "slip_date", header: "Date" },
+            { key: "vehicle_no", header: "Vehicle" },
+            { key: "loading_point", header: "From" },
+            { key: "destination", header: "To" },
+            { key: "truck_owner", header: "Truck Owner" },
+          ]}
+          rows={exportRows}
+        />
+      </div>
       <div className="overflow-hidden rounded border border-border bg-white">
         <table className="w-full text-sm">
           <thead>

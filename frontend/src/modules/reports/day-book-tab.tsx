@@ -3,6 +3,7 @@ import { useDayBook } from "@/api/reports";
 import { rupees } from "@/lib/money";
 import { formatDate, todayIso } from "@/lib/dates";
 import { DateRangeFilter } from "./date-range-filter";
+import { ExportCsvButton } from "./export-csv-button";
 
 const KIND_LABEL: Record<string, string> = {
   receipt: "Receipt",
@@ -16,7 +17,21 @@ export function DayBookTab({ firmId }: { firmId: string | undefined }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+      <div className="flex items-start justify-between gap-3">
+        <DateRangeFilter dateFrom={range.dateFrom} dateTo={range.dateTo} onChange={setRange} />
+        <ExportCsvButton
+          filename="day-book"
+          columns={[
+            { key: "date", header: "Date" },
+            { key: "kind", header: "Type" },
+            { key: "particulars", header: "Particulars" },
+            { key: "reference", header: "Reference" },
+            { key: "inflow", header: "Inflow" },
+            { key: "outflow", header: "Outflow" },
+          ]}
+          rows={data?.entries}
+        />
+      </div>
 
       {isLoading && <p className="text-sm text-muted">Loading…</p>}
 
