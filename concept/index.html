@@ -27,6 +27,26 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;b
 .error{background:#fdecea;border:1px solid #f2a29c;color:#8a1f16;padding:10px;border-radius:8px;font-size:13px;margin-top:10px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}main{padding:9px}table{font-size:12px}}
 @media print{header,nav,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+.link-btn{background:none;border:0;color:#17324d;text-decoration:underline;padding:0;font-size:12px;cursor:pointer}
+.gr-doc{border:2px solid #17324d;padding:16px;background:#fff;font-size:12px}
+.gr-head{text-align:center;border-bottom:2px solid #17324d;padding-bottom:8px;margin-bottom:10px}
+.gr-head h2{margin:0 0 2px;font-size:21px;color:#17324d}
+.gr-head .tag{font-size:10px;color:#687682}
+.gr-head .addr{font-size:11px;margin-top:4px}
+.gr-toprow{display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px}
+.gr-meta{display:flex;justify-content:space-between;font-size:12px;margin:6px 0}
+.gr-boxes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.gr-box{border:1px solid #ccd3da;padding:6px;min-height:50px}
+.gr-box b{display:block;margin-bottom:3px;font-size:10px;color:#53606c;text-transform:uppercase}
+.gr-table{width:100%;border-collapse:collapse;margin:8px 0}
+.gr-table th,.gr-table td{border:1px solid #ccd3da;padding:5px;text-align:left}
+.gr-total-row td{font-weight:bold}
+.gr-gst{display:flex;gap:14px;font-size:11px;margin:8px 0}
+.gr-insure{border:1px dashed #ccd3da;padding:6px;font-size:11px;margin:8px 0}
+.gr-sign{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}
+.gr-note{font-size:10px;color:#687682;margin-top:8px}
+.gr-bank{font-size:10px;color:#53606c;border-top:1px solid #e5e8eb;margin-top:10px;padding-top:6px}
+@media print{.gr-doc{border:none}}
 </style>
 </head>
 <body>
@@ -104,7 +124,7 @@ function dashboard(){
  <div class="notice">Current firm: <b>${state.firm?state.firm.name:"(none)"}</b>. All new documents inherit this firm automatically.</div>`;
 }
 function loadingForm(err){
- let rows=state.loading.map(x=>`<tr><td>${x.slip_date}</td><td>${firmName(x.firm_id)}</td><td>${x.vehicle.vehicle_no}</td><td>${x.truck_owner?x.truck_owner.name:""}</td><td>${x.agent?x.agent.name:""}</td><td>${x.loading_point}</td><td>${x.destination}</td><td>${x.goods_description}</td><td>${x.quantity_weight}</td><td>${x.package_count||""}</td></tr>`).join("");
+ let rows=state.loading.map(x=>`<tr><td>${x.slip_date}</td><td>${firmName(x.firm_id)}</td><td>${x.vehicle.vehicle_no}</td><td>${x.truck_owner?x.truck_owner.name:""}</td><td>${x.agent?x.agent.name:""}</td><td>${x.loading_point}</td><td>${x.destination}</td><td>${x.goods_description}</td><td>${x.quantity_weight}</td><td>${x.package_count||""}</td><td><button class="link-btn" onclick="printLoadingSlip('${x.id}')">View / Download</button></td></tr>`).join("");
  return `<div class="card"><h2>Loading Slip</h2>${datalists()}<div class="grid">
  <label>Lorry / Vehicle No.<input id="l_vehicle" list="dl_vehicles" required></label>
  <label>Date<input id="l_date" type="date" required></label>
@@ -120,17 +140,43 @@ function loadingForm(err){
  </div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addLoading()">Save Loading Slip</button></div></div>
- <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>Truck Owner</th><th>Broker</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th><th>Pkgs</th></tr>${rows||"<tr><td colspan=10>No entries</td></tr>"}</table></div></div>`;
+ <div class="card"><h3>Recent Loading Slips</h3><div class="table-wrap"><table><tr><th>Date</th><th>Firm</th><th>Vehicle</th><th>Truck Owner</th><th>Broker</th><th>From</th><th>To</th><th>Goods</th><th>Qty</th><th>Pkgs</th><th></th></tr>${rows||"<tr><td colspan=11>No entries</td></tr>"}</table></div></div>`;
 }
 async function addLoading(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Loading Slip");}
+ let created;
  try{
-  await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),truck_owner_name:v("l_owner")||null,agent_name:v("l_agent")||null,loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty"),package_count:v("l_pkgcount")||null,advance_amount:n("l_advance"),advance_note:v("l_advnote")||null});
+  created=await apiPost("/loading-slips",{firm_id:state.firm.id,slip_date:v("l_date"),vehicle_no:v("l_vehicle"),truck_owner_name:v("l_owner")||null,agent_name:v("l_agent")||null,loading_point:v("l_from"),destination:v("l_to"),goods_description:v("l_goods"),quantity_weight:v("l_qty"),package_count:v("l_pkgcount")||null,advance_amount:n("l_advance"),advance_note:v("l_advnote")||null});
  }catch(e){lastError=e.message;return show("Loading Slip");}
- alert("Loading Slip saved");show("Dashboard");
+ await printLoadingSlip(created.id);
+}
+async function printLoadingSlip(id){
+ let x;
+ try{x=await apiGet(`/loading-slips/${id}`);}catch(e){alert("Could not load Loading Slip: "+e.message);return;}
+ const firm=state.firms.find(f=>f.id===x.firm_id)||{};
+ document.getElementById("nav").querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+ document.getElementById("app").innerHTML=loadingSlipPrintView(x,firm);
+}
+function loadingSlipPrintView(x,firm){
+ return `<div class="card no-print"><div class="actions">
+  <button class="secondary" onclick="show('Dashboard')">← Back</button>
+  <button class="primary" onclick="window.print()">Download / Print (PDF)</button>
+ </div><p class="muted">In the print dialog, choose "Save as PDF" as the destination to download a file you can share on WhatsApp/email.</p></div>
+ <div class="card gr-doc">
+ <div class="gr-head"><h2>${firm.name||""}</h2><div class="tag">लोडिंग स्लिप — Loading Slip</div>
+ ${firm.address?`<div class="addr">${firm.address}</div>`:""}</div>
+ <div class="gr-toprow"><span>${x.agent?"Through: "+x.agent.name:""}</span><span>${firm.phone?"Mob: "+firm.phone:""}</span></div>
+ <div class="gr-meta"><span>Date: ${x.slip_date}</span><span></span></div>
+ <div class="gr-box"><b>M/s (Truck Owner)</b>${x.truck_owner?x.truck_owner.name:""}</div>
+ <p>आपके पास गाड़ी क्र. <b>${x.vehicle.vehicle_no}</b> जा रही है, इसमें <b>${x.goods_description}</b> का <b>${x.quantity_weight}</b> चढ़ (कट्टी ${x.package_count||"—"}) लोड करवाने की कृपा करें।</p>
+ <div class="gr-meta"><span>From: ${x.loading_point}</span><span>To: ${x.destination}</span></div>
+ ${Number(x.advance_amount)>0?`<div class="gr-meta"><span>Advance: ₹${money(x.advance_amount)}</span><span></span></div>`:""}
+ ${x.advance_note?`<div class="gr-meta"><span>Notes: ${x.advance_note}</span></div>`:""}
+ <div class="gr-sign"><span>Signature of Booking Clerk</span><span>For ${firm.name||""}</span></div>
+ </div>`;
 }
 function biltiForm(err){
- let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>₹${money(x.freight)}</td><td>₹${money(x.grand_total)}</td><td>₹${money(x.topay)}</td></tr>`).join("");
+ let rows=state.bilties.map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.consignor}</td><td>₹${money(x.freight)}</td><td>₹${money(x.grand_total)}</td><td>₹${money(x.topay)}</td><td><button class="link-btn" onclick="printBilti('${x.id}')">View / Download</button></td></tr>`).join("");
  return `<div class="card"><h2>Bilti / GR</h2>${datalists()}<div class="grid">
  <label>Bilti No.<input id="b_no" required></label><label>Date<input id="b_date" type="date" required></label>
  <label>Consignor / Goods Provider<input id="b_party" required></label><label>Consignee<input id="b_consignee" required></label>
@@ -173,7 +219,7 @@ function biltiForm(err){
  <div class="notice">Grand Total: ₹<span id="b_gt_display">0.00</span> · To Pay: ₹<span id="b_tp_display">0.00</span></div>
  ${err?`<div class="error">${err}</div>`:""}
  <div class="actions"><button class="primary" onclick="addBilti()">Save Bilti</button><button class="secondary" onclick="window.print()">Print</button></div></div>
- <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th><th>Grand Total</th><th>To Pay</th></tr>${rows||"<tr><td colspan=7>No entries</td></tr>"}</table></div></div>`;
+ <div class="card"><h3>Recent Bilties</h3><div class="table-wrap"><table><tr><th>Date</th><th>Bilti No.</th><th>Firm</th><th>Consignor</th><th>Freight</th><th>Grand Total</th><th>To Pay</th><th></th></tr>${rows||"<tr><td colspan=8>No entries</td></tr>"}</table></div></div>`;
 }
 function updateBiltiTotals(){
  const freight=n("b_freight"),other=n("b_other"),kanta=n("b_kanta"),bahi=n("b_bahi"),stax=n("b_stax"),hamali=n("b_hamali"),pfreight=n("b_pfreight"),advance=n("b_advance");
@@ -184,8 +230,9 @@ function updateBiltiTotals(){
 async function addBilti(){
  if(!state.firm){lastError="Select a firm first (Firm Setup).";return show("Bilti / GR");}
  const insuredSel=v("b_insured");
+ let created;
  try{
-  await apiPost("/bilties",{
+  created=await apiPost("/bilties",{
    firm_id:state.firm.id,bilti_no:v("b_no"),bilti_date:v("b_date"),consignor:v("b_party"),consignee:v("b_consignee"),
    from_location:v("b_from"),to_location:v("b_to"),vehicle_no:v("b_vehicle"),palti_vehicle_no:v("b_palti")||null,
    truck_owner_name:v("b_owner"),agent_name:v("b_agent")||null,goods_description:v("b_goods"),
@@ -201,7 +248,59 @@ async function addBilti(){
    goods_value_declared:v("b_goodsvalue")?n("b_goodsvalue"):null,remark:v("b_remark")||null
   });
  }catch(e){lastError=e.message;return show("Bilti / GR");}
- alert("Bilti saved. Ledger entries generated automatically.");show("Dashboard");
+ await printBilti(created.id);
+}
+async function printBilti(id){
+ let b;
+ try{b=await apiGet(`/bilties/${id}/print`);}catch(e){alert("Could not load Bilti: "+e.message);return;}
+ const firm=state.firms.find(f=>f.id===b.firm_id)||{};
+ document.getElementById("nav").querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+ document.getElementById("app").innerHTML=biltiPrintView(b,firm);
+}
+function biltiPrintView(b,firm){
+ const gstOptions=["consignor","consignee","transporter","exempted"];
+ const gstRow=gstOptions.map(o=>`<label><input type="checkbox" disabled ${b.gst_paid_by===o?"checked":""}> ${o[0].toUpperCase()+o.slice(1)}</label>`).join("");
+ const insuranceBox=(b.insured||b.insurance_company||b.insurance_policy_no)?`<div class="gr-insure">
+  <b>Insurance</b> ${b.insured?"Insured":"Not insured / at owner's risk"}
+  ${b.insurance_company?` · Company: ${b.insurance_company}`:""}${b.insurance_policy_no?` · Policy No: ${b.insurance_policy_no}`:""}
+  ${b.insurance_amount?` · Amount: ₹${money(b.insurance_amount)}`:""}${b.insurance_date?` · Date: ${b.insurance_date}`:""}
+  ${b.insurance_risk?` · Risk: ${b.insurance_risk}`:""}${b.insurance_agent_name?` · Insurance Agent: ${b.insurance_agent_name}`:""}
+  </div>`:"";
+ const bankLine=(firm.bank_name||firm.bank_account_no)?`<div class="gr-bank">Bank: ${firm.bank_name||""} ${firm.bank_branch?"("+firm.bank_branch+")":""} · A/c No.: ${firm.bank_account_no||""} · IFSC: ${firm.bank_ifsc||""}</div>`:"";
+ return `<div class="card no-print"><div class="actions">
+  <button class="secondary" onclick="show('Dashboard')">← Back</button>
+  <button class="primary" onclick="window.print()">Download / Print (PDF)</button>
+ </div><p class="muted">In the print dialog, choose "Save as PDF" as the destination to download a file you can share on WhatsApp/email.</p></div>
+ <div class="card gr-doc">
+ <div class="gr-head"><h2>${firm.name||""}</h2><div class="tag">All Subject to KATNI Jurisdiction</div>
+ ${firm.address?`<div class="addr">${firm.address}</div>`:""}</div>
+ <div class="gr-toprow"><span>${firm.pan_no?"PAN: "+firm.pan_no:""} ${firm.email?" · "+firm.email:""}</span><span>${firm.phone?"Mob: "+firm.phone:""}</span></div>
+ <div class="gr-meta"><b>GR No.: ${b.bilti_no}</b><span>Date: ${b.bilti_date}</span></div>
+ <div class="gr-meta"><span>From: ${b.from_location}</span><span>To: ${b.to_location}</span></div>
+ <div class="gr-meta"><span>Truck No.: ${b.vehicle.vehicle_no}</span><span>${b.palti_vehicle?"Palti Vehicle No.: "+b.palti_vehicle.vehicle_no:""}</span></div>
+ <div class="gr-boxes">
+  <div class="gr-box"><b>Consignor</b>${b.consignor}</div>
+  <div class="gr-box"><b>Consignee</b>${b.consignee}</div>
+ </div>
+ <table class="gr-table"><tr><th>Package</th><th>Description</th><th>Weight (Actual)</th><th>Weight (Charged)</th></tr>
+ <tr><td>${b.package_count||""} ${b.package_unit||""}</td><td>${b.goods_description}</td><td>${b.weight}</td><td>${b.charged_weight||b.weight}</td></tr></table>
+ <table class="gr-table">
+ <tr><th>Freight</th><th>Other Ch.</th><th>Kanta Ch.</th><th>Bahi Ch.</th><th>Service Tax</th><th>Hamali</th><th>P.Freight</th><th>Dalali</th></tr>
+ <tr><td>₹${money(b.freight)}${b.freight_rate?` (@₹${money(b.freight_rate)})`:""}</td><td>₹${money(b.other_charges)}</td><td>₹${money(b.kanta_charges)}</td><td>₹${money(b.bahi_charges)}</td><td>₹${money(b.service_tax)}</td><td>₹${money(b.hamali)}</td><td>₹${money(b.p_freight)}</td><td>₹${money(b.dalali)}</td></tr>
+ <tr class="gr-total-row"><td colspan=6></td><td>Grand Total</td><td>₹${money(b.grand_total)}</td></tr>
+ <tr class="gr-total-row"><td colspan=6></td><td>Advance</td><td>₹${money(b.advance_to_owner)}</td></tr>
+ <tr class="gr-total-row"><td colspan=6></td><td>To Pay</td><td>₹${money(b.topay)}</td></tr>
+ </table>
+ <div class="gr-gst"><b>GST Paid By:</b> ${gstRow}</div>
+ ${insuranceBox}
+ <div class="gr-meta"><span>Truck Owner: ${b.truck_owner.name}</span><span>${b.goods_value_declared?"Value: ₹"+money(b.goods_value_declared):""}</span></div>
+ <div class="gr-meta"><span>${b.agent?"Agent / Broker: "+b.agent.name:""}</span><span>${b.eway_bill_no?"E-Way Bill: "+b.eway_bill_no:""}</span></div>
+ ${b.invoice_value?`<div class="gr-meta"><span>Invoice Value: ₹${money(b.invoice_value)}</span><span></span></div>`:""}
+ ${b.remark?`<div class="gr-meta"><span>Remark: ${b.remark}</span></div>`:""}
+ <div class="gr-sign"><span>Signature of Booking Clerk</span><span>For ${firm.name||""}</span></div>
+ <div class="gr-note">This consignment is booked subject to the terms endorsed on the original GR. FD (internal accounting) is never shown here.</div>
+ ${bankLine}
+ </div>`;
 }
 function agentLedger(err){
  let rows=state.bilties.filter(x=>x.agent).map(x=>`<tr><td>${x.bilti_date}</td><td>${x.bilti_no}</td><td>${firmName(x.firm_id)}</td><td>${x.agent.name}</td><td>₹${money(x.dalali)}</td><td>₹${money(x.freight_difference)}</td><td>₹${money(Number(x.dalali)+Number(x.freight_difference))}</td></tr>`).join("");
