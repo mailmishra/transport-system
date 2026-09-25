@@ -132,10 +132,10 @@
     "semantic_hash": "b8553c467fde2ed73414ffec56b3fe59"
   },
   "backend/app/models/bilti.py": {
-    "mtime": 1790343947.7142234,
-    "seen": 1790344089.19249,
-    "ast_hash": "e184037f84b9742b4b511be898bc794a",
-    "semantic_hash": ""
+    "mtime": 1789977783.816501,
+    "seen": 1789978123.049688,
+    "ast_hash": "ff804e6a6c35e188eb4008acaed0aec5",
+    "semantic_hash": "ff804e6a6c35e188eb4008acaed0aec5"
   },
   "backend/app/models/firm.py": {
     "mtime": 1789993819.460668,
@@ -240,10 +240,10 @@
     "semantic_hash": "187c33ec17401024ae26a3961c988a37"
   },
   "backend/app/schemas/bilti.py": {
-    "mtime": 1790343967.244693,
-    "seen": 1790344089.1924999,
-    "ast_hash": "3578e295dd75edc7e5bf037f5c381c06",
-    "semantic_hash": ""
+    "mtime": 1790342623.4000893,
+    "seen": 1790343462.9492218,
+    "ast_hash": "48a9aaa12a06b9f3b2b0407085993038",
+    "semantic_hash": "48a9aaa12a06b9f3b2b0407085993038"
   },
   "backend/app/schemas/firm.py": {
     "mtime": 1789993819.4616444,
@@ -564,10 +564,10 @@
     "semantic_hash": "987ca27162da3fcb220726a1ef8693fb"
   },
   "frontend/src/api/types.ts": {
-    "mtime": 1790343974.556742,
-    "seen": 1790344089.192519,
-    "ast_hash": "83ba8e12fbf4fa3b3e21307e78a2f2f0",
-    "semantic_hash": ""
+    "mtime": 1790342630.652389,
+    "seen": 1790343462.949242,
+    "ast_hash": "af9272a24fcbf7ba167a82219df33156",
+    "semantic_hash": "af9272a24fcbf7ba167a82219df33156"
   },
   "frontend/src/api/vehicles.ts": {
     "mtime": 1789992181.5286665,
@@ -732,10 +732,10 @@
     "semantic_hash": "2ef8600c6977786e5a0c2d3e832bd498"
   },
   "frontend/src/modules/bilti/bilti-form-drawer.tsx": {
-    "mtime": 1790344004.5097349,
-    "seen": 1790344089.192533,
-    "ast_hash": "6c7b0b19638b64fe8c5b59572263e887",
-    "semantic_hash": ""
+    "mtime": 1790342681.185419,
+    "seen": 1790343462.949256,
+    "ast_hash": "6ce486f91216f20734091e909da849e7",
+    "semantic_hash": "6ce486f91216f20734091e909da849e7"
   },
   "frontend/src/modules/bilti/bilti-list-page.tsx": {
     "mtime": 1789996131.5183673,
@@ -744,10 +744,10 @@
     "semantic_hash": "b267c21c1f8e052bcc219e453acf5540"
   },
   "frontend/src/modules/bilti/bilti-print-view.tsx": {
-    "mtime": 1790344016.705898,
-    "seen": 1790344089.192534,
-    "ast_hash": "4418bb847d25e4c7038477035af1da19",
-    "semantic_hash": ""
+    "mtime": 1789996131.5186987,
+    "seen": 1790343462.949257,
+    "ast_hash": "fe5b506f0643da519cf9127a318620b3",
+    "semantic_hash": "fe5b506f0643da519cf9127a318620b3"
   },
   "frontend/src/modules/dashboard-page.tsx": {
     "mtime": 1789996131.5189333,
@@ -756,10 +756,10 @@
     "semantic_hash": "67aa9880c88d69e7b2ddf7350570023f"
   },
   "frontend/src/modules/loading-slips/loading-slip-form-drawer.tsx": {
-    "mtime": 1790343615.5860913,
-    "seen": 1790344089.192535,
-    "ast_hash": "e7a386c3d7787c01e8f710b19ad09945",
-    "semantic_hash": ""
+    "mtime": 1790342652.6667762,
+    "seen": 1790343462.949258,
+    "ast_hash": "6075eba3ba6d9ebe67c3748d0b0c31f7",
+    "semantic_hash": "6075eba3ba6d9ebe67c3748d0b0c31f7"
   },
   "frontend/src/modules/loading-slips/loading-slip-list-page.tsx": {
     "mtime": 1789996131.5194266,
@@ -768,10 +768,10 @@
     "semantic_hash": "77433f3a5e0129e6395217e6e22c8317"
   },
   "frontend/src/modules/loading-slips/loading-slip-print-view.tsx": {
-    "mtime": 1790343611.4925156,
-    "seen": 1790344089.192536,
-    "ast_hash": "83b7f0760ada1f6b5b19fade6d5c98c7",
-    "semantic_hash": ""
+    "mtime": 1790342664.0601249,
+    "seen": 1790343462.94926,
+    "ast_hash": "3ab9111d7022d09ba1004a6ecca70a66",
+    "semantic_hash": "3ab9111d7022d09ba1004a6ecca70a66"
   },
   "frontend/src/modules/receipts/receipt-form-drawer.tsx": {
     "mtime": 1789996131.519993,
@@ -898,11 +898,5 @@
     "seen": 1790343462.949273,
     "ast_hash": "29ea6f81ff33058f372a9ada6b0d70b6",
     "semantic_hash": "29ea6f81ff33058f372a9ada6b0d70b6"
-  },
-  "backend/alembic/versions/0006_bilti_weight_per_bag.py": {
-    "mtime": 1790343943.4898262,
-    "seen": 1790344089.19248,
-    "ast_hash": "e0489187eff6c54502c458979bce4b8d",
-    "semantic_hash": ""
   }
 }
