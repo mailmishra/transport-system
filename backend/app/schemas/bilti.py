@@ -156,7 +156,7 @@ class _BiltiChargeFieldsMixin(BaseModel):
 
     Those totals are never stored -- computed here, same "compute, don't
     duplicate" approach already used for ledger balances (see README).
-    Dalali is included in grand_total per business requirement (item 7).
+    Dalali is captured but excluded from grand_total (stored only).
     """
 
     freight: Decimal
@@ -174,7 +174,6 @@ class _BiltiChargeFieldsMixin(BaseModel):
     def grand_total(self) -> Decimal:
         return (
             self.freight
-            + self.dalali
             + self.other_charges
             + self.kanta_charges
             + self.bahi_charges

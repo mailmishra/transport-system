@@ -155,8 +155,8 @@ def test_soft_deleted_bilti_hidden_from_list_and_get(client):
     assert not any(x["id"] == created["id"] for x in listed.json()["items"])
 
 
-def test_grand_total_includes_dalali_topay_is_net_of_advance(client):
-    """Dalali is included in grand_total (user feedback #7) but not shown on print."""
+def test_grand_total_excludes_dalali_topay_is_net_of_advance(client):
+    """Dalali is stored but excluded from grand_total. topay = grand_total - advance."""
     firm_id = get_firm_id(client)
     created = create_bilti(
         client,
@@ -171,18 +171,17 @@ def test_grand_total_includes_dalali_topay_is_net_of_advance(client):
         p_freight=0,
         advance_to_owner=1000,
     )
-    # grand_total = freight + dalali + all other charges (no advance deducted here)
-    # 5000 + 200 + 100 + 50 + 20 + 30 + 260 + 0 = 5660
-    assert created["grand_total"] == "5660.00"
+    # grand_total = freight + other charges (dalali excluded)
+    # 5000 + 100 + 50 + 20 + 30 + 260 + 0 = 5460
+    assert created["grand_total"] == "5460.00"
+    # dalali still stored and returned
+    assert created["dalali"] == "200.00"
     # topay = grand_total - advance_to_owner
-    assert created["topay"] == "4660.00"
+    assert created["topay"] == "4460.00"
 
-    # print view reflects same totals; dalali IS in the API response (the
-    # frontend's print layout just doesn't render a Dalali line item)
     printable = client.get(f"/api/bilties/{created['id']}/print")
-    assert printable.json()["grand_total"] == "5660.00"
-    assert printable.json()["topay"] == "4660.00"
-    # freight_difference is the only hidden field on BiltiPrint
+    assert printable.json()["grand_total"] == "5460.00"
+    assert printable.json()["topay"] == "4460.00"
     assert "freight_difference" not in printable.json()
 
 
