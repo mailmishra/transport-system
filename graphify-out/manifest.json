@@ -60,10 +60,10 @@
     "semantic_hash": "34c9b148666d3f732e546a30a7e8ba6b"
   },
   "backend/app/crud/bilti.py": {
-    "mtime": 1789996131.5100346,
-    "seen": 1790343462.9492018,
-    "ast_hash": "d7203be0b8fea12b48764b11368b8878",
-    "semantic_hash": "d7203be0b8fea12b48764b11368b8878"
+    "mtime": 1790347874.9390974,
+    "seen": 1790348015.720932,
+    "ast_hash": "06dc2e3f202290fe75f58feccfe42176",
+    "semantic_hash": ""
   },
   "backend/app/crud/loading_slip.py": {
     "mtime": 1789996131.5103097,
@@ -132,9 +132,9 @@
     "semantic_hash": "b8553c467fde2ed73414ffec56b3fe59"
   },
   "backend/app/models/bilti.py": {
-    "mtime": 1790344532.4628026,
-    "seen": 1790344737.036621,
-    "ast_hash": "3f1d6ac8ee2441e602c5932993bd4244",
+    "mtime": 1790348885.309257,
+    "seen": 1790349178.864622,
+    "ast_hash": "0ae1c200eb16746d4021447e8269270c",
     "semantic_hash": ""
   },
   "backend/app/models/firm.py": {
@@ -186,9 +186,9 @@
     "semantic_hash": "24396277f2ff265988cb9ae69e79fe8e"
   },
   "backend/app/routers/bilties.py": {
-    "mtime": 1790344548.4648705,
-    "seen": 1790344737.036627,
-    "ast_hash": "4d3a99cff3eba795de6bf75ad2918023",
+    "mtime": 1790347883.1813564,
+    "seen": 1790348015.7209442,
+    "ast_hash": "8d77c191a9c041ca845a3f6c5698b697",
     "semantic_hash": ""
   },
   "backend/app/routers/firms.py": {
@@ -240,9 +240,9 @@
     "semantic_hash": "187c33ec17401024ae26a3961c988a37"
   },
   "backend/app/schemas/bilti.py": {
-    "mtime": 1790345698.661535,
-    "seen": 1790345738.467079,
-    "ast_hash": "260ad17fb06eaa1e86ef89559c2bea6b",
+    "mtime": 1790348928.6193268,
+    "seen": 1790349178.864633,
+    "ast_hash": "5bae1d79f2ab938f95ef1fc4e43e6eb6",
     "semantic_hash": ""
   },
   "backend/app/schemas/firm.py": {
@@ -468,9 +468,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/app/scripts/seed_demo_data.py": {
-    "mtime": 1790345404.0289373,
-    "seen": 1790345483.241243,
-    "ast_hash": "2f686c8b5a229dcd252f727cf0d8277b",
+    "mtime": 1790347347.60347,
+    "seen": 1790347376.273797,
+    "ast_hash": "667e1f34d8aa6ac8052345bd652f5819",
     "semantic_hash": ""
   },
   "backend/tests/integration/test_reports.py": {
@@ -510,9 +510,9 @@
     "semantic_hash": "dc7cf662415be88b3c926c2784f1042a"
   },
   "frontend/src/api/bilties.ts": {
-    "mtime": 1790344592.4650207,
-    "seen": 1790344737.0366468,
-    "ast_hash": "a8b6e0074b699c760ff3f8c185732ed9",
+    "mtime": 1790347898.9873233,
+    "seen": 1790348015.7209651,
+    "ast_hash": "ca14b6a95a08b09e6e2318c76cb54683",
     "semantic_hash": ""
   },
   "frontend/src/api/client.ts": {
@@ -564,9 +564,9 @@
     "semantic_hash": "987ca27162da3fcb220726a1ef8693fb"
   },
   "frontend/src/api/types.ts": {
-    "mtime": 1790343974.556742,
-    "seen": 1790344089.192519,
-    "ast_hash": "83ba8e12fbf4fa3b3e21307e78a2f2f0",
+    "mtime": 1790348954.646866,
+    "seen": 1790349178.864653,
+    "ast_hash": "1e9047f4a0ed64caa357575c7f1d88e9",
     "semantic_hash": ""
   },
   "frontend/src/api/vehicles.ts": {
@@ -732,16 +732,16 @@
     "semantic_hash": "2ef8600c6977786e5a0c2d3e832bd498"
   },
   "frontend/src/modules/bilti/bilti-form-drawer.tsx": {
-    "mtime": 1790344651.796494,
-    "seen": 1790344737.0366652,
-    "ast_hash": "3f8218905f357f6507a5dad11a71223f",
+    "mtime": 1790349043.8692884,
+    "seen": 1790349178.864667,
+    "ast_hash": "71a3fad2ccd96ce6622f775de6c72b6a",
     "semantic_hash": ""
   },
   "frontend/src/modules/bilti/bilti-list-page.tsx": {
-    "mtime": 1789996131.5183673,
-    "seen": 1790343462.949257,
-    "ast_hash": "b267c21c1f8e052bcc219e453acf5540",
-    "semantic_hash": "b267c21c1f8e052bcc219e453acf5540"
+    "mtime": 1790347352.3168678,
+    "seen": 1790347376.273827,
+    "ast_hash": "2c95dc25c0a86129aff8ceffe0f10c38",
+    "semantic_hash": ""
   },
   "frontend/src/modules/bilti/bilti-print-view.tsx": {
     "mtime": 1790344672.8780572,
@@ -834,10 +834,10 @@
     "semantic_hash": "54601583753bb6e58cc0c40a5bc0df75"
   },
   "frontend/src/modules/reports/reports-page.tsx": {
-    "mtime": 1789996131.5222707,
-    "seen": 1790343462.949265,
-    "ast_hash": "05cff3b361559def5a8a5bcfefcc9011",
-    "semantic_hash": "05cff3b361559def5a8a5bcfefcc9011"
+    "mtime": 1790347956.0746322,
+    "seen": 1790348015.720992,
+    "ast_hash": "13cc8f0605ddafe93027f914b7abbe87",
+    "semantic_hash": ""
   },
   "frontend/src/modules/reports/vehicle-activity-tab.tsx": {
     "mtime": 1789996131.5224884,
@@ -909,6 +909,18 @@
     "mtime": 1790344511.3055825,
     "seen": 1790344737.036611,
     "ast_hash": "e4ef1fcbbb0027c0cf811a61779ecad4",
+    "semantic_hash": ""
+  },
+  "frontend/src/modules/reports/gr-report-tab.tsx": {
+    "mtime": 1790348452.5389125,
+    "seen": 1790348636.6129868,
+    "ast_hash": "a4eb1488e68e01859670ba6bd5c080fb",
+    "semantic_hash": ""
+  },
+  "backend/alembic/versions/0008_bilti_goods_items_and_party_fields.py": {
+    "mtime": 1790348867.981318,
+    "seen": 1790349178.8646111,
+    "ast_hash": "d6ae1d14f701ad59fb87269b24f3ec9a",
     "semantic_hash": ""
   }
 }
