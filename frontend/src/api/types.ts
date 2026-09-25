@@ -215,6 +215,16 @@ export interface VehicleUpdateInput {
 
 export type GstPaidBy = "consignor" | "consignee" | "transporter" | "exempted";
 
+export interface GoodsItem {
+  item_name: string;
+  description: string;
+  unit: string;
+  pkg: string;
+  qty: string;
+  actual_weight: string;
+  charged_weight: string;
+}
+
 export interface Bilti {
   id: string;
   firm_id: string;
@@ -230,6 +240,15 @@ export interface Bilti {
   truck_owner: TruckOwner;
   agent: Agent | null;
   goods_description: string;
+  goods_items: GoodsItem[] | null;
+  consignor_gstin: string | null;
+  consignee_gstin: string | null;
+  consignor_address: string | null;
+  consignee_address: string | null;
+  consignee_mobile: string | null;
+  billing_party: string | null;
+  invoice_no: string | null;
+  invoice_date: string | null;
   weight: string;
   weight_per_bag: string | null;
   charged_weight: string | null;
@@ -246,6 +265,7 @@ export interface Bilti {
   service_tax: string;
   hamali: string;
   p_freight: string;
+  un_load_labour: string;
   gst_paid_by: GstPaidBy | null;
   eway_bill_no: string | null;
   invoice_value: string | null;
@@ -283,6 +303,15 @@ export interface BiltiCreateInput {
   truck_owner_name: string;
   agent_name?: string | null;
   goods_description: string;
+  goods_items?: GoodsItem[] | null;
+  consignor_gstin?: string | null;
+  consignee_gstin?: string | null;
+  consignor_address?: string | null;
+  consignee_address?: string | null;
+  consignee_mobile?: string | null;
+  billing_party?: string | null;
+  invoice_no?: string | null;
+  invoice_date?: string | null;
   weight: string;
   weight_per_bag?: number | null;
   charged_weight?: string | null;
@@ -299,6 +328,7 @@ export interface BiltiCreateInput {
   service_tax?: number;
   hamali?: number;
   p_freight?: number;
+  un_load_labour?: number;
   gst_paid_by?: GstPaidBy | null;
   eway_bill_no?: string | null;
   invoice_value?: number | null;

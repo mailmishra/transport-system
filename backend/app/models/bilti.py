@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 
 from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -47,6 +47,17 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
         UUID(as_uuid=True), ForeignKey("agents.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     goods_description: Mapped[str] = mapped_column(Text, nullable=False)
+    # Structured goods rows matching the "Said to contain" table on the original
+    # paper form: [{item_name, description, unit, pkg, qty, actual_weight, charged_weight}]
+    goods_items: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    consignor_gstin: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    consignee_gstin: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    consignor_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    consignee_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    consignee_mobile: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    billing_party: Mapped[str | None] = mapped_column(Text, nullable=True)
+    invoice_no: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    invoice_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     # Actual weight as loaded; charged_weight is what freight is billed on
     # (may differ after rounding/minimum-weight rules) -- both appear
     # separately on the real GR form.
@@ -69,6 +80,7 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     service_tax: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     hamali: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     p_freight: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
+    un_load_labour: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     # Validated at the app layer (see schemas/bilti.py) against
     # consignor/consignee/transporter/exempted rather than a DB CHECK, so a
     # future allowed value doesn't need a migration.

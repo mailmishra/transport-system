@@ -42,6 +42,16 @@ class BiltiBase(BaseModel):
     truck_owner_name: str = Field(min_length=1, max_length=200)
     agent_name: str = Field(min_length=1, max_length=200)
     goods_description: str = Field(min_length=1)
+    # Structured rows: [{item_name, description, unit, pkg, qty, actual_weight, charged_weight}]
+    goods_items: list[dict] | None = None
+    consignor_gstin: str | None = Field(default=None, max_length=20)
+    consignee_gstin: str | None = Field(default=None, max_length=20)
+    consignor_address: str | None = None
+    consignee_address: str | None = None
+    consignee_mobile: str | None = Field(default=None, max_length=20)
+    billing_party: str | None = None
+    invoice_no: str | None = Field(default=None, max_length=100)
+    invoice_date: date | None = None
     weight: str = Field(min_length=1, max_length=100)
     weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)
@@ -58,6 +68,7 @@ class BiltiBase(BaseModel):
     service_tax: Decimal = Field(default=Decimal("0"), ge=0)
     hamali: Decimal = Field(default=Decimal("0"), ge=0)
     p_freight: Decimal = Field(default=Decimal("0"), ge=0)
+    un_load_labour: Decimal = Field(default=Decimal("0"), ge=0)
     gst_paid_by: str | None = Field(default=None, max_length=20)
     eway_bill_no: str | None = Field(default=None, max_length=50)
     invoice_value: Decimal | None = Field(default=None, ge=0)
@@ -120,6 +131,15 @@ class BiltiUpdate(BaseModel):
     truck_owner_name: str | None = Field(default=None, min_length=1, max_length=200)
     agent_name: str | None = Field(default=None, max_length=200)
     goods_description: str | None = Field(default=None, min_length=1)
+    goods_items: list[dict] | None = None
+    consignor_gstin: str | None = Field(default=None, max_length=20)
+    consignee_gstin: str | None = Field(default=None, max_length=20)
+    consignor_address: str | None = None
+    consignee_address: str | None = None
+    consignee_mobile: str | None = Field(default=None, max_length=20)
+    billing_party: str | None = None
+    invoice_no: str | None = Field(default=None, max_length=100)
+    invoice_date: date | None = None
     weight: str | None = Field(default=None, min_length=1, max_length=100)
     weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)
@@ -136,6 +156,7 @@ class BiltiUpdate(BaseModel):
     service_tax: Decimal | None = Field(default=None, ge=0)
     hamali: Decimal | None = Field(default=None, ge=0)
     p_freight: Decimal | None = Field(default=None, ge=0)
+    un_load_labour: Decimal | None = Field(default=None, ge=0)
     gst_paid_by: str | None = Field(default=None, max_length=20)
     eway_bill_no: str | None = Field(default=None, max_length=50)
     invoice_value: Decimal | None = Field(default=None, ge=0)
@@ -167,6 +188,7 @@ class _BiltiChargeFieldsMixin(BaseModel):
     service_tax: Decimal
     hamali: Decimal
     p_freight: Decimal
+    un_load_labour: Decimal
     advance_to_owner: Decimal
 
     @computed_field  # type: ignore[prop-decorator]
@@ -180,6 +202,7 @@ class _BiltiChargeFieldsMixin(BaseModel):
             + self.service_tax
             + self.hamali
             + self.p_freight
+            + self.un_load_labour
         )
 
     @computed_field  # type: ignore[prop-decorator]
@@ -205,6 +228,15 @@ class BiltiRead(_BiltiChargeFieldsMixin):
     truck_owner: TruckOwnerRead
     agent: AgentRead | None
     goods_description: str
+    goods_items: list[dict] | None
+    consignor_gstin: str | None
+    consignee_gstin: str | None
+    consignor_address: str | None
+    consignee_address: str | None
+    consignee_mobile: str | None
+    billing_party: str | None
+    invoice_no: str | None
+    invoice_date: date | None
     weight: str
     weight_per_bag: Decimal | None
     charged_weight: str | None
@@ -250,6 +282,15 @@ class BiltiPrint(_BiltiChargeFieldsMixin):
     truck_owner: TruckOwnerRead
     agent: AgentRead | None
     goods_description: str
+    goods_items: list[dict] | None
+    consignor_gstin: str | None
+    consignee_gstin: str | None
+    consignor_address: str | None
+    consignee_address: str | None
+    consignee_mobile: str | None
+    billing_party: str | None
+    invoice_no: str | None
+    invoice_date: date | None
     weight: str
     weight_per_bag: Decimal | None
     charged_weight: str | None
