@@ -962,7 +962,7 @@
       "file_type": "code",
       "norm_label": "biltiprint",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L231"
+      "source_location": "L232"
     },
     {
       "id": "backend_app_schemas_bilti_biltiread",
@@ -975,7 +975,7 @@
       "file_type": "code",
       "norm_label": "biltiread",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L191"
+      "source_location": "L192"
     },
     {
       "id": "frontend_src_api_loadingslips_loadingsliplistparams",
@@ -3564,7 +3564,7 @@
       "file_type": "code",
       "norm_label": "test_consignor_accepts_multiline()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L222"
+      "source_location": "L223"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_create_bilti_resolves_agent_and_truck_owner_by_name",
@@ -3612,17 +3612,17 @@
       "file_type": "code",
       "norm_label": "test_goods_description_accepts_multiline()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L234"
+      "source_location": "L235"
     },
     {
-      "id": "backend_tests_integration_test_bilties_test_grand_total_excludes_dalali_topay_is_net_of_advance",
-      "label": "test_grand_total_excludes_dalali_topay_is_net_of_advance()",
+      "id": "backend_tests_integration_test_bilties_test_grand_total_includes_dalali_topay_is_net_of_advance",
+      "label": "test_grand_total_includes_dalali_topay_is_net_of_advance()",
       "_callable": true,
       "_origin": "ast",
       "community": 23,
       "community_name": "get_firm_id",
       "file_type": "code",
-      "norm_label": "test_grand_total_excludes_dalali_topay_is_net_of_advance()",
+      "norm_label": "test_grand_total_includes_dalali_topay_is_net_of_advance()",
       "source_file": "backend/tests/integration/test_bilties.py",
       "source_location": "L158"
     },
@@ -3636,7 +3636,7 @@
       "file_type": "code",
       "norm_label": "test_gst_paid_by_rejects_invalid_value()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L188"
+      "source_location": "L189"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_list_is_paginated_with_envelope",
@@ -3648,7 +3648,7 @@
       "file_type": "code",
       "norm_label": "test_list_is_paginated_with_envelope()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L278"
+      "source_location": "L279"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
@@ -3660,7 +3660,7 @@
       "file_type": "code",
       "norm_label": "test_next_bilti_no_increments_past_existing()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L265"
+      "source_location": "L266"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
@@ -3672,7 +3672,7 @@
       "file_type": "code",
       "norm_label": "test_next_bilti_no_returns_sequence()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L241"
+      "source_location": "L242"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_print_view_omits_freight_difference",
@@ -3720,7 +3720,7 @@
       "file_type": "code",
       "norm_label": "test_search_q_matches_consignor_and_bilti_no()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L303"
+      "source_location": "L304"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_soft_deleted_bilti_hidden_from_list_and_get",
@@ -3744,7 +3744,7 @@
       "file_type": "code",
       "norm_label": "test_sort_by_freight()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L317"
+      "source_location": "L318"
     },
     {
       "id": "backend_tests_integration_test_bilties_test_unknown_loading_slip_id_returns_422",
@@ -3768,7 +3768,7 @@
       "file_type": "code",
       "norm_label": "test_weight_per_bag_stored_and_returned()",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L212"
+      "source_location": "L213"
     },
     {
       "id": "backend_tests_utils_create_bilti",
@@ -4572,7 +4572,7 @@
       "file_type": "code",
       "norm_label": ".topay()",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L187"
+      "source_location": "L188"
     },
     {
       "id": "frontend_src_api_loadingslips_toquery",
@@ -8195,17 +8195,17 @@
     },
     {
       "id": "backend_tests_integration_test_bilties_rationale_159",
-      "label": "Dalali is stored but excluded from grand_total. topay = grand_total - advance.",
+      "label": "Dalali is included in grand_total (user feedback #7) but not shown on print.",
       "_origin": "ast",
       "community": 23,
       "community_name": "get_firm_id",
       "file_type": "rationale",
-      "norm_label": "dalali is stored but excluded from grand_total. topay = grand_total - advance.",
+      "norm_label": "dalali is included in grand_total (user feedback #7) but not shown on print.",
       "source_file": "backend/tests/integration/test_bilties.py",
       "source_location": "L159"
     },
     {
-      "id": "backend_tests_integration_test_bilties_rationale_223",
+      "id": "backend_tests_integration_test_bilties_rationale_224",
       "label": "Multi-consignor stored as newline-separated text; list and print round-trip\u2026",
       "_origin": "ast",
       "community": 23,
@@ -8213,10 +8213,10 @@
       "file_type": "rationale",
       "norm_label": "multi-consignor stored as newline-separated text; list and print round-trip...",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L223"
+      "source_location": "L224"
     },
     {
-      "id": "backend_tests_integration_test_bilties_rationale_242",
+      "id": "backend_tests_integration_test_bilties_rationale_243",
       "label": "GET /bilties/next-no returns the next available numeric bilti_no for the firm.",
       "_origin": "ast",
       "community": 23,
@@ -8224,10 +8224,10 @@
       "file_type": "rationale",
       "norm_label": "get /bilties/next-no returns the next available numeric bilti_no for the firm.",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L242"
+      "source_location": "L243"
     },
     {
-      "id": "backend_tests_integration_test_bilties_rationale_266",
+      "id": "backend_tests_integration_test_bilties_rationale_267",
       "label": "next-no returns max+1 when numeric bilti_nos already exist for the firm.",
       "_origin": "ast",
       "community": 23,
@@ -8235,7 +8235,7 @@
       "file_type": "rationale",
       "norm_label": "next-no returns max+1 when numeric bilti_nos already exist for the firm.",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L266"
+      "source_location": "L267"
     },
     {
       "id": "backend_tests_integration_test_bilties_rationale_32",
@@ -8887,7 +8887,7 @@
       "source_location": "L154"
     },
     {
-      "id": "backend_app_schemas_bilti_rationale_232",
+      "id": "backend_app_schemas_bilti_rationale_233",
       "label": "Printable view \u2014 freight_difference is deliberately excluded. FD (Freight\u2026",
       "_origin": "ast",
       "community": 33,
@@ -8895,7 +8895,7 @@
       "file_type": "rationale",
       "norm_label": "printable view \u2014 freight_difference is deliberately excluded. fd (freight...",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L232"
+      "source_location": "L233"
     },
     {
       "id": "frontend_src_api_loadingslips",
@@ -11827,30 +11827,6 @@
       "type": "external"
     },
     {
-      "id": "app_schemas_bilti",
-      "label": "app_schemas_bilti",
-      "_origin": "semantic",
-      "community": 31,
-      "community_name": "test_schemas.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "app_schemas_bilti",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "app_schemas_loading_slip",
-      "label": "app_schemas_loading_slip",
-      "_origin": "semantic",
-      "community": 31,
-      "community_name": "test_schemas.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "app_schemas_loading_slip",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "app_schemas_agent",
       "label": "app_schemas_agent",
       "_origin": "semantic",
@@ -12015,6 +11991,28 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "sqlalchemy_sql_elements",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "app_schemas_bilti",
+      "label": "app_schemas_bilti",
+      "community": 31,
+      "community_name": "test_schemas.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "app_schemas_bilti",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "app_schemas_loading_slip",
+      "label": "app_schemas_loading_slip",
+      "community": 31,
+      "community_name": "test_schemas.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "app_schemas_loading_slip",
       "source_file": "",
       "type": "external"
     }
@@ -16229,7 +16227,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L185",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -33041,7 +33039,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L187",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -35019,7 +35017,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -35030,7 +35028,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L231",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -35508,7 +35506,7 @@
     },
     {
       "source": "backend_tests_integration_test_bilties",
-      "target": "backend_tests_integration_test_bilties_test_grand_total_excludes_dalali_topay_is_net_of_advance",
+      "target": "backend_tests_integration_test_bilties_test_grand_total_includes_dalali_topay_is_net_of_advance",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -35525,7 +35523,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L188",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -35536,7 +35534,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L212",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -35547,7 +35545,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L222",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -35569,7 +35567,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L234",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -35580,7 +35578,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L241",
+      "source_location": "L242",
       "weight": 1.0
     },
     {
@@ -35591,7 +35589,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L265",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -35602,7 +35600,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L278",
+      "source_location": "L279",
       "weight": 1.0
     },
     {
@@ -35613,7 +35611,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L303",
+      "source_location": "L304",
       "weight": 1.0
     },
     {
@@ -35635,7 +35633,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L317",
+      "source_location": "L318",
       "weight": 1.0
     },
     {
@@ -39969,7 +39967,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L231",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -39980,7 +39978,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -40365,7 +40363,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L187",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -40589,14 +40587,14 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_schemas_bilti_rationale_232",
+      "source": "backend_app_schemas_bilti_rationale_233",
       "target": "backend_app_schemas_bilti_biltiprint",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/schemas/bilti.py",
-      "source_location": "L232",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -40678,7 +40676,7 @@
     },
     {
       "source": "backend_tests_integration_test_bilties_rationale_159",
-      "target": "backend_tests_integration_test_bilties_test_grand_total_excludes_dalali_topay_is_net_of_advance",
+      "target": "backend_tests_integration_test_bilties_test_grand_total_includes_dalali_topay_is_net_of_advance",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -40688,36 +40686,36 @@
       "weight": 1.0
     },
     {
-      "source": "backend_tests_integration_test_bilties_rationale_223",
+      "source": "backend_tests_integration_test_bilties_rationale_224",
       "target": "backend_tests_integration_test_bilties_test_consignor_accepts_multiline",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L223",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
-      "source": "backend_tests_integration_test_bilties_rationale_242",
+      "source": "backend_tests_integration_test_bilties_rationale_243",
       "target": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L242",
+      "source_location": "L243",
       "weight": 1.0
     },
     {
-      "source": "backend_tests_integration_test_bilties_rationale_266",
+      "source": "backend_tests_integration_test_bilties_rationale_267",
       "target": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L266",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -40993,7 +40991,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L224",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -41005,7 +41003,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L226",
+      "source_location": "L227",
       "weight": 1.0
     },
     {
@@ -41113,7 +41111,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L235",
+      "source_location": "L236",
       "weight": 1.0
     },
     {
@@ -41125,11 +41123,11 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L237",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
-      "source": "backend_tests_integration_test_bilties_test_grand_total_excludes_dalali_topay_is_net_of_advance",
+      "source": "backend_tests_integration_test_bilties_test_grand_total_includes_dalali_topay_is_net_of_advance",
       "target": "backend_tests_conftest_get_firm_id",
       "relation": "calls",
       "_origin": "ast",
@@ -41141,7 +41139,7 @@
       "weight": 1.0
     },
     {
-      "source": "backend_tests_integration_test_bilties_test_grand_total_excludes_dalali_topay_is_net_of_advance",
+      "source": "backend_tests_integration_test_bilties_test_grand_total_includes_dalali_topay_is_net_of_advance",
       "target": "backend_tests_utils_create_bilti",
       "relation": "calls",
       "_origin": "ast",
@@ -41161,7 +41159,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L189",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -41173,24 +41171,12 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L194",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
       "source": "backend_tests_integration_test_bilties_test_list_is_paginated_with_envelope",
       "target": "backend_tests_conftest_get_firm_id",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L279",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_tests_integration_test_bilties_test_list_is_paginated_with_envelope",
-      "target": "backend_tests_utils_unique",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "INFERRED",
@@ -41202,55 +41188,55 @@
     },
     {
       "source": "backend_tests_integration_test_bilties_test_list_is_paginated_with_envelope",
-      "target": "backend_tests_utils_create_bilti",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L282",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
-      "target": "backend_tests_conftest_get_firm_id",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L267",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
-      "target": "backend_tests_utils_create_bilti",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L270",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
-      "target": "backend_tests_conftest_get_firm_id",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L243",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
       "target": "backend_tests_utils_unique",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "backend/tests/integration/test_bilties.py",
+      "source_location": "L281",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_tests_integration_test_bilties_test_list_is_paginated_with_envelope",
+      "target": "backend_tests_utils_create_bilti",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "backend/tests/integration/test_bilties.py",
+      "source_location": "L283",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
+      "target": "backend_tests_conftest_get_firm_id",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "backend/tests/integration/test_bilties.py",
+      "source_location": "L268",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_increments_past_existing",
+      "target": "backend_tests_utils_create_bilti",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "backend/tests/integration/test_bilties.py",
+      "source_location": "L271",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
+      "target": "backend_tests_conftest_get_firm_id",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "INFERRED",
@@ -41262,6 +41248,18 @@
     },
     {
       "source": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
+      "target": "backend_tests_utils_unique",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "source_file": "backend/tests/integration/test_bilties.py",
+      "source_location": "L245",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_tests_integration_test_bilties_test_next_bilti_no_returns_sequence",
       "target": "backend_tests_utils_create_bilti",
       "relation": "calls",
       "_origin": "ast",
@@ -41269,7 +41267,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L247",
+      "source_location": "L248",
       "weight": 1.0
     },
     {
@@ -41365,7 +41363,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L304",
+      "source_location": "L305",
       "weight": 1.0
     },
     {
@@ -41377,7 +41375,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L305",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -41389,7 +41387,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L306",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -41425,7 +41423,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L318",
+      "source_location": "L319",
       "weight": 1.0
     },
     {
@@ -41437,7 +41435,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L319",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -41449,7 +41447,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L320",
+      "source_location": "L321",
       "weight": 1.0
     },
     {
@@ -41485,7 +41483,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L213",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
@@ -41497,7 +41495,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "backend/tests/integration/test_bilties.py",
-      "source_location": "L214",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -43193,5 +43191,5 @@
       ]
     }
   ],
-  "built_at_commit": "94fea8e06a9d07cb69aa6a45e31abe75571e92a5"
+  "built_at_commit": "3867ee3b40ec57dd4ad8cd7a73a0e931b80af34e"
 }

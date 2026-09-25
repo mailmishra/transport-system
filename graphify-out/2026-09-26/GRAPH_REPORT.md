@@ -1,7 +1,7 @@
 # Graph Report - transport-system  (2026-09-26)
 
 ## Corpus Check
-- 148 files · ~42,854 words
+- 148 files · ~42,888 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 4, .ini 2, .example 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `94fea8e0`
+- Built from commit: `3867ee3b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -94,12 +94,12 @@
 ## Surprising Connections (you probably didn't know these)
 - `can(action, resource) permissions helper` --semantically_similar_to--> `Auth Stub Pattern`  [INFERRED] [semantically similar]
   frontend/README.md → README.md
+- `test_blank_required_field_returns_422()` --calls--> `get_firm_id()`  [INFERRED]
+  backend/tests/integration/test_loading_slips.py → backend/tests/conftest.py
 - `test_loading_slip_requires_non_blank_fields()` --calls--> `LoadingSlipCreate`  [INFERRED]
   backend/tests/unit/test_schemas.py → backend/app/schemas/loading_slip.py
 - `test_pending_loading_slips_excludes_slips_with_a_bilti()` --calls--> `create_loading_slip()`  [INFERRED]
   backend/tests/integration/test_reports.py → backend/app/routers/loading_slips.py
-- `test_blank_required_field_returns_422()` --calls--> `get_firm_id()`  [INFERRED]
-  backend/tests/integration/test_loading_slips.py → backend/tests/conftest.py
 - `pytest dev dependency` --references--> `Testcontainers Real Postgres Testing`  [INFERRED]
   backend/requirements-dev.txt → README.md
 
@@ -195,7 +195,7 @@ Nodes (10): pytest_configure(), pytest_unconfigure(), Session-wide test setup. A
 
 ### Community 23 - "get_firm_id"
 Cohesion: 0.17
-Nodes (28): get_firm_id(), The first seeded firm's id (`firms` is seeded by migration 0001)., Dalali is stored but excluded from grand_total. topay = grand_total - advance., Multi-consignor stored as newline-separated text; list and print round-trip…, GET /bilties/next-no returns the next available numeric bilti_no for the firm., next-no returns max+1 when numeric bilti_nos already exist for the firm., agent_name is required since user feedback #6. Omitting or nulling it must…, test_agent_name_is_required_at_api_level() (+20 more)
+Nodes (28): get_firm_id(), The first seeded firm's id (`firms` is seeded by migration 0001)., Dalali is included in grand_total (user feedback #7) but not shown on print., Multi-consignor stored as newline-separated text; list and print round-trip…, GET /bilties/next-no returns the next available numeric bilti_no for the firm., next-no returns max+1 when numeric bilti_nos already exist for the firm., agent_name is required since user feedback #6. Omitting or nulling it must…, test_agent_name_is_required_at_api_level() (+20 more)
 
 ### Community 24 - "test_migration_backfill.py"
 Cohesion: 0.21
@@ -254,20 +254,20 @@ Cohesion: 0.67
 Nodes (3): BaseModel, VehicleRead, VehicleUpdate
 
 ## Knowledge Gaps
-- **127 isolated node(s):** `FormValues`, `BiltiListParams`, `FormValues`, `AgentPaymentListParams`, `AgentListParams` (+122 more)
+- **127 isolated node(s):** `TruckOwnerPaymentListParams`, `PaymentFormValues`, `ReceiptListParams`, `AgentListParams`, `BiltiListParams` (+122 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 337 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `loading-slip-form-drawer.tsx` to `loading-slip-list-page.tsx`, `types.ts`, `reports.ts`, `agent-ledger-page.tsx`, `App.tsx`, `firm-setup-tab.tsx`, `bilti-form-drawer.tsx`, `package.json`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Why does `BiltiCreate` connect `test_schemas.py` to `UUID`, `crud/bilti.py`, `schemas/bilti.py`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Why does `react-router-dom` connect `App.tsx` to `loading-slip-list-page.tsx`, `types.ts`, `loading-slip-form-drawer.tsx`, `reports.ts`, `agent-ledger-page.tsx`, `bilti-form-drawer.tsx`, `package.json`?**
+- **Why does `get_settings()` connect `sqlalchemy` to `Settings`, `agent_payments.py`, `routers/reports.py`, `test_migration_backfill.py`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **What connects `FormValues`, `BiltiListParams`, `FormValues` to the rest of the system?**
+- **Why does `Firm` connect `loading_slips.py` to `agent_payments.py`, `sqlalchemy`, `truck_owner_payments.py`, `receipts.py`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `react` connect `loading-slip-form-drawer.tsx` to `loading-slip-list-page.tsx`, `types.ts`, `reports.ts`, `agent-ledger-page.tsx`, `App.tsx`, `firm-setup-tab.tsx`, `bilti-form-drawer.tsx`, `package.json`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **What connects `TruckOwnerPaymentListParams`, `PaymentFormValues`, `ReceiptListParams` to the rest of the system?**
   _127 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `agent_payments.py` be split into smaller, more focused modules?**
   _Cohesion score 0.09634146341463415 - nodes in this community are weakly interconnected._

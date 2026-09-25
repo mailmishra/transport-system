@@ -240,9 +240,9 @@
     "semantic_hash": "187c33ec17401024ae26a3961c988a37"
   },
   "backend/app/schemas/bilti.py": {
-    "mtime": 1790345698.661535,
-    "seen": 1790345738.467079,
-    "ast_hash": "260ad17fb06eaa1e86ef89559c2bea6b",
+    "mtime": 1790344573.6861877,
+    "seen": 1790344737.036632,
+    "ast_hash": "8f2ef319a9821c2ac8265207141c8140",
     "semantic_hash": ""
   },
   "backend/app/schemas/firm.py": {
@@ -306,9 +306,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/tests/integration/test_bilties.py": {
-    "mtime": 1790345712.279995,
-    "seen": 1790345738.467087,
-    "ast_hash": "617dc1375108bac11846e57db8ea3481",
+    "mtime": 1790345034.2706804,
+    "seen": 1790345483.241246,
+    "ast_hash": "85f6b688f6db4a3ab1853c0bee38b8a8",
     "semantic_hash": ""
   },
   "backend/tests/integration/test_firms.py": {
