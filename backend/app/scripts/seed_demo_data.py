@@ -145,14 +145,16 @@ def main() -> None:
         ls_linked = loading_slip(
             slip_date=d(25),
             vehicle_no="RJ14GB5678",
-            truck_owner_name="Patel Roadways",
+            truck_owner_name="Gupta Carriers",
             agent_name="Mahesh Traders",
             loading_point="Ratlam",
-            destination="Ujjain",
+            destination="Jabalpur",
             goods_description="Cement Bags",
-            quantity_weight="9000 kg",
-            package_count="450 bags",
+            quantity_weight="5750 kg",
+            package_count="150 bags",
             advance_amount=3000,
+            advance_note="Cash advance at loading point",
+            factory_name="Narmada Cement Mill",
         )
         loading_slip(  # no truck owner, no agent -- both are optional
             slip_date=d(19),
@@ -167,7 +169,7 @@ def main() -> None:
             advance_amount=0,
             advance_note=None,
         )
-        loading_slip(  # advance_amount = 0 but a note is still present
+        loading_slip(  # factory_name set, advance_amount=0 with a note
             slip_date=d(18),
             vehicle_no="UP32AB9999",
             truck_owner_name="Gupta Carriers",
@@ -179,6 +181,7 @@ def main() -> None:
             package_count="80 bundles",
             advance_amount=0,
             advance_note="Advance to be settled on delivery, not at loading",
+            factory_name="Kanpur Steel Works",
         )
         loading_slip(
             slip_date=d(17),
