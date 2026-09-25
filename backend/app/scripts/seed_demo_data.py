@@ -138,6 +138,7 @@ def main() -> None:
                 "package_count": "200 bags",
                 "advance_amount": 1000,
                 "advance_note": "Cash advance at loading point",
+                "factory_name": "Indore Textile Mills Pvt Ltd",
             }
             payload.update(over)
             return post(client, "/api/loading-slips", payload, label=f"loading-slip {payload.get('vehicle_no')}")
@@ -194,7 +195,14 @@ def main() -> None:
             quantity_weight="6000 kg",
             package_count="300 बोरी",
             advance_amount=1500,
+            factory_name="Bhopal Rice & Flour Mills",
         )
+        _bulk_factories = [
+            "Indore Textile Mills Pvt Ltd",
+            "Narmada Cement Works",
+            "Malwa Grain Depot",
+            "Maruti Auto Parts Warehouse",
+        ]
         for i in range(9):
             loading_slip(
                 slip_date=d(16 - i),
@@ -207,6 +215,7 @@ def main() -> None:
                 quantity_weight=f"{4000 + i * 350} kg",
                 package_count=f"{100 + i * 10} bags",
                 advance_amount=500 * (i % 5),
+                factory_name=_bulk_factories[i % 4],
             )
 
         # ------------------------------------------------------------------

@@ -156,7 +156,7 @@ export function BiltiListPage() {
           setSearch(q);
           setPage(1);
         }}
-        searchPlaceholder="Search by GR no., consignor, consignee…"
+        searchPlaceholder="Search by GR no., consignor, consignee, truck no.…"
         isLoading={isLoading || (isFetching && !data)}
         onRowClick={(row) => navigate(`/bilti/${row.id}/print`)}
       />

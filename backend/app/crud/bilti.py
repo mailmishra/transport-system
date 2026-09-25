@@ -8,6 +8,7 @@ from app.crud import agent as agent_crud
 from app.crud import truck_owner as truck_owner_crud
 from app.crud import vehicle as vehicle_crud
 from app.models.bilti import Bilti
+from app.models.vehicle import Vehicle
 from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.bilti import BiltiCreate, BiltiUpdate
 
@@ -84,8 +85,13 @@ async def list_(
         stmt = stmt.where(Bilti.bilti_date <= date_to)
     if q:
         needle = f"%{q.strip()}%"
-        stmt = stmt.where(
-            or_(Bilti.bilti_no.ilike(needle), Bilti.consignor.ilike(needle), Bilti.consignee.ilike(needle))
+        stmt = stmt.join(Vehicle, Bilti.vehicle_id == Vehicle.id).where(
+            or_(
+                Bilti.bilti_no.ilike(needle),
+                Bilti.consignor.ilike(needle),
+                Bilti.consignee.ilike(needle),
+                Vehicle.vehicle_no.ilike(needle),
+            )
         )
     stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
     return await paginate(db, stmt, page, limit)
