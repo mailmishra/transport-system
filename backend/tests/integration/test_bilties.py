@@ -28,10 +28,29 @@ def test_same_name_reuses_agent_case_and_whitespace_insensitively(client):
     assert first["agent"]["id"] == second["agent"]["id"]
 
 
-def test_bilti_without_agent_name_has_no_agent(client):
+def test_agent_name_is_required_at_api_level(client):
+    """agent_name is required since user feedback #6. Omitting or nulling it must return 422."""
     firm_id = get_firm_id(client)
-    created = create_bilti(client, firm_id, agent_name=None)
-    assert created["agent"] is None
+    for bad_agent in [None, "   "]:
+        res = client.post(
+            "/api/bilties",
+            json={
+                "firm_id": firm_id,
+                "bilti_no": unique("B"),
+                "bilti_date": "2026-01-15",
+                "consignor": "A",
+                "consignee": "B",
+                "from_location": "C",
+                "to_location": "D",
+                "vehicle_no": unique("MP20"),
+                "truck_owner_name": unique("Owner"),
+                "agent_name": bad_agent,
+                "goods_description": "G",
+                "weight": "1",
+                "freight": 100,
+            },
+        )
+        assert res.status_code == 422, f"expected 422 for agent_name={bad_agent!r}"
 
 
 def test_freight_must_be_positive(client):
@@ -48,6 +67,7 @@ def test_freight_must_be_positive(client):
             "to_location": "D",
             "vehicle_no": unique("MP20"),
             "truck_owner_name": unique("Owner"),
+            "agent_name": unique("Agent"),
             "goods_description": "G",
             "weight": "1",
             "freight": -5,
@@ -72,6 +92,7 @@ def test_duplicate_bilti_no_for_same_firm_is_rejected(client):
             "to_location": "D",
             "vehicle_no": unique("MP20"),
             "truck_owner_name": unique("Owner"),
+            "agent_name": unique("Agent"),
             "goods_description": "G",
             "weight": "1",
             "freight": 100,
@@ -104,6 +125,7 @@ def test_unknown_loading_slip_id_returns_422(client):
             "to_location": "D",
             "vehicle_no": unique("MP20"),
             "truck_owner_name": unique("Owner"),
+            "agent_name": unique("Agent"),
             "goods_description": "G",
             "weight": "1",
             "freight": 100,
@@ -133,12 +155,14 @@ def test_soft_deleted_bilti_hidden_from_list_and_get(client):
     assert not any(x["id"] == created["id"] for x in listed.json()["items"])
 
 
-def test_grand_total_and_topay_computed_from_charge_breakdown(client):
+def test_grand_total_includes_dalali_topay_is_net_of_advance(client):
+    """Dalali is included in grand_total (user feedback #7) but not shown on print."""
     firm_id = get_firm_id(client)
     created = create_bilti(
         client,
         firm_id,
         freight=5000,
+        dalali=200,
         other_charges=100,
         kanta_charges=50,
         bahi_charges=20,
@@ -147,14 +171,19 @@ def test_grand_total_and_topay_computed_from_charge_breakdown(client):
         p_freight=0,
         advance_to_owner=1000,
     )
-    # 5000 + 100 + 50 + 20 + 30 + 260 + 0
-    assert created["grand_total"] == "5460.00"
-    # grand_total - advance_to_owner
-    assert created["topay"] == "4460.00"
+    # grand_total = freight + dalali + all other charges (no advance deducted here)
+    # 5000 + 200 + 100 + 50 + 20 + 30 + 260 + 0 = 5660
+    assert created["grand_total"] == "5660.00"
+    # topay = grand_total - advance_to_owner
+    assert created["topay"] == "4660.00"
 
+    # print view reflects same totals; dalali IS in the API response (the
+    # frontend's print layout just doesn't render a Dalali line item)
     printable = client.get(f"/api/bilties/{created['id']}/print")
-    assert printable.json()["grand_total"] == "5460.00"
-    assert printable.json()["topay"] == "4460.00"
+    assert printable.json()["grand_total"] == "5660.00"
+    assert printable.json()["topay"] == "4660.00"
+    # freight_difference is the only hidden field on BiltiPrint
+    assert "freight_difference" not in printable.json()
 
 
 def test_gst_paid_by_rejects_invalid_value(client):
@@ -171,6 +200,7 @@ def test_gst_paid_by_rejects_invalid_value(client):
             "to_location": "D",
             "vehicle_no": unique("MP20"),
             "truck_owner_name": unique("Owner"),
+            "agent_name": unique("Agent"),
             "goods_description": "G",
             "weight": "1",
             "freight": 100,
@@ -178,6 +208,72 @@ def test_gst_paid_by_rejects_invalid_value(client):
         },
     )
     assert res.status_code == 422
+
+
+def test_weight_per_bag_stored_and_returned(client):
+    firm_id = get_firm_id(client)
+    created = create_bilti(client, firm_id, weight_per_bag=0.05)
+    assert created["weight_per_bag"] == "0.050"
+
+    # omitting it gives null
+    created2 = create_bilti(client, firm_id)
+    assert created2["weight_per_bag"] is None
+
+
+def test_consignor_accepts_multiline(client):
+    """Multi-consignor stored as newline-separated text; list and print round-trip intact."""
+    firm_id = get_firm_id(client)
+    multi = "ABC Traders\nXYZ Mills\nPatel Roadways"
+    created = create_bilti(client, firm_id, consignor=multi)
+    assert created["consignor"] == multi
+
+    # print view returns same value (rendering is front-end's job)
+    printable = client.get(f"/api/bilties/{created['id']}/print").json()
+    assert printable["consignor"] == multi
+
+
+def test_goods_description_accepts_multiline(client):
+    firm_id = get_firm_id(client)
+    multi = "Cement Bags\nSteel Rods"
+    created = create_bilti(client, firm_id, goods_description=multi)
+    assert created["goods_description"] == multi
+
+
+def test_next_bilti_no_returns_sequence(client):
+    """GET /bilties/next-no returns the next available numeric bilti_no for the firm."""
+    firm_id = get_firm_id(client)
+    marker = unique("NextNo")
+    # Create a few with numeric bilti_nos under this firm
+    # Use firm-level unique marker in consignor so we can track them
+    create_bilti(client, firm_id, bilti_no=unique("NNN"), consignor=marker, freight=100)
+
+    # Create biltis with explicit numeric keys
+    n_prefix = unique("NUM")
+    create_bilti(client, firm_id, bilti_no=f"{n_prefix}100", freight=100)
+
+    # next-no is per-firm; just assert it returns a non-empty string (other tests
+    # may have created numeric bilti_nos already, so we can't pin the exact value)
+    res = client.get("/api/bilties/next-no", params={"firm_id": firm_id})
+    assert res.status_code == 200
+    body = res.json()
+    assert "next_no" in body
+    # it must be a string representation of an integer
+    assert body["next_no"].isdigit()
+    # and it must be > 0
+    assert int(body["next_no"]) > 0
+
+
+def test_next_bilti_no_increments_past_existing(client):
+    """next-no returns max+1 when numeric bilti_nos already exist for the firm."""
+    firm_id = get_firm_id(client)
+    # Plant a known high numeric bilti_no
+    known_high = "77777"
+    create_bilti(client, firm_id, bilti_no=known_high, freight=100)
+
+    res = client.get("/api/bilties/next-no", params={"firm_id": firm_id})
+    assert res.status_code == 200
+    returned = int(res.json()["next_no"])
+    assert returned >= 77778  # at least one past the planted value
 
 
 def test_list_is_paginated_with_envelope(client):

@@ -301,6 +301,7 @@ def main() -> None:
             to_location="Ujjain",
             vehicle_no="GJ05CT4321",
             truck_owner_name="Gupta Carriers",
+            agent_name="Suresh Bhai",
             goods_description="Groceries",
             weight="1200 kg",
             freight=2200,
@@ -394,16 +395,18 @@ def main() -> None:
             freight_difference=150,
         )
 
-        # 8. No agent at all (agent_name omitted) -- must never appear in
-        #    any Agent Ledger balance.
+        # 8. All required fields including agent (agent became required per
+        #    user feedback #6). Agent set to "Suresh Bhai" to keep ledger
+        #    scenarios intact -- see agent_a_* comments above.
         create_bilti(
-            "no_agent",
+            "no_extras",
             bilti_no=next_no(),
             bilti_date=d(20),
             consignor="Direct Shipper Co",
             consignee="Direct Receiver Co",
             vehicle_no="MP09XY1235",
             truck_owner_name="Ramesh Singh Transport",
+            agent_name="Suresh Bhai",
             goods_description="Furniture",
             weight="3000 kg",
             freight=6000,
@@ -422,6 +425,7 @@ def main() -> None:
             consignee="Ratlam Retail Hub",
             vehicle_no="RJ14GB5678",
             truck_owner_name="Sagar Roadlines",
+            agent_name="Suresh Bhai",
             goods_description="Packaged Foods",
             weight="4000 kg",
             freight=7000,
@@ -435,6 +439,7 @@ def main() -> None:
             consignee="Dewas Retail Hub",
             vehicle_no="RJ14GB5678",
             truck_owner_name="Sagar Roadlines",
+            agent_name="Suresh Bhai",
             goods_description="Packaged Foods",
             weight="3500 kg",
             freight=6500,
@@ -452,6 +457,7 @@ def main() -> None:
             consignee="Indore Fresh Mart",
             vehicle_no="UP32AB9999",
             truck_owner_name="Gupta Carriers",
+            agent_name="Om Logistics Agency",
             goods_description="Perishable Produce",
             weight="6000 kg",
             freight=9500,
@@ -459,7 +465,8 @@ def main() -> None:
         )
 
         # 12. Palti (alternate) vehicle set -- print view's "Palti Vehicle
-        #    No." row.
+        #    No." row. Also demonstrates multi-goods-description (newline-
+        #    separated lines rendered as separate items on the print GR).
         create_bilti(
             "palti_vehicle",
             bilti_no=next_no(),
@@ -469,7 +476,8 @@ def main() -> None:
             vehicle_no="MH12CD3456",
             palti_vehicle_no="CG04EF7890",
             truck_owner_name="Bhopal Freight Carriers",
-            goods_description="Auto Spare Parts",
+            agent_name="Om Logistics Agency",
+            goods_description="Auto Spare Parts\nEngine Components\nGear Assemblies",
             weight="2500 kg",
             freight=5200,
         )
@@ -486,6 +494,7 @@ def main() -> None:
             consignee="Low Cost Retail Chain",
             vehicle_no="MP09XY1235",
             truck_owner_name="Ramesh Singh Transport",
+            agent_name="Suresh Bhai",
             goods_description="Plastic Goods",
             weight="4200 kg",
             freight=6800,
@@ -503,6 +512,7 @@ def main() -> None:
                 consignee=f"GST Test Consignee {gst.title()}",
                 vehicle_no=["MP09XY1234", "RJ14GB5678", "GJ05CT4321", "UP32AB9999"][i],
                 truck_owner_name="Ramesh Singh Transport",
+                agent_name="Suresh Bhai",
                 goods_description="Mixed Cargo",
                 weight=f"{3000 + i * 500} kg",
                 freight=5500 + i * 500,
@@ -528,31 +538,39 @@ def main() -> None:
             other_charges=450.25,
         )
 
-        # 19. Long text near max length on goods_description (300) and
-        #    remark (500) -- table/print wrapping.
+        # 19. Multi-consignor + multi-goods + weight_per_bag auto-calc demo.
+        #    Demonstrates all three features added in the second iteration:
+        #    consignor stores newline-separated names, goods_description
+        #    stores newline-separated items, weight_per_bag is the per-unit
+        #    weight (100 bags × 0.05 MT = 5 MT weight).
         create_bilti(
-            "long_text",
+            "multi_consignor_goods",
             bilti_no=next_no(),
             bilti_date=d(9),
-            consignor="Consolidated Freight & Logistics Solutions Private Limited",
-            consignee="National Distribution and Warehousing Corporation of India",
+            consignor=(
+                "Consolidated Freight & Logistics Solutions Pvt Ltd\n"
+                "National Distribution and Warehousing Corp\n"
+                "Sunrise Wholesale Mart"
+            ),
+            consignee="Central Receiving Hub",
             vehicle_no="MH12CD3456",
             truck_owner_name="Bhopal Freight Carriers",
+            agent_name="Mahesh Traders",
             goods_description=(
-                "Mixed general merchandise consisting of household plastic goods, "
-                "kitchenware, assorted stationery items, packaged consumer durables, "
-                "and miscellaneous retail-ready cartons consolidated from multiple "
-                "small shippers under a single consignment for cost efficiency"
-            )[:300],
-            weight="5600 kg",
+                "Household Plastic Goods\n"
+                "Kitchenware Assorted\n"
+                "Packaged Consumer Durables\n"
+                "Retail-Ready Cartons"
+            ),
+            package_count="100",
+            package_unit="BAG",
+            weight_per_bag=0.05,
+            weight="5 MT",
+            charged_weight="5.2 MT",
+            freight_rate=1.8,
             freight=9200,
-            remark=(
-                "Consignment consolidated from 6 separate shippers at the loading "
-                "point — please verify carton count against the enclosed manifest "
-                "before unloading, and contact the transporter's office immediately "
-                "if any carton appears tampered with or the count does not match. "
-                "Driver has been instructed to wait up to 2 hours for unloading."
-            )[:500],
+            dalali=300,
+            remark="Multi-consignor consolidated load — verify per-consignor carton count.",
         )
 
         # 20. Unicode / Hindi party names and goods description -- full
@@ -588,6 +606,7 @@ def main() -> None:
             consignee="Whitespace Test Receivers",
             vehicle_no="MP09XY1234",
             truck_owner_name="  ramesh SINGH transport  ",
+            agent_name="Suresh Bhai",
             goods_description="Test Cargo",
             weight="2000 kg",
             freight=3500,
@@ -608,6 +627,7 @@ def main() -> None:
                 consignee="Ujjain Building Materials",
                 vehicle_no="RJ14GB5678",
                 truck_owner_name="Patel Roadways",
+                agent_name="Mahesh Traders",
                 goods_description="Cement Bags",
                 weight="9000 kg",
                 freight=16200,
@@ -625,6 +645,7 @@ def main() -> None:
                 consignee="Second Firm Test Consignee",
                 vehicle_no="MP09XY1234",
                 truck_owner_name="Ramesh Singh Transport",
+                agent_name="Suresh Bhai",
                 goods_description="Firm Isolation Test Cargo",
                 weight="1800 kg",
                 freight=3100,
@@ -658,16 +679,18 @@ def main() -> None:
         # agent_name here on purpose -- attaching "Suresh Bhai" et al.
         # would inflate the exact accrued/balance figures the dedicated
         # agent_a_*/agent_b_* scenarios above are documented against.
-        consignors = ["Narmada Traders", "Vindhya Wholesalers", "Malwa Mills", "Omkareshwar Exports"]
+        bulk_agents = ["Suresh Bhai", "Om Logistics Agency", "Mahesh Traders"]
+        bulk_consignors = ["Narmada Traders", "Vindhya Wholesalers", "Malwa Mills", "Omkareshwar Exports"]
         for i in range(6):
             create_bilti(
                 f"bulk_{i}",
                 bilti_no=next_no(),
                 bilti_date=d(4 - (i % 4)),
-                consignor=f"{consignors[i % 4]} #{i + 1}",
+                consignor=f"{bulk_consignors[i % 4]} #{i + 1}",
                 consignee=f"Bulk Consignee {i + 1}",
                 vehicle_no=["MP09XY1234", "RJ14GB5678", "GJ05CT4321", "UP32AB9999"][i % 4],
                 truck_owner_name=["Ramesh Singh Transport", "Patel Roadways", "Gupta Carriers"][i % 3],
+                agent_name=bulk_agents[i % 3],
                 goods_description=["Textiles", "Grain", "Hardware", "Furniture"][i % 4],
                 weight=f"{2000 + i * 300} kg",
                 freight=4000 + i * 350,
@@ -789,7 +812,7 @@ def main() -> None:
         if unicode_b:
             post(client, "/api/receipts", {"firm_id": firm_id, "bilti_id": unicode_b["id"], "amount": 7600, "receipt_date": d(4), "received_from": "श्री गणेश ट्रेडर्स"}, label="receipt (unicode)")
 
-        for tag in ["agent_a_1", "agent_b_1", "owner_exact_settle_2", "gst_consignor", "gst_exempted", "palti_vehicle", "explicitly_uninsured", "no_agent"]:
+        for tag in ["agent_a_1", "agent_b_1", "owner_exact_settle_2", "gst_consignor", "gst_exempted", "palti_vehicle", "explicitly_uninsured", "no_extras"]:
             b = bilties.get(tag)
             if b:
                 post(
@@ -801,7 +824,7 @@ def main() -> None:
                         "amount": round(float(b["freight"]) * 0.6, 2),
                         "receipt_date": d(2),
                         "received_from": b["consignor"],
-                        "remarks": "Partial receipt" if tag != "no_agent" else None,
+                        "remarks": "Partial receipt" if tag != "no_extras" else None,
                     },
                     label=f"receipt ({tag})",
                 )

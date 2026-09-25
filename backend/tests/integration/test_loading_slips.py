@@ -53,6 +53,17 @@ def test_unknown_firm_id_returns_422(client):
     assert res.status_code == 422
 
 
+def test_factory_name_stored_and_returned(client):
+    """factory_name is the mill/factory where goods are loaded or delivered."""
+    firm_id = get_firm_id(client)
+    created = create_loading_slip(client, firm_id, factory_name="Narmada Cement Mill")
+    assert created["factory_name"] == "Narmada Cement Mill"
+
+    # omitting factory_name gives null
+    created2 = create_loading_slip(client, firm_id)
+    assert created2["factory_name"] is None
+
+
 def test_update_and_soft_delete(client):
     firm_id = get_firm_id(client)
     created = create_loading_slip(client, firm_id)

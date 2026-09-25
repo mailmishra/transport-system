@@ -57,16 +57,41 @@ def test_bilti_required_text_fields_reject_blank(field):
         BiltiCreate(**_bilti_payload(**{field: "   "}))
 
 
-def test_bilti_blank_agent_name_becomes_none():
-    b = BiltiCreate(**_bilti_payload(agent_name="   "))
-    assert b.agent_name is None
+def test_bilti_agent_name_is_required():
+    """agent_name became required (user feedback #6). Blank or missing must be rejected."""
+    with pytest.raises(ValidationError):
+        BiltiCreate(**_bilti_payload(agent_name="   "))
 
-
-def test_bilti_missing_agent_name_is_fine():
     payload = _bilti_payload()
     del payload["agent_name"]
-    b = BiltiCreate(**payload)
-    assert b.agent_name is None
+    with pytest.raises(ValidationError):
+        BiltiCreate(**payload)
+
+
+def test_bilti_weight_per_bag_optional():
+    """weight_per_bag defaults absent and accepts a positive decimal."""
+    b = BiltiCreate(**_bilti_payload())
+    assert b.weight_per_bag is None
+
+    b2 = BiltiCreate(**_bilti_payload(weight_per_bag=0.05))
+    assert float(b2.weight_per_bag) == pytest.approx(0.05)
+
+    with pytest.raises(ValidationError):
+        BiltiCreate(**_bilti_payload(weight_per_bag=-1))
+
+
+def test_bilti_consignor_accepts_multiline():
+    """Multi-consignor is stored as newline-separated text in the consignor column."""
+    two_consignors = "ABC Traders\nXYZ Mills"
+    b = BiltiCreate(**_bilti_payload(consignor=two_consignors))
+    assert b.consignor == two_consignors
+
+
+def test_bilti_goods_description_accepts_multiline():
+    """Multi-goods is stored as newline-separated text."""
+    two_lines = "Cement Bags\nSteel Rods"
+    b = BiltiCreate(**_bilti_payload(goods_description=two_lines))
+    assert b.goods_description == two_lines
 
 
 def test_loading_slip_requires_non_blank_fields():
@@ -82,6 +107,24 @@ def test_loading_slip_requires_non_blank_fields():
     LoadingSlipCreate(**base)  # valid, should not raise
     with pytest.raises(ValidationError):
         LoadingSlipCreate(**{**base, "vehicle_no": ""})
+
+
+def test_loading_slip_factory_name_optional():
+    """factory_name added for loading slip (mill/factory where goods are loaded or delivered)."""
+    base = dict(
+        firm_id=FIRM_ID,
+        slip_date="2026-01-15",
+        vehicle_no="MP20AB1234",
+        loading_point="Katni",
+        destination="Jabalpur",
+        goods_description="Cement",
+        quantity_weight="10 tons",
+    )
+    s = LoadingSlipCreate(**base)
+    assert s.factory_name is None
+
+    s2 = LoadingSlipCreate(**base, factory_name="Narmada Cement Mill")
+    assert s2.factory_name == "Narmada Cement Mill"
 
 
 def test_receipt_amount_must_be_positive():
