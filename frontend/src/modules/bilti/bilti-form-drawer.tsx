@@ -10,7 +10,7 @@ import { AsyncCombobox } from "@/components/combobox/async-combobox";
 import { useVehicleSearch } from "@/api/vehicles";
 import { useAgentSearch } from "@/api/agents";
 import { useTruckOwnerSearch } from "@/api/truckOwners";
-import { useBilti, useCreateBilti, useUpdateBilti } from "@/api/bilties";
+import { useBilti, useCreateBilti, useUpdateBilti, fetchNextBiltiNo } from "@/api/bilties";
 import { useSelectedFirm } from "@/state/selected-firm";
 import { ApiError } from "@/api/client";
 import type { BiltiCreateInput, GstPaidBy } from "@/api/types";
@@ -19,7 +19,6 @@ import { todayIso } from "@/lib/dates";
 interface FormValues {
   bilti_no: string;
   bilti_date: string;
-  consignor: string;
   consignee: string;
   from_location: string;
   to_location: string;
@@ -27,7 +26,6 @@ interface FormValues {
   palti_vehicle_no: string;
   truck_owner_name: string;
   agent_name: string;
-  goods_description: string;
   package_count: string;
   package_unit: string;
   weight: string;
@@ -52,22 +50,16 @@ interface FormValues {
 }
 
 const EMPTY: FormValues = {
-  bilti_no: "", bilti_date: todayIso(), consignor: "", consignee: "",
+  bilti_no: "", bilti_date: todayIso(), consignee: "",
   from_location: "", to_location: "", vehicle_no: "", palti_vehicle_no: "",
-  truck_owner_name: "", agent_name: "", goods_description: "",
-  package_count: "", package_unit: "", weight: "", charged_weight: "",
-  weight_per_bag: "", freight_rate: "", freight: "", other_charges: "0", kanta_charges: "0",
-  bahi_charges: "0", service_tax: "0", hamali: "0", p_freight: "0",
-  dalali: "0", advance_to_owner: "0", freight_difference: "0",
-  gst_paid_by: "", eway_bill_no: "", invoice_value: "",
-  goods_value_declared: "", remark: "",
+  truck_owner_name: "", agent_name: "", package_count: "", package_unit: "",
+  weight: "", charged_weight: "", weight_per_bag: "", freight_rate: "",
+  freight: "", other_charges: "0", kanta_charges: "0", bahi_charges: "0",
+  service_tax: "0", hamali: "0", p_freight: "0", dalali: "0",
+  advance_to_owner: "0", freight_difference: "0", gst_paid_by: "",
+  eway_bill_no: "", invoice_value: "", goods_value_declared: "", remark: "",
 };
 
-/** Maps a BiltiCreateInput field name (from a 422's `loc`) to the react-
- * hook-form field it belongs to -- same idea as concept/index.html's
- * BILTI_FIELD_MAP, native to react-hook-form's setError() instead of
- * manual DOM manipulation.
- */
 const FIELD_NAMES = Object.keys(EMPTY) as Array<keyof FormValues>;
 
 export function BiltiFormDrawer() {
@@ -78,6 +70,14 @@ export function BiltiFormDrawer() {
   const { data: existing } = useBilti(id);
   const createBilti = useCreateBilti();
   const updateBilti = useUpdateBilti();
+
+  // Multi-consignor: each entry is one name
+  const [consignors, setConsignors] = React.useState<string[]>([""]);
+  // Multi-goods: each entry is one goods line
+  const [goodsLines, setGoodsLines] = React.useState<string[]>([""]);
+  const [consignorError, setConsignorError] = React.useState<string>();
+  const [goodsError, setGoodsError] = React.useState<string>();
+  const [generatingNo, setGeneratingNo] = React.useState(false);
 
   const {
     register,
@@ -114,10 +114,11 @@ export function BiltiFormDrawer() {
 
   React.useEffect(() => {
     if (existing) {
+      setConsignors(existing.consignor.split("\n").filter(Boolean) || [""]);
+      setGoodsLines(existing.goods_description.split("\n").filter(Boolean) || [""]);
       reset({
         bilti_no: existing.bilti_no,
         bilti_date: existing.bilti_date,
-        consignor: existing.consignor,
         consignee: existing.consignee,
         from_location: existing.from_location,
         to_location: existing.to_location,
@@ -125,7 +126,6 @@ export function BiltiFormDrawer() {
         palti_vehicle_no: existing.palti_vehicle?.vehicle_no ?? "",
         truck_owner_name: existing.truck_owner.name,
         agent_name: existing.agent?.name ?? "",
-        goods_description: existing.goods_description,
         package_count: existing.package_count ?? "",
         package_unit: existing.package_unit ?? "",
         weight: existing.weight,
@@ -153,14 +153,40 @@ export function BiltiFormDrawer() {
 
   const close = () => navigate(-1);
 
+  const generateNo = async () => {
+    if (!firmId) return;
+    setGeneratingNo(true);
+    try {
+      const { next_no } = await fetchNextBiltiNo(firmId);
+      setValue("bilti_no", next_no);
+    } finally {
+      setGeneratingNo(false);
+    }
+  };
+
   const onSubmit = handleSubmit(async (values) => {
     if (!firmId) return;
+
+    // Validate dynamic arrays
+    const filledConsignors = consignors.map((s) => s.trim()).filter(Boolean);
+    const filledGoods = goodsLines.map((s) => s.trim()).filter(Boolean);
+    if (filledConsignors.length === 0) {
+      setConsignorError("At least one consignor is required");
+      return;
+    }
+    if (filledGoods.length === 0) {
+      setGoodsError("At least one goods description is required");
+      return;
+    }
+    setConsignorError(undefined);
+    setGoodsError(undefined);
+
     const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
     const payload: BiltiCreateInput = {
       firm_id: firmId,
       bilti_no: values.bilti_no,
       bilti_date: values.bilti_date,
-      consignor: values.consignor,
+      consignor: filledConsignors.join("\n"),
       consignee: values.consignee,
       from_location: values.from_location,
       to_location: values.to_location,
@@ -168,7 +194,7 @@ export function BiltiFormDrawer() {
       palti_vehicle_no: values.palti_vehicle_no || null,
       truck_owner_name: values.truck_owner_name,
       agent_name: values.agent_name,
-      goods_description: values.goods_description,
+      goods_description: filledGoods.join("\n"),
       package_count: values.package_count || null,
       package_unit: values.package_unit || null,
       weight: values.weight,
@@ -225,14 +251,54 @@ export function BiltiFormDrawer() {
 
             <Section title="Route & Party">
               <Field label="Bilti / GR No." error={errors.bilti_no?.message}>
-                <Input invalid={!!errors.bilti_no} {...register("bilti_no", { required: "Required" })} />
+                <div className="flex gap-2">
+                  <Input invalid={!!errors.bilti_no} {...register("bilti_no", { required: "Required" })} className="flex-1" />
+                  <Button type="button" variant="secondary" className="shrink-0 px-3 text-xs" onClick={generateNo} disabled={generatingNo}>
+                    {generatingNo ? "…" : "Generate"}
+                  </Button>
+                </div>
               </Field>
               <Field label="Date" error={errors.bilti_date?.message}>
                 <Input type="date" invalid={!!errors.bilti_date} {...register("bilti_date", { required: "Required" })} />
               </Field>
-              <Field label="Consignor" error={errors.consignor?.message}>
-                <Input invalid={!!errors.consignor} {...register("consignor", { required: "Required" })} />
-              </Field>
+
+              <div>
+                <Label>Consignor(s)</Label>
+                <div className="mt-1 space-y-1.5">
+                  {consignors.map((val, i) => (
+                    <div key={i} className="flex gap-1.5">
+                      <Input
+                        value={val}
+                        onChange={(e) => {
+                          const next = [...consignors];
+                          next[i] = e.target.value;
+                          setConsignors(next);
+                        }}
+                        placeholder={`Consignor ${i + 1}`}
+                        className="flex-1"
+                      />
+                      {consignors.length > 1 && (
+                        <button
+                          type="button"
+                          className="px-2 text-sm text-muted hover:text-destructive"
+                          onClick={() => setConsignors(consignors.filter((_, j) => j !== i))}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="text-xs text-navy underline"
+                    onClick={() => setConsignors([...consignors, ""])}
+                  >
+                    + Add Consignor
+                  </button>
+                </div>
+                {consignorError && <p className="mt-1 text-xs text-destructive">{consignorError}</p>}
+              </div>
+
               <Field label="Consignee" error={errors.consignee?.message}>
                 <Input invalid={!!errors.consignee} {...register("consignee", { required: "Required" })} />
               </Field>
@@ -309,9 +375,42 @@ export function BiltiFormDrawer() {
             </Section>
 
             <Section title="Goods & Weight">
-              <Field label="Goods / Description" error={errors.goods_description?.message}>
-                <Input invalid={!!errors.goods_description} {...register("goods_description", { required: "Required" })} />
-              </Field>
+              <div>
+                <Label>Goods / Description</Label>
+                <div className="mt-1 space-y-1.5">
+                  {goodsLines.map((val, i) => (
+                    <div key={i} className="flex gap-1.5">
+                      <Input
+                        value={val}
+                        onChange={(e) => {
+                          const next = [...goodsLines];
+                          next[i] = e.target.value;
+                          setGoodsLines(next);
+                        }}
+                        placeholder={`Item ${i + 1}`}
+                        className="flex-1"
+                      />
+                      {goodsLines.length > 1 && (
+                        <button
+                          type="button"
+                          className="px-2 text-sm text-muted hover:text-destructive"
+                          onClick={() => setGoodsLines(goodsLines.filter((_, j) => j !== i))}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="text-xs text-navy underline"
+                    onClick={() => setGoodsLines([...goodsLines, ""])}
+                  >
+                    + Add Item
+                  </button>
+                </div>
+                {goodsError && <p className="mt-1 text-xs text-destructive">{goodsError}</p>}
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Package Count"><Input {...register("package_count")} placeholder="67" /></Field>
                 <Field label="Package Unit"><Input {...register("package_unit")} placeholder="BAG" /></Field>

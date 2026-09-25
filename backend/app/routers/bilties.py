@@ -2,10 +2,12 @@ import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import bilti as crud
 from app.deps import Actor, get_current_actor, get_db
+from app.models.bilti import Bilti
 from app.models.firm import Firm
 from app.models.loading_slip import LoadingSlip
 from app.pagination import DEFAULT_LIMIT, Page
@@ -30,6 +32,18 @@ async def _get_or_404(db: AsyncSession, bilti_id: uuid.UUID):
     if obj is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bilti not found")
     return obj
+
+
+@router.get("/next-no")
+async def next_bilti_no(firm_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Return the next suggested bilti_no for the given firm (max numeric value + 1)."""
+    rows = (
+        await db.execute(
+            select(Bilti.bilti_no).where(Bilti.firm_id == firm_id, Bilti.is_deleted.is_(False))
+        )
+    ).scalars().all()
+    nums = [int(r) for r in rows if r.strip().isdigit()]
+    return {"next_no": str(max(nums) + 1) if nums else "1"}
 
 
 @router.post("", response_model=BiltiRead, status_code=status.HTTP_201_CREATED)

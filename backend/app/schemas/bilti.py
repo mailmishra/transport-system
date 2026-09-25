@@ -29,8 +29,8 @@ class BiltiBase(BaseModel):
     loading_slip_id: uuid.UUID | None = None
     bilti_no: str = Field(min_length=1, max_length=50)
     bilti_date: date
-    consignor: str = Field(min_length=1, max_length=200)
-    consignee: str = Field(min_length=1, max_length=200)
+    consignor: str = Field(min_length=1)
+    consignee: str = Field(min_length=1)
     from_location: str = Field(min_length=1, max_length=200)
     to_location: str = Field(min_length=1, max_length=200)
     # Free text in, normalized to vehicles/agents/truck_owners rows via
@@ -41,7 +41,7 @@ class BiltiBase(BaseModel):
     palti_vehicle_no: str | None = Field(default=None, max_length=50)
     truck_owner_name: str = Field(min_length=1, max_length=200)
     agent_name: str = Field(min_length=1, max_length=200)
-    goods_description: str = Field(min_length=1, max_length=300)
+    goods_description: str = Field(min_length=1)
     weight: str = Field(min_length=1, max_length=100)
     weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)
@@ -111,15 +111,15 @@ class BiltiUpdate(BaseModel):
     loading_slip_id: uuid.UUID | None = None
     bilti_no: str | None = Field(default=None, min_length=1, max_length=50)
     bilti_date: date | None = None
-    consignor: str | None = Field(default=None, min_length=1, max_length=200)
-    consignee: str | None = Field(default=None, min_length=1, max_length=200)
+    consignor: str | None = Field(default=None, min_length=1)
+    consignee: str | None = Field(default=None, min_length=1)
     from_location: str | None = Field(default=None, min_length=1, max_length=200)
     to_location: str | None = Field(default=None, min_length=1, max_length=200)
     vehicle_no: str | None = Field(default=None, min_length=1, max_length=50)
     palti_vehicle_no: str | None = Field(default=None, max_length=50)
     truck_owner_name: str | None = Field(default=None, min_length=1, max_length=200)
     agent_name: str | None = Field(default=None, max_length=200)
-    goods_description: str | None = Field(default=None, min_length=1, max_length=300)
+    goods_description: str | None = Field(default=None, min_length=1)
     weight: str | None = Field(default=None, min_length=1, max_length=100)
     weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)

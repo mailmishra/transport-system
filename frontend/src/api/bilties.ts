@@ -81,6 +81,10 @@ export function useUpdateBilti() {
   });
 }
 
+export function fetchNextBiltiNo(firmId: string): Promise<{ next_no: string }> {
+  return api.get(`/bilties/next-no?firm_id=${firmId}`);
+}
+
 export function useDeleteBilti() {
   const qc = useQueryClient();
   return useMutation({

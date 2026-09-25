@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,8 +25,8 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     )
     bilti_no: Mapped[str] = mapped_column(String(50), nullable=False)
     bilti_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    consignor: Mapped[str] = mapped_column(String(200), nullable=False)
-    consignee: Mapped[str] = mapped_column(String(200), nullable=False)
+    consignor: Mapped[str] = mapped_column(Text, nullable=False)
+    consignee: Mapped[str] = mapped_column(Text, nullable=False)
     from_location: Mapped[str] = mapped_column(String(200), nullable=False)
     to_location: Mapped[str] = mapped_column(String(200), nullable=False)
     # Normalized so the ledgers can aggregate by identity instead of free text
@@ -46,7 +46,7 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     agent_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("agents.id", ondelete="RESTRICT"), nullable=True, index=True
     )
-    goods_description: Mapped[str] = mapped_column(String(300), nullable=False)
+    goods_description: Mapped[str] = mapped_column(Text, nullable=False)
     # Actual weight as loaded; charged_weight is what freight is billed on
     # (may differ after rounding/minimum-weight rules) -- both appear
     # separately on the real GR form.

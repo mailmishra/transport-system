@@ -45,7 +45,11 @@ export function BiltiPrintView() {
       />
 
       <div className="my-2.5 grid grid-cols-2 gap-2.5">
-        <Box label="Consignor">{b.consignor}</Box>
+        <Box label="Consignor">
+          {b.consignor.split("\n").filter(Boolean).map((name, i) => (
+            <div key={i}>{name}</div>
+          ))}
+        </Box>
         <Box label="Consignee">{b.consignee}</Box>
       </div>
 
@@ -61,7 +65,11 @@ export function BiltiPrintView() {
         <tbody>
           <tr>
             <Td>{[b.package_count, b.package_unit].filter(Boolean).join(" ")}</Td>
-            <Td>{b.goods_description}</Td>
+            <Td>
+              {b.goods_description.split("\n").filter(Boolean).map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </Td>
             <Td>{b.weight}</Td>
             <Td>{b.charged_weight || b.weight}</Td>
           </tr>
