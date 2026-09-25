@@ -10,6 +10,13 @@ export interface BiltiListParams {
   limit?: number;
   agentId?: string;
   truckOwnerId?: string;
+  vehicleNo?: string;
+  fromLocation?: string;
+  toLocation?: string;
+  agentName?: string;
+  factoryName?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 function toQuery(p: BiltiListParams) {
@@ -21,6 +28,13 @@ function toQuery(p: BiltiListParams) {
     limit: p.limit,
     agent_id: p.agentId,
     truck_owner_id: p.truckOwnerId,
+    vehicle_no: p.vehicleNo,
+    from_location: p.fromLocation,
+    to_location: p.toLocation,
+    agent_name: p.agentName,
+    factory_name: p.factoryName,
+    date_from: p.dateFrom,
+    date_to: p.dateTo,
   });
 }
 

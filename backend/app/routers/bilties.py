@@ -74,6 +74,11 @@ async def list_bilties(
     date_from: date | None = None,
     date_to: date | None = None,
     q: str | None = None,
+    vehicle_no: str | None = None,
+    from_location: str | None = None,
+    to_location: str | None = None,
+    agent_name: str | None = None,
+    factory_name: str | None = None,
     sort: str | None = None,
     page: int = 1,
     limit: int = DEFAULT_LIMIT,
@@ -82,7 +87,9 @@ async def list_bilties(
     items, total, page, limit = await crud.list_(
         db, firm_id=firm_id, agent_id=agent_id, truck_owner_id=truck_owner_id,
         vehicle_id=vehicle_id, date_from=date_from, date_to=date_to,
-        q=q, sort=sort, page=page, limit=limit,
+        q=q, vehicle_no=vehicle_no, from_location=from_location,
+        to_location=to_location, agent_name=agent_name, factory_name=factory_name,
+        sort=sort, page=page, limit=limit,
     )
     return Page(items=items, total=total, page=page, limit=limit)
 

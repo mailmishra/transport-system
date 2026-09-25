@@ -6,6 +6,7 @@ import { GstTab } from "./gst-tab";
 import { VehicleActivityTab } from "./vehicle-activity-tab";
 import { PendingLoadingSlipsTab } from "./pending-loading-slips-tab";
 import { ReceivablesTab } from "./receivables-tab";
+import { GrReportTab } from "./gr-report-tab";
 
 /** Reports landing page -- grouped by who reads them (Reports + PDF
  * template plan, Part 2a): Overview/Owner, Accounts, Dispatch. The
@@ -29,6 +30,7 @@ export function ReportsPage() {
           <TabsTrigger value="gst">GST</TabsTrigger>
           <TabsTrigger value="vehicle-activity">Vehicle Activity</TabsTrigger>
           <TabsTrigger value="pending-loading-slips">Pending Loading Slips</TabsTrigger>
+          <TabsTrigger value="gr-report">GR Report</TabsTrigger>
         </TabsList>
 
         <TabsContent value="day-book">
@@ -48,6 +50,9 @@ export function ReportsPage() {
         </TabsContent>
         <TabsContent value="pending-loading-slips">
           <PendingLoadingSlipsTab firmId={firmId} />
+        </TabsContent>
+        <TabsContent value="gr-report">
+          <GrReportTab firmId={firmId} />
         </TabsContent>
       </Tabs>
     </div>

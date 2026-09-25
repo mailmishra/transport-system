@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud import agent as agent_crud
 from app.crud import truck_owner as truck_owner_crud
 from app.crud import vehicle as vehicle_crud
+from app.models.agent import Agent
 from app.models.bilti import Bilti
+from app.models.loading_slip import LoadingSlip
 from app.models.vehicle import Vehicle
 from app.pagination import DEFAULT_LIMIT, apply_sort, paginate
 from app.schemas.bilti import BiltiCreate, BiltiUpdate
@@ -66,6 +68,11 @@ async def list_(
     date_from: date | None = None,
     date_to: date | None = None,
     q: str | None = None,
+    vehicle_no: str | None = None,
+    from_location: str | None = None,
+    to_location: str | None = None,
+    agent_name: str | None = None,
+    factory_name: str | None = None,
     sort: str | None = None,
     page: int = 1,
     limit: int = DEFAULT_LIMIT,
@@ -83,6 +90,7 @@ async def list_(
         stmt = stmt.where(Bilti.bilti_date >= date_from)
     if date_to is not None:
         stmt = stmt.where(Bilti.bilti_date <= date_to)
+    # q: free-text across bilti_no, consignor, consignee, vehicle_no
     if q:
         needle = f"%{q.strip()}%"
         stmt = stmt.join(Vehicle, Bilti.vehicle_id == Vehicle.id).where(
@@ -92,6 +100,27 @@ async def list_(
                 Bilti.consignee.ilike(needle),
                 Vehicle.vehicle_no.ilike(needle),
             )
+        )
+    # dedicated report filters -- applied independently of q
+    if vehicle_no:
+        if q:
+            # Vehicle already joined above; reuse it
+            stmt = stmt.where(Vehicle.vehicle_no.ilike(f"%{vehicle_no.strip()}%"))
+        else:
+            stmt = stmt.join(Vehicle, Bilti.vehicle_id == Vehicle.id).where(
+                Vehicle.vehicle_no.ilike(f"%{vehicle_no.strip()}%")
+            )
+    if from_location:
+        stmt = stmt.where(Bilti.from_location.ilike(f"%{from_location.strip()}%"))
+    if to_location:
+        stmt = stmt.where(Bilti.to_location.ilike(f"%{to_location.strip()}%"))
+    if agent_name:
+        stmt = stmt.join(Agent, Bilti.agent_id == Agent.id).where(
+            Agent.name.ilike(f"%{agent_name.strip()}%")
+        )
+    if factory_name:
+        stmt = stmt.join(LoadingSlip, Bilti.loading_slip_id == LoadingSlip.id).where(
+            LoadingSlip.factory_name.ilike(f"%{factory_name.strip()}%")
         )
     stmt = apply_sort(stmt, sort, _SORTABLE, _DEFAULT_SORT)
     return await paginate(db, stmt, page, limit)
