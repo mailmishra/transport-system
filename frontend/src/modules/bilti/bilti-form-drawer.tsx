@@ -84,8 +84,21 @@ export function BiltiFormDrawer() {
     control,
     reset,
     setError,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ defaultValues: EMPTY });
+
+  // Auto-calc freight when rate changes: freight = rate × weight (MT)
+  const freightRate = watch("freight_rate");
+  const weight = watch("weight");
+  React.useEffect(() => {
+    const rate = parseFloat(freightRate);
+    const w = parseFloat(weight);
+    if (!isNaN(rate) && rate > 0 && !isNaN(w) && w > 0) {
+      setValue("freight", String(Math.round(rate * w * 100) / 100));
+    }
+  }, [freightRate, weight, setValue]);
 
   React.useEffect(() => {
     if (existing) {
@@ -141,7 +154,7 @@ export function BiltiFormDrawer() {
       vehicle_no: values.vehicle_no,
       palti_vehicle_no: values.palti_vehicle_no || null,
       truck_owner_name: values.truck_owner_name,
-      agent_name: values.agent_name || null,
+      agent_name: values.agent_name,
       goods_description: values.goods_description,
       package_count: values.package_count || null,
       package_unit: values.package_unit || null,
@@ -263,17 +276,18 @@ export function BiltiFormDrawer() {
                   )}
                 />
               </Field>
-              <Field label="Agent / Dalal (Broker)">
+              <Field label="Agent / Dalal (Broker)" error={errors.agent_name?.message}>
                 <Controller
                   control={control}
                   name="agent_name"
+                  rules={{ required: "Required" }}
                   render={({ field }) => (
                     <AsyncCombobox
                       value={field.value}
                       onChange={field.onChange}
                       useSearch={useAgentSearch}
                       getLabel={(a) => a.name}
-                      placeholder="optional"
+                      invalid={!!errors.agent_name}
                     />
                   )}
                 />

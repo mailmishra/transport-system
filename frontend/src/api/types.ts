@@ -63,6 +63,7 @@ export interface LoadingSlip {
   package_count: string | null;
   advance_amount: string;
   advance_note: string | null;
+  factory_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -80,6 +81,7 @@ export interface LoadingSlipCreateInput {
   package_count?: string | null;
   advance_amount?: number;
   advance_note?: string | null;
+  factory_name?: string | null;
 }
 
 export type LoadingSlipUpdateInput = Partial<LoadingSlipCreateInput>;

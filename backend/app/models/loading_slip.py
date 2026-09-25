@@ -46,6 +46,8 @@ class LoadingSlip(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixi
     # meaning varies shipment to shipment -- a note captures that faithfully
     # without forcing an arbitrary rigid structure.
     advance_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Destination factory / consignee name shown as "M/s." on the printed slip.
+    factory_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     vehicle: Mapped[Vehicle] = relationship(lazy="joined")
     truck_owner: Mapped[TruckOwner | None] = relationship(lazy="joined")

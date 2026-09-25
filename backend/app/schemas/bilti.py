@@ -16,6 +16,7 @@ _TEXT_FIELDS = (
     "to_location",
     "vehicle_no",
     "truck_owner_name",
+    "agent_name",
     "goods_description",
     "weight",
 )
@@ -39,7 +40,7 @@ class BiltiBase(BaseModel):
     vehicle_no: str = Field(min_length=1, max_length=50)
     palti_vehicle_no: str | None = Field(default=None, max_length=50)
     truck_owner_name: str = Field(min_length=1, max_length=200)
-    agent_name: str | None = Field(default=None, max_length=200)
+    agent_name: str = Field(min_length=1, max_length=200)
     goods_description: str = Field(min_length=1, max_length=300)
     weight: str = Field(min_length=1, max_length=100)
     charged_weight: str | None = Field(default=None, max_length=100)
@@ -79,7 +80,7 @@ class BiltiBase(BaseModel):
             raise ValueError("must not be blank")
         return v
 
-    @field_validator("agent_name", "palti_vehicle_no")
+    @field_validator("palti_vehicle_no")
     @classmethod
     def blank_optional_to_none(cls, v: str | None) -> str | None:
         if v is None:
@@ -153,9 +154,11 @@ class _BiltiChargeFieldsMixin(BaseModel):
 
     Those totals are never stored -- computed here, same "compute, don't
     duplicate" approach already used for ledger balances (see README).
+    Dalali is included in grand_total per business requirement (item 7).
     """
 
     freight: Decimal
+    dalali: Decimal
     other_charges: Decimal
     kanta_charges: Decimal
     bahi_charges: Decimal
@@ -169,6 +172,7 @@ class _BiltiChargeFieldsMixin(BaseModel):
     def grand_total(self) -> Decimal:
         return (
             self.freight
+            + self.dalali
             + self.other_charges
             + self.kanta_charges
             + self.bahi_charges
@@ -205,7 +209,6 @@ class BiltiRead(_BiltiChargeFieldsMixin):
     package_count: str | None
     package_unit: str | None
     freight_rate: Decimal | None
-    dalali: Decimal
     freight_difference: Decimal
     gst_paid_by: str | None
     eway_bill_no: str | None
@@ -250,7 +253,6 @@ class BiltiPrint(_BiltiChargeFieldsMixin):
     package_count: str | None
     package_unit: str | None
     freight_rate: Decimal | None
-    dalali: Decimal
     gst_paid_by: str | None
     eway_bill_no: str | None
     invoice_value: Decimal | None

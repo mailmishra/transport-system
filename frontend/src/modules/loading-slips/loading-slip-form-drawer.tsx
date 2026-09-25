@@ -23,6 +23,7 @@ interface FormValues {
   agent_name: string;
   loading_point: string;
   destination: string;
+  factory_name: string;
   goods_description: string;
   quantity_weight: string;
   package_count: string;
@@ -37,6 +38,7 @@ const EMPTY: FormValues = {
   agent_name: "",
   loading_point: "",
   destination: "",
+  factory_name: "",
   goods_description: "",
   quantity_weight: "",
   package_count: "",
@@ -73,6 +75,7 @@ export function LoadingSlipFormDrawer() {
         agent_name: existing.agent?.name ?? "",
         loading_point: existing.loading_point,
         destination: existing.destination,
+        factory_name: existing.factory_name ?? "",
         goods_description: existing.goods_description,
         quantity_weight: existing.quantity_weight,
         package_count: existing.package_count ?? "",
@@ -99,6 +102,7 @@ export function LoadingSlipFormDrawer() {
       package_count: values.package_count || null,
       advance_amount: values.advance_amount.trim() === "" ? 0 : Number(values.advance_amount),
       advance_note: values.advance_note || null,
+      factory_name: values.factory_name || null,
     };
 
     try {
@@ -191,6 +195,9 @@ export function LoadingSlipFormDrawer() {
               </Field>
               <Field label="Destination" error={errors.destination?.message}>
                 <Input invalid={!!errors.destination} {...register("destination", { required: "Required" })} />
+              </Field>
+              <Field label="Destination Factory / Party (M/s.)">
+                <Input {...register("factory_name")} placeholder="e.g. Ramesh Dal Mill" />
               </Field>
               <Field label="Goods / Material" error={errors.goods_description?.message}>
                 <Input invalid={!!errors.goods_description} {...register("goods_description", { required: "Required" })} />

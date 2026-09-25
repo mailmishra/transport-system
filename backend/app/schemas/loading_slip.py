@@ -25,6 +25,7 @@ class LoadingSlipBase(BaseModel):
     package_count: str | None = Field(default=None, max_length=50)
     advance_amount: Decimal = Field(default=Decimal("0"), ge=0)
     advance_note: str | None = Field(default=None, max_length=500)
+    factory_name: str | None = Field(default=None, max_length=200)
 
     @field_validator(
         "vehicle_no", "loading_point", "destination", "goods_description", "quantity_weight"
@@ -62,6 +63,7 @@ class LoadingSlipUpdate(BaseModel):
     package_count: str | None = Field(default=None, max_length=50)
     advance_amount: Decimal | None = Field(default=None, ge=0)
     advance_note: str | None = Field(default=None, max_length=500)
+    factory_name: str | None = Field(default=None, max_length=200)
 
 
 class LoadingSlipRead(BaseModel):
@@ -80,5 +82,6 @@ class LoadingSlipRead(BaseModel):
     package_count: str | None
     advance_amount: Decimal
     advance_note: str | None
+    factory_name: str | None
     created_at: datetime
     updated_at: datetime

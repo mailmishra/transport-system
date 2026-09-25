@@ -45,9 +45,17 @@ export function LoadingSlipPrintView() {
         </div>
       )}
 
+      {s.factory_name && (
+        <div className="my-2.5 rounded border border-border px-2.5 py-2">
+          <b className="mb-1 block text-[10px] uppercase tracking-wide text-navy">M/s (Destination Factory / Party)</b>
+          {s.factory_name}
+        </div>
+      )}
+
       <p className="my-3 rounded border border-dashed border-border bg-[#fbfcfd] px-3 py-2.5 text-[13px] leading-relaxed">
         आपके पास गाड़ी क्र. <b>{s.vehicle.vehicle_no}</b> जा रही है, इसमें <b>{s.goods_description}</b> का{" "}
-        <b>{s.quantity_weight}</b> चढ़ (कट्टी {s.package_count || "—"}) लोड करवाने की कृपा करें।
+        <b>{s.quantity_weight}</b> चढ़ (कट्टी {s.package_count || "—"}) लोड करवाने की कृपा करें।{" "}
+        गंतव्य: <b>{s.destination}</b>।
       </p>
 
       <FieldRow left={<Field label="From" value={s.loading_point} />} right={<Field label="To" value={s.destination} />} />
