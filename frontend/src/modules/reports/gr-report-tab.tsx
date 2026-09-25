@@ -1,8 +1,6 @@
 import * as React from "react";
 import { Download } from "lucide-react";
 import { useBiltiList } from "@/api/bilties";
-import { useAgentList } from "@/api/agents";
-import { useVehicleList } from "@/api/vehicles";
 import { useLoadingSlipList } from "@/api/loadingSlips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,13 +74,61 @@ export function GrReportTab({ firmId }: { firmId: string | undefined }) {
   const [filters, setFilters] = React.useState<Filters>(EMPTY);
   const [applied, setApplied] = React.useState<Filters>(EMPTY);
 
-  // Populate dropdowns — fetch all at once; these lists are small
-  const { data: agentsPage } = useAgentList({ sort: "name", limit: 500 });
-  const { data: vehiclesPage } = useVehicleList({ sort: "vehicle_no", limit: 500 });
+  // Loading slips for factory names — these aren't on Bilti directly
   const { data: slipsPage } = useLoadingSlipList({ firmId, limit: 500 });
 
-  const agents = agentsPage?.items ?? [];
-  const vehicles = vehiclesPage?.items ?? [];
+  // Live query: runs on pending filters so dropdowns narrow as user builds selection
+  const hasLive = hasFilter(filters);
+  const { data: liveData } = useBiltiList({
+    firmId,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    vehicleNo: filters.vehicleNo || undefined,
+    fromLocation: filters.fromLocation || undefined,
+    toLocation: filters.toLocation || undefined,
+    agentName: filters.agentName || undefined,
+    factoryName: filters.factoryName || undefined,
+    limit: 500,
+    sort: "-bilti_date",
+    enabled: hasLive,
+  });
+
+  // Derive dropdown options from live results (narrowed) or all bilties
+  // When no filter is active, show everything from an unfiltered fetch
+  const { data: allData } = useBiltiList({
+    firmId,
+    limit: 500,
+    sort: "bilti_date",
+    enabled: !hasLive && !!firmId,
+  });
+
+  const optionSource = (hasLive ? liveData : allData)?.items ?? [];
+
+  const vehicles = React.useMemo(() => {
+    const seen = new Set<string>();
+    return optionSource
+      .map((b) => b.vehicle)
+      .filter((v) => { if (seen.has(v.id)) return false; seen.add(v.id); return true; })
+      .sort((a, b) => a.vehicle_no.localeCompare(b.vehicle_no));
+  }, [optionSource]);
+
+  const agents = React.useMemo(() => {
+    const seen = new Set<string>();
+    return optionSource
+      .flatMap((b) => (b.agent ? [b.agent] : []))
+      .filter((a) => { if (seen.has(a.id)) return false; seen.add(a.id); return true; })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [optionSource]);
+
+  const fromLocations = React.useMemo(() => {
+    const vals = [...new Set(optionSource.map((b) => b.from_location).filter(Boolean))];
+    return vals.sort((a, b) => a.localeCompare(b));
+  }, [optionSource]);
+
+  const toLocations = React.useMemo(() => {
+    const vals = [...new Set(optionSource.map((b) => b.to_location).filter(Boolean))];
+    return vals.sort((a, b) => a.localeCompare(b));
+  }, [optionSource]);
 
   // Unique, sorted factory names from loading slips
   const factories = React.useMemo(() => {
@@ -175,13 +221,23 @@ export function GrReportTab({ firmId }: { firmId: string | undefined }) {
 
           <div>
             <Label>From (Source)</Label>
-            <Input className="mt-1" placeholder="e.g. Indore" value={filters.fromLocation}
-              onChange={(e) => set("fromLocation", e.target.value)} />
+            <select className={`${SELECT_CLS} mt-1`} value={filters.fromLocation}
+              onChange={(e) => set("fromLocation", e.target.value)}>
+              <option value="">All sources</option>
+              {fromLocations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
           </div>
           <div>
             <Label>To (Destination)</Label>
-            <Input className="mt-1" placeholder="e.g. Mumbai" value={filters.toLocation}
-              onChange={(e) => set("toLocation", e.target.value)} />
+            <select className={`${SELECT_CLS} mt-1`} value={filters.toLocation}
+              onChange={(e) => set("toLocation", e.target.value)}>
+              <option value="">All destinations</option>
+              {toLocations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="mt-3 flex gap-2">

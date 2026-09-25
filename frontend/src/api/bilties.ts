@@ -17,6 +17,7 @@ export interface BiltiListParams {
   factoryName?: string;
   dateFrom?: string;
   dateTo?: string;
+  enabled?: boolean;
 }
 
 function toQuery(p: BiltiListParams) {
@@ -38,11 +39,12 @@ function toQuery(p: BiltiListParams) {
   });
 }
 
-export function useBiltiList(params: BiltiListParams) {
+export function useBiltiList({ enabled = true, ...params }: BiltiListParams) {
   return useQuery({
     queryKey: ["bilties", "list", params],
     queryFn: () => api.get<Page<Bilti>>(`/bilties${toQuery(params)}`),
     placeholderData: (prev) => prev,
+    enabled,
   });
 }
 
