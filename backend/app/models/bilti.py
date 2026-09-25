@@ -51,6 +51,7 @@ class Bilti(UUIDPKMixin, TimestampMixin, SoftDeleteMixin, ActorTrackedMixin, Bas
     # (may differ after rounding/minimum-weight rules) -- both appear
     # separately on the real GR form.
     weight: Mapped[str] = mapped_column(String(100), nullable=False)
+    weight_per_bag: Mapped[Decimal | None] = mapped_column(Numeric(12, 3), nullable=True)
     charged_weight: Mapped[str | None] = mapped_column(String(100), nullable=True)
     package_count: Mapped[str | None] = mapped_column(String(50), nullable=True)
     package_unit: Mapped[str | None] = mapped_column(String(50), nullable=True)

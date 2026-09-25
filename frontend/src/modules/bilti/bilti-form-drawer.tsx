@@ -31,6 +31,7 @@ interface FormValues {
   package_count: string;
   package_unit: string;
   weight: string;
+  weight_per_bag: string;
   charged_weight: string;
   freight_rate: string;
   freight: string;
@@ -55,7 +56,7 @@ const EMPTY: FormValues = {
   from_location: "", to_location: "", vehicle_no: "", palti_vehicle_no: "",
   truck_owner_name: "", agent_name: "", goods_description: "",
   package_count: "", package_unit: "", weight: "", charged_weight: "",
-  freight_rate: "", freight: "", other_charges: "0", kanta_charges: "0",
+  weight_per_bag: "", freight_rate: "", freight: "", other_charges: "0", kanta_charges: "0",
   bahi_charges: "0", service_tax: "0", hamali: "0", p_freight: "0",
   dalali: "0", advance_to_owner: "0", freight_difference: "0",
   gst_paid_by: "", eway_bill_no: "", invoice_value: "",
@@ -89,7 +90,18 @@ export function BiltiFormDrawer() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ defaultValues: EMPTY });
 
-  // Auto-calc freight when rate changes: freight = rate × weight (MT)
+  // Auto-calc weight when package_count × weight_per_bag are both entered
+  const packageCount = watch("package_count");
+  const weightPerBag = watch("weight_per_bag");
+  React.useEffect(() => {
+    const count = parseFloat(packageCount);
+    const perBag = parseFloat(weightPerBag);
+    if (!isNaN(count) && count > 0 && !isNaN(perBag) && perBag > 0) {
+      setValue("weight", String(Math.round(count * perBag * 1000) / 1000));
+    }
+  }, [packageCount, weightPerBag, setValue]);
+
+  // Auto-calc freight when rate × weight are both entered
   const freightRate = watch("freight_rate");
   const weight = watch("weight");
   React.useEffect(() => {
@@ -117,6 +129,7 @@ export function BiltiFormDrawer() {
         package_count: existing.package_count ?? "",
         package_unit: existing.package_unit ?? "",
         weight: existing.weight,
+        weight_per_bag: existing.weight_per_bag ?? "",
         charged_weight: existing.charged_weight ?? "",
         freight_rate: existing.freight_rate ?? "",
         freight: existing.freight,
@@ -159,6 +172,7 @@ export function BiltiFormDrawer() {
       package_count: values.package_count || null,
       package_unit: values.package_unit || null,
       weight: values.weight,
+      weight_per_bag: num(values.weight_per_bag) ?? null,
       charged_weight: values.charged_weight || null,
       freight_rate: num(values.freight_rate) ?? null,
       freight: Number(values.freight),
@@ -302,6 +316,9 @@ export function BiltiFormDrawer() {
                 <Field label="Package Count"><Input {...register("package_count")} placeholder="67" /></Field>
                 <Field label="Package Unit"><Input {...register("package_unit")} placeholder="BAG" /></Field>
               </div>
+              <Field label="Weight per Bag / Unit (MT)">
+                <Input type="number" step="0.001" {...register("weight_per_bag")} placeholder="e.g. 0.05 for 50 kg" />
+              </Field>
               <Field label="Weight (Actual)" error={errors.weight?.message}>
                 <Input invalid={!!errors.weight} {...register("weight", { required: "Required" })} />
               </Field>

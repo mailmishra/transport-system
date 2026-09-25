@@ -196,8 +196,8 @@ export function LoadingSlipFormDrawer() {
               <Field label="Destination" error={errors.destination?.message}>
                 <Input invalid={!!errors.destination} {...register("destination", { required: "Required" })} />
               </Field>
-              <Field label="Destination Factory / Party (M/s.)">
-                <Input {...register("factory_name")} placeholder="e.g. Ramesh Dal Mill" />
+              <Field label="Factory / Mill Name (M/s.) — where goods are loaded or delivered">
+                <Input {...register("factory_name")} placeholder="e.g. Anil Industries Katni Pvt Ltd" />
               </Field>
               <Field label="Goods / Material" error={errors.goods_description?.message}>
                 <Input invalid={!!errors.goods_description} {...register("goods_description", { required: "Required" })} />

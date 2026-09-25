@@ -47,7 +47,7 @@ export function LoadingSlipPrintView() {
 
       {s.factory_name && (
         <div className="my-2.5 rounded border border-border px-2.5 py-2">
-          <b className="mb-1 block text-[10px] uppercase tracking-wide text-navy">M/s (Destination Factory / Party)</b>
+          <b className="mb-1 block text-[10px] uppercase tracking-wide text-navy">M/s. (Factory / Mill)</b>
           {s.factory_name}
         </div>
       )}

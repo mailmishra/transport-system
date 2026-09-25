@@ -43,6 +43,7 @@ class BiltiBase(BaseModel):
     agent_name: str = Field(min_length=1, max_length=200)
     goods_description: str = Field(min_length=1, max_length=300)
     weight: str = Field(min_length=1, max_length=100)
+    weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)
     package_count: str | None = Field(default=None, max_length=50)
     package_unit: str | None = Field(default=None, max_length=50)
@@ -120,6 +121,7 @@ class BiltiUpdate(BaseModel):
     agent_name: str | None = Field(default=None, max_length=200)
     goods_description: str | None = Field(default=None, min_length=1, max_length=300)
     weight: str | None = Field(default=None, min_length=1, max_length=100)
+    weight_per_bag: Decimal | None = Field(default=None, ge=0)
     charged_weight: str | None = Field(default=None, max_length=100)
     package_count: str | None = Field(default=None, max_length=50)
     package_unit: str | None = Field(default=None, max_length=50)
@@ -205,6 +207,7 @@ class BiltiRead(_BiltiChargeFieldsMixin):
     agent: AgentRead | None
     goods_description: str
     weight: str
+    weight_per_bag: Decimal | None
     charged_weight: str | None
     package_count: str | None
     package_unit: str | None
@@ -249,6 +252,7 @@ class BiltiPrint(_BiltiChargeFieldsMixin):
     agent: AgentRead | None
     goods_description: str
     weight: str
+    weight_per_bag: Decimal | None
     charged_weight: str | None
     package_count: str | None
     package_unit: str | None

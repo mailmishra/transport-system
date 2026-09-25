@@ -78,7 +78,6 @@ export function BiltiPrintView() {
             <Th>Service Tax</Th>
             <Th>Hamali</Th>
             <Th>P.Freight</Th>
-            <Th>Dalali</Th>
           </tr>
         </thead>
         <tbody>
@@ -93,11 +92,10 @@ export function BiltiPrintView() {
             <Td>{rupees(b.service_tax)}</Td>
             <Td>{rupees(b.hamali)}</Td>
             <Td>{rupees(b.p_freight)}</Td>
-            <Td>{rupees(b.dalali)}</Td>
           </tr>
-          <TotalRow label="Grand Total" value={rupees(b.grand_total)} span={6} />
-          <TotalRow label="Advance" value={rupees(b.advance_to_owner)} span={6} />
-          <TotalRow label="To Pay" value={rupees(b.topay)} span={6} />
+          <TotalRow label="Grand Total" value={rupees(b.grand_total)} span={5} />
+          <TotalRow label="Advance" value={rupees(b.advance_to_owner)} span={5} />
+          <TotalRow label="To Pay" value={rupees(b.topay)} span={5} />
         </tbody>
       </table>
 

@@ -231,6 +231,7 @@ export interface Bilti {
   agent: Agent | null;
   goods_description: string;
   weight: string;
+  weight_per_bag: string | null;
   charged_weight: string | null;
   package_count: string | null;
   package_unit: string | null;
@@ -283,6 +284,7 @@ export interface BiltiCreateInput {
   agent_name?: string | null;
   goods_description: string;
   weight: string;
+  weight_per_bag?: number | null;
   charged_weight?: string | null;
   package_count?: string | null;
   package_unit?: string | null;
