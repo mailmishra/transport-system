@@ -1,6 +1,9 @@
 import * as React from "react";
 import { Download } from "lucide-react";
 import { useBiltiList } from "@/api/bilties";
+import { useAgentList } from "@/api/agents";
+import { useVehicleList } from "@/api/vehicles";
+import { useLoadingSlipList } from "@/api/loadingSlips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +11,9 @@ import { rupees } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { downloadCsv } from "@/lib/csv";
 import type { Bilti } from "@/api/types";
+
+const SELECT_CLS =
+  "flex h-9 w-full rounded border border-border bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-navy";
 
 interface Filters {
   dateFrom: string;
@@ -70,6 +76,22 @@ export function GrReportTab({ firmId }: { firmId: string | undefined }) {
   const [filters, setFilters] = React.useState<Filters>(EMPTY);
   const [applied, setApplied] = React.useState<Filters>(EMPTY);
 
+  // Populate dropdowns — fetch all at once; these lists are small
+  const { data: agentsPage } = useAgentList({ sort: "name", limit: 500 });
+  const { data: vehiclesPage } = useVehicleList({ sort: "vehicle_no", limit: 500 });
+  const { data: slipsPage } = useLoadingSlipList({ firmId, limit: 500 });
+
+  const agents = agentsPage?.items ?? [];
+  const vehicles = vehiclesPage?.items ?? [];
+
+  // Unique, sorted factory names from loading slips
+  const factories = React.useMemo(() => {
+    const names = (slipsPage?.items ?? [])
+      .map((s) => s.factory_name)
+      .filter((n): n is string => !!n);
+    return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+  }, [slipsPage]);
+
   const active = hasFilter(applied);
 
   const { data, isLoading } = useBiltiList({
@@ -117,11 +139,40 @@ export function GrReportTab({ firmId }: { firmId: string | undefined }) {
             <Input type="date" className="mt-1" value={filters.dateTo}
               onChange={(e) => set("dateTo", e.target.value)} />
           </div>
+
           <div>
             <Label>Truck / Vehicle No.</Label>
-            <Input className="mt-1" placeholder="e.g. MP09" value={filters.vehicleNo}
-              onChange={(e) => set("vehicleNo", e.target.value)} />
+            <select className={`${SELECT_CLS} mt-1`} value={filters.vehicleNo}
+              onChange={(e) => set("vehicleNo", e.target.value)}>
+              <option value="">All vehicles</option>
+              {vehicles.map((v) => (
+                <option key={v.id} value={v.vehicle_no}>{v.vehicle_no}</option>
+              ))}
+            </select>
           </div>
+
+          <div>
+            <Label>Agent / Dalal</Label>
+            <select className={`${SELECT_CLS} mt-1`} value={filters.agentName}
+              onChange={(e) => set("agentName", e.target.value)}>
+              <option value="">All agents</option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.name}>{a.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Label>Factory / Mill</Label>
+            <select className={`${SELECT_CLS} mt-1`} value={filters.factoryName}
+              onChange={(e) => set("factoryName", e.target.value)}>
+              <option value="">All factories</option>
+              {factories.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <Label>From (Source)</Label>
             <Input className="mt-1" placeholder="e.g. Indore" value={filters.fromLocation}
@@ -131,16 +182,6 @@ export function GrReportTab({ firmId }: { firmId: string | undefined }) {
             <Label>To (Destination)</Label>
             <Input className="mt-1" placeholder="e.g. Mumbai" value={filters.toLocation}
               onChange={(e) => set("toLocation", e.target.value)} />
-          </div>
-          <div>
-            <Label>Agent / Dalal</Label>
-            <Input className="mt-1" placeholder="Agent name" value={filters.agentName}
-              onChange={(e) => set("agentName", e.target.value)} />
-          </div>
-          <div>
-            <Label>Factory / Mill</Label>
-            <Input className="mt-1" placeholder="Factory name" value={filters.factoryName}
-              onChange={(e) => set("factoryName", e.target.value)} />
           </div>
         </div>
         <div className="mt-3 flex gap-2">
